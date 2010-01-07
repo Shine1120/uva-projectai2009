@@ -1,0 +1,115 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}   
+\geometry{a4paper}
+%\usepackage[utf8]{inputenc}
+\usepackage{fullpage}
+\usepackage{geometry}
+\usepackage{boxedminipage}
+%\usepackage{caption}
+\usepackage[pdftex]{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{graphics}
+%\usepackage{hyperref}
+\usepackage{amsmath}
+%\usepackage{multicol}
+\usepackage{listings}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{amssymb}
+\usepackage[parfill]{parskip}
+\begin{document}
+\definecolor{orange}{rgb}{0.9,0.4,0}
+\definecolor{lg}{rgb}{0.7,0.7,0.7}
+\fontfamily{ptm}\selectfont\tiny %ccr%cmbr%cmss
+\begin{algorithm}[*h]
+\caption{haar\_featlist($window_y$ = 24, $window_x$ = 24, double *rectangle\_patterns $[10\times no_{rectangles}]$,  $no_{rectangles}$)} 
+\begin{algorithmic}
+	\STATE index\_features = 0		
+	\STATE index\_rectangle = 0
+	\STATE \COMMENT{\textcolor{lg}{$no_{rectangles}$ = the TOTAL number of rectangles regardless of the pattern}}
+	\FOR {r = 0, r$<$ $no_{rectangles}$}
+		\STATE temp $\leftarrow$ (id of current pattern) \COMMENT{\textcolor{lg}{as they wrote it: rect\_param[0 + index\_rectangle] and is initially 0}} 
+		\IF{id\_current\_feature != temp}
+			\STATE id\_current\_feature $\leftarrow$ temp \COMMENT{\textcolor{lg}{id\_current\_feature is initially 0}}
+			\STATE W $\leftarrow$ (width of current pattern) \COMMENT{\textcolor{lg}{as they wrote it: rect\_param[1 + index\_rectangle]}}
+			\STATE H $\leftarrow$ (height of current pattern) \COMMENT{\textcolor{lg}{as they wrote it: rect\_param[2 + index\_rectangle]}}
+			\STATE \COMMENT{\textcolor{lg}{24$\times$24 is the size of the sub-window -- so I guess we don't have to slice anything}}
+			\STATE \COMMENT{\textcolor{lg}{loop over the image trying to fit the current pattern}}
+			\FOR{w = W, w$<$ 24+1, w = w+W}
+				\FOR{h = H, h$<$ 24+1, h = h+H}
+					\FOR{y = 0, y+h $<$ 24+1, y ++}
+						\FOR{x = 0, x+w $<$ 24+1, x = ++}
+							\STATE Features[0 + index\_features] $\leftarrow$ id\_current\_feature
+							\STATE \COMMENT{\textcolor{lg}{store the top-left coordinates of the pattern in the sub-window}}
+							\STATE Features[1 + index\_features] $\leftarrow$ x 
+							\STATE Features[2 + index\_features] $\leftarrow$ y 
+							\STATE \COMMENT{\textcolor{lg}{store the width and height of the pattern in the sub-window}}	
+							\STATE Features[3 + index\_features] $\leftarrow$ w 
+							\STATE Features[4 + index\_features] $\leftarrow$ h
+							\STATE Features[5 + index\_features] $\leftarrow$ index\_rectangle
+							\STATE \COMMENT{\textcolor{lg}{it is stored as an array instead of matrix -- because they don't know the future size of it, maybe? -- and so the size of one feature is 6}}
+							\STATE index\_features $\leftarrow$ index\_features + 6 
+ 						\ENDFOR				
+					\ENDFOR
+				\ENDFOR
+			\ENDFOR
+		\ENDIF
+		\STATE \COMMENT{\textcolor{lg}{the rectangles are stored as an array instead of matrix -- I can't see the reason here -- and so the size of one rectangle is 10 ..look at the top of haar.c for more info}}	
+		\STATE \STATE index\_rectangle $\leftarrow$ index\_rectangle + 10		
+		\RETURN Features
+	\ENDFOR		
+\end{algorithmic} 
+\end{algorithm}
+
+\begin{algorithm}[*h]
+\caption{haar(Image, rectangle\_patterns, Features, $subwindow_{y}$=24, $subwindow_x$ = 24, P, standardize)} 
+\begin{algorithmic}
+		\STATE window\_size $\leftarrow$ $subwindow_{x} \times subwindow_{y}$ = 24*24 
+		\STATE last $\leftarrow$ window\_size-1
+		\IF {standardize}
+			\STATE \COMMENT{\textcolor{lg}{P = 10 but I do not know what it means, the final features have the size P $\times$ number\_of\_features}}
+			\FOR {p=0 to P}
+				\STATE [IntegralImage] $\leftarrow$ MakeIntegralImage((Image + index), 24, 24)\COMMENT{\textcolor{lg}{index is 0 in the beginning}}
+				\FOR {i=0 to window\_size}
+					\STATE temp\_Image $\leftarrow$ Image[i+index] \COMMENT{\textcolor{lg}{index is initially equal to 0}}
+					\STATE variation $\leftarrow$ temp\_Image*temp\_Image
+				\ENDFOR
+				\STATE variation $\leftarrow$ $\frac{variation}{window_size}$
+				\STATE mean $\leftarrow$ $\frac{IntegralImage[last]}{window_size}$
+				\STATE standard\_deviation $\leftarrow$ $\frac{1}{\sqrt{variation - mean^2}}$  
+				
+				\FOR {f=0 to sizeof(Features)}
+					\STATE x $\leftarrow$  (top coordinate of the feature)\COMMENT{\textcolor{lg}{Features[1 + index\_features]}}
+					\STATE y $\leftarrow$  (left coordinate of the feature)\COMMENT{\textcolor{lg}{Features[2 + index\_features]}}
+					\STATE w $\leftarrow$ (width of the feature) \COMMENT{\textcolor{lg}{Features[3 + index\_features]}}
+					\STATE h $\leftarrow$ (height of the feature) \COMMENT{\textcolor{lg}{Features[4 + index\_features]}}
+					\STATE index\_rectangle $\leftarrow$ (index of the corresponding rectangle)\COMMENT{\textcolor{lg}{Features[5 + index\_features]}}
+					\STATE R $\leftarrow$ (number of rectangles in the pattern)\COMMENT{\textcolor{lg}{rectangle\_patterns[3 + index\_rectangle]}}
+					\STATE value $\leftarrow$ 0
+					\STATE \COMMENT{\textcolor{lg}{loop over all rectangles in the pattern of the current feature}}
+					\FOR{r to R} 
+						\STATE x\_rectangle $\leftarrow$ x * $\frac{w}{width of current pattern}$ * (top coordinate of the current rectangle)
+						\STATE y\_rectangle $\leftarrow$ y * $\frac{h}{height of current pattern}$ * (top coordinate of the current rectangle)
+						\STATE width\_rectangle $\leftarrow$ $\frac{w}{width of current pattern}$ * (width of the current rectangle) 
+						\STATE height\_rectangle $\leftarrow$ $\frac{h}{height of current pattern}$ * (height of the current rectangle)
+						\STATE value $\leftarrow$ (weight of current rectangle) *Area(IntrgralImage, x\_rectangle, y\_rectangle, width\_rectangle, height\_rectangle) 
+						\STATE index\_rectangle $\leftarrow$ index\_rectangle + 10 
+					\ENDFOR	
+					\STATE final\_features[f + index\_feature] $\leftarrow$ value * standard\_deviation
+				\ENDFOR
+				\STATE index $\leftarrow$ index + window\_size 
+				\STATE index\_feature $\leftarrow$ index\_feature + 6		
+			\ENDFOR
+		\ELSE 
+				\STATE the same as above but without computing the "standard\_deviation"
+				\STATE final\_features[f + index\_feature] $\leftarrow$ value 
+		\ENDIF
+		\RETURN final\_features
+\end{algorithmic} 
+\end{algorithm}
+
+\end{document}
+
+
+
+
