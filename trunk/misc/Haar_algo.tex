@@ -74,8 +74,8 @@
 					\STATE temp\_Image $\leftarrow$ Image[i+index] \COMMENT{\textcolor{lg}{index is initially equal to 0}}
 					\STATE variation $\leftarrow$ temp\_Image*temp\_Image
 				\ENDFOR
-				\STATE variation $\leftarrow$ $\frac{variation}{window_size}$
-				\STATE mean $\leftarrow$ $\frac{IntegralImage[last]}{window_size}$
+				\STATE variation $\leftarrow$ $\frac{variation}{window\_size}$
+				\STATE mean $\leftarrow$ $\frac{IntegralImage[last]}{window\_size}$
 				\STATE standard\_deviation $\leftarrow$ $\frac{1}{\sqrt{variation - mean^2}}$  
 				
 				\FOR {f=0 to sizeof(Features)}
@@ -88,10 +88,10 @@
 					\STATE value $\leftarrow$ 0
 					\STATE \COMMENT{\textcolor{lg}{loop over all rectangles in the pattern of the current feature}}
 					\FOR{r to R} 
-						\STATE x\_rectangle $\leftarrow$ x * $\frac{w}{width of current pattern}$ * (top coordinate of the current rectangle)
-						\STATE y\_rectangle $\leftarrow$ y * $\frac{h}{height of current pattern}$ * (top coordinate of the current rectangle)
-						\STATE width\_rectangle $\leftarrow$ $\frac{w}{width of current pattern}$ * (width of the current rectangle) 
-						\STATE height\_rectangle $\leftarrow$ $\frac{h}{height of current pattern}$ * (height of the current rectangle)
+						\STATE x\_rectangle $\leftarrow$ x * $\frac{w}{width\_of\_current\_pattern}$ * (top coordinate of the current rectangle)
+						\STATE y\_rectangle $\leftarrow$ y * $\frac{h}{height\_of\_current\_pattern}$ * (top coordinate of the current rectangle)
+						\STATE width\_rectangle $\leftarrow$ $\frac{w}{width\_of\_current\_pattern}$ * (width of the current rectangle) 
+						\STATE height\_rectangle $\leftarrow$ $\frac{h}{height\_of\_current\_pattern}$ * (height of the current rectangle)
 						\STATE value $\leftarrow$ (weight of current rectangle) *Area(IntrgralImage, x\_rectangle, y\_rectangle, width\_rectangle, height\_rectangle) 
 						\STATE index\_rectangle $\leftarrow$ index\_rectangle + 10 
 					\ENDFOR	
