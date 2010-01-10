@@ -1,6 +1,6 @@
 function [ testData, trainMean, trainCov, histogramSum ] =...
   CEsplitTrainTest(type,allData,randIndex,foldIter,itemsInFold,...
-  histogramSum,doPlot,numberOfFolds,histBins )
+  histogramSum,doPlot,numberOfFolds,histBins, lastOfMultMethods )
 
   trainCount=0;
   testCount=0;
@@ -16,7 +16,7 @@ function [ testData, trainMean, trainCov, histogramSum ] =...
       trainData(:,trainCount) = allData(:,i);
     end
   end
-  if foldIter==1
+  if (foldIter==1 & lastOfMultMethods>=1)
     fprintf('\t\t%d fit train images \n\t\t%d fit test images\n',...
     trainCount,testCount)
   end
@@ -26,8 +26,11 @@ function [ testData, trainMean, trainCov, histogramSum ] =...
   trainCov = cov(trainData(1,:));
 
   if (doPlot>=1 & foldIter==numberOfFolds)
+%     if lastOfMultMethods==2
+%       numberOfFolds = numberOfFolds*2;
+%     end
     %calculate and plot histogram
-    figure(1)
+    figure(lastOfMultMethods+1)
     if strcmp(type,'fit')
       plotNr=1;
     end
@@ -46,6 +49,5 @@ function [ testData, trainMean, trainCov, histogramSum ] =...
     [hist, binSize,mini] = constrHistogram(trainData(1,:),histBins);
     histogramSum = histogramSum + hist;
   end
-
 end
 
