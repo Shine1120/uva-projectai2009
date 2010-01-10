@@ -1,10 +1,7 @@
-%[tp , fp , threshold] = basicroc(y , f , [positive]);
-%
+%[tp , fp , threshold] = basicroc(y , f , [positive])
 % Return the true positive rate, the false positive rate and the threshold
-%
-%
-%  Author : Sébastien PARIS : sebastien.paris@lsis.org
-%  -------  Date : 04/09/2006
+% Author : Sébastien PARIS : sebastien.paris@lsis.org
+% -------  Date : 04/09/2006
 function [tp , fp , threshold] = basicroc(y , f , options)
 if nargin < 3
     options.positive = 1;    

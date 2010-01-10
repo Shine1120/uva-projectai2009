@@ -1,47 +1,73 @@
 %CLASSIFIES THE DATA BASED ON THE HAAR FEATURES AND USING ADABOOST CASCADE 
 %FOR SELECTING THE BEST FEATURES TO BE USED
 %INPUT:
-%       T -- number of features to be used (not too large :P)
-function classification_haar(T)
+%       T      -- number of features to be used (not too large :P)
+%       rounds -- number of rounds for cross-validation
+function classification_haar(T, rounds)
     % Do the CROSS-VALIDATION loop
     money_dir = 'neur10'; % 'neur05';
     fit_path   = {'/fit/fit_front/', '/fit/fit_rear/'};
     unfit_path = {'/unfit/unfit_front/', '/unfit/unfit_rear/'};
-    for j=1:size(fit_path,2)
-        for i=1:2
+%{
+    %TRAIN - COMMENT OUT WHEN THE MODELS ARE SAVED_________________________
+    for i=1:rounds
+        for j=1:size(fit_path,2)         
             fit   = [money_dir char(fit_path(j))];
             unfit = [money_dir char(unfit_path(j))];
-            [labels, ImgSet, nx, ny] = preprocess(0.75,i,1,2,fit,unfit); % get the train matrix   
+            [labels, ImgSet, nx, ny] = preprocess(0.75,i,1,rounds,fit,unfit); % get the train matrix   
             %the result structure retrieved from the AdaBoost cascade
             [model, rect_param, F]   = train_haar(T, labels, ImgSet);
 
-            [labels, ImgSet, nx, ny] = preprocess(0.75,i,0,2,fit,unfit); % get the test matrix   
             %save the obtained model(the weak classifiers corresponding to the features chosen)
-            model           = struct('param',model,'weaklearner',1,'dimsItraining', ...
-                              [ny nx],'rect_param',rect_param,'F',F,'cascade_type',1,'postprocessing',1);
-            
-            %classify the new data using another cascade and evaluate 
+            model = struct('param',model,'weaklearner',1,'dimsItraining', ...
+                    [ny nx],'rect_param',rect_param,'F',F,'cascade_type',0,'postprocessing',1);
+            %classify the new data using another cascade and evaluate             
             if (mod(j,2)==0)                 
                 string_name = ['model_' money_dir sprintf('_rear%d.mat', i)];
-                save string_name model;   
-                [tp_rear(i), fp_rear(i), error_rear(i), tpp_rear(:,i), fpp_rear(:,i)] = eval_bills(model, labels, ImgSet);
+                save(string_name, 'model');   
             elseif (mod(j,2)~=0) 
                 string_name = ['model_' money_dir sprintf('_front%d.mat', i)];
-                save string_name model;   
-                [tp_front(i), fp_front(i), error_front(i), tpp_front(:,i), fpp_front(:,i)] = eval_bills(model, labels, ImgSet);
+                save(string_name, 'model');           
             end
         end
+    end
+%}    
+    %EVALUATION____________________________________________________________
+    for i=1:rounds         
+        for j=1:size(fit_path,2)
+            fit   = [money_dir char(fit_path(j))];
+            unfit = [money_dir char(unfit_path(j))];
+            [labels, ImgSet, nx, ny] = preprocess(0.75,i,0,rounds,fit,unfit); % get the test matrix   
+
+            %load the corresponding model
+            if (mod(j,2)==0)                 
+                string_name = ['model_' money_dir sprintf('_rear%d.mat', i)];
+                load(string_name);
+                [tp_rear(i), fp_rear(i), error_rear(i), tpp_rear(:,i), fpp_rear(:,i), classifier_rear]...
+                                        = eval_bills(model, labels, ImgSet,0);
+            elseif (mod(j,2)~=0) 
+                string_name = ['model_' money_dir sprintf('_front%d.mat', i)];
+                load(string_name);
+                [tp_front(i), fp_front(i), error_front(i), tpp_front(:,i), fpp_front(:,i), classifier_front]...
+                                        = eval_bills(model, labels, ImgSet,0);
+            end
+        end
+        [tp_both(i), fp_both(i), error_both(i), tpp_both(:,i), fpp_both(:,i), classifier_both]...
+        = eval_bills(model, labels, ImgSet, (classifier_rear.*classifier_front));       
     end
     
     %average over all results to obtain the performance of the classifier
     true_positive_rear  = mean(tp_rear)
     true_positive_front = mean(tp_front)
+    true_positive_both  = mean(tp_both)
     
     false_positive_rear  = mean(fp_rear)
     false_positive_front = mean(fp_rear)
-    
+    false_positive_both  = mean(fp_both)
+       
     error_rear  = mean(error_rear)
     error_front = mean(error_front)
+    error_both  = mean(error_both)
     
     tpp_rear  = mean(tpp_rear,2);
     fpp_rear  = mean(fpp_rear,2);
@@ -50,9 +76,10 @@ function classification_haar(T)
     
     figure; hold on;
     plot(fpp_rear , tpp_rear ,'r' , 'linewidth' , 2)
+    plot(fpp_front , tpp_front ,'b' , 'linewidth' , 2)
+    plot(fpp_front , tpp_both ,'g' , 'linewidth' , 2)
     axis([-0.02 , 1.02 , -0.02 , 1.02])
-    plot(fpp_front , tpp_front ,'b' , 'linewidth' , 2)   
-    legend('rear', 'front')
+    legend('rear', 'front', 'both')
     title(sprintf('ROC for Haar Classifier with the best T = %d, features considered', T));
     hold off;
 end

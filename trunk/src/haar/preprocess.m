@@ -20,12 +20,20 @@ function [labels, ImgSet, nx, ny] = preprocess(res,index,train,no_rounds,path_fi
     struct_fit = dir(path_fit);
     struct_fit = struct_fit(find(cellfun(@length,{struct_fit(:).name}))>2);
     no_fit     = size(struct_fit,1);
-    slice_fit  = round(no_fit/no_rounds);
+    if(no_rounds == 1) 
+        slice_fit  = round(no_fit/7);
+    else    
+        slice_fit  = round(no_fit/no_rounds);
+    end
     
     struct_unfit = dir(path_unfit);
     struct_unfit = struct_unfit(find(cellfun(@length,{struct_unfit(:).name}))>2);
     no_unfit     = size(struct_unfit,1);
-    slice_unfit  = round(no_unfit/no_rounds);
+    if(no_rounds == 1)
+        slice_unfit  = round(no_unfit/7);
+    else 
+        slice_unfit  = round(no_unfit/no_rounds);
+    end
     if(~train && index==1) %for test set 
         struct_fit   = struct_fit(1:slice_fit);
         struct_unfit = struct_unfit(1:slice_unfit);
