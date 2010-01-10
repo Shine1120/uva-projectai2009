@@ -3,14 +3,14 @@ function [ output_args ] = CErun( input_args )
   close all
 
   %windows
- pathFit = '..\money\wholeplusborder\neur10\fit\';
- pathUnfit = '..\money\wholeplusborder\neur10\unfit\';
+  pathFit = '..\money\wholeplusborder\neur05\fit\';
+  pathUnfit = '..\money\wholeplusborder\neur05\unfit\';
 
 %  pathFit = '..\money\whitepatch\neur05\fit\';
 %  pathUnfit = '..\money\whitepatch\neur05\unfit\';
 
-%  pathFit = '..\money\whole\neur10\fit\';
-%  pathUnfit = '..\money\whole\neur10\unfit\';
+%  pathFit = '..\money\whole\neur05\fit\';
+%  pathUnfit = '..\money\whole\neur05\unfit\';
 
   %linux
 %  pathFit = '../DirtyMoney2010/wholeplusborder/neur05/fit/';
