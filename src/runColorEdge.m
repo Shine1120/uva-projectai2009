@@ -26,17 +26,20 @@ function [] = runColorEdge()
 %  pathUnFit = '../DirtyMoney2010/wholeplusborder/neur10/unfit/';
 
   maxNrImg = 250;
-  numberOfFolds = 6;
+  numberOfFolds = 10;
 
   do = 'edge';
 %  do = 'color';
 %  do = 'edge and color';
-  cannyThresh=0.04;
+  cannyThresh=0.0355;
 
   useFront=1;
   useRear=1;
 
-  doPlot=0;
+  % doPlot = 0: no plot
+  % doPlot = 1: plots histogram of trainingdata
+  % doPlot = 2: plots also all the testData (1 plot per iteration)
+  doPlot=1;
 
   histogramBins = 25;
   
@@ -173,7 +176,7 @@ function [] = runColorEdge()
         meanFit = mean(trainResultsFit(1,:));
         covFit = cov(trainResultsFit(1,:));
 
-        if (doPlot)
+        if (doPlot>=1 & foldIter==1)
           %calculate and plot histogram
           figure(1)
           subplot(1,2,1)
@@ -206,7 +209,7 @@ function [] = runColorEdge()
         meanUnfit = mean(trainResultsUnfit(1,:));
         covUnfit = cov(trainResultsUnfit(1,:));
         
-        if (doPlot)
+        if (doPlot>=1 & foldIter==1)
           %Histogram calculation and plot
           figure(1)
           subplot(1,2,2)
@@ -226,10 +229,8 @@ function [] = runColorEdge()
       % calculate and store probability of x according to mean and covariance
       probFitBeFit(x) = bigauss(meanFit,covFit,testResultsFit(1,x));
     end
-    %normalize to get values between 0 and 1
-    probFitBeFit = probFitBeFit./max(probFitBeFit);
 
-    if (doPlot)
+    if (doPlot>=2)
       figure('name','Probabilities')
       %plot resulting probabilities of test set
       subplot(2,2,1); 
@@ -244,9 +245,8 @@ function [] = runColorEdge()
       %same as first loop
       probUnfitBeFit(x) = bigauss(meanFit,covFit,testResultsUnfit(1,x));
     end
-    probUnfitBeFit = probUnfitBeFit./max(probUnfitBeFit);
 
-    if (doPlot)
+    if (doPlot>=2)
       subplot(2,2,2); 
       plot(1:size(probUnfitBeFit,2),probUnfitBeFit)
       title('UnFit beeing Fit')
@@ -259,9 +259,8 @@ function [] = runColorEdge()
       %same as first loop
       probFitBeUnfit(x) = bigauss(meanUnfit,covUnfit,testResultsFit(1,x));
     end
-    probFitBeUnfit = probFitBeUnfit./max(probFitBeUnfit);
 
-    if (doPlot)
+    if (doPlot>=2)
       subplot(2,2,3); 
       plot(1:size(probFitBeUnfit,2),probFitBeUnfit)
       title('Fit beeing UnFit')
@@ -274,9 +273,8 @@ function [] = runColorEdge()
       %same as first loop
       probUnfitBeUnfit(x) = bigauss(meanUnfit,covUnfit,testResultsUnfit(1,x));
     end
-    probUnfitBeUnfit = probUnfitBeUnfit./max(probUnfitBeUnfit);
 
-    if (doPlot)
+    if (doPlot>=2)
       subplot(2,2,4); 
       plot(1:size(probUnfitBeUnfit,2),probUnfitBeUnfit)
       title('UnFit beeing UnFit')
@@ -381,6 +379,7 @@ function [histogram,binSize,mini] = histConstr(list,bins)
   resultBinned = zeros(size(list));
   histogram = zeros(bins,1);
   for i=1:bins
+    %get all items in list that have values that correspond to bin i
     mask = list>=((binSize*(i-1))+mini) & list<=((binSize*(i))+mini);
     resultBinned(mask) = i;
   end
