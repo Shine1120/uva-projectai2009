@@ -1,12 +1,18 @@
 %COMPUTES THE CLASSIFIER THAT PERFORMS THE BEST AS THE FINAL CLASSIFIER
 %USING "A SIMPLE CASCADE" AND EVALUATES THE RESULT ON THE TEST SET
 %INPUT:
-%       model -- model structure of the features computed in the
-%                train_haar.m
+%       model  -- model structure of the features computed in the
+%                 train_haar.m
 %       labels -- array of labels for the images
 %       ImgSet -- the images of the training set saved as a matrix   
-function [true_pos, false_pos, performance, tpp, fpp] = eval_bills(model, labels, ImgSet)
-    load model_struct.mat
+%OUTPUT:
+%       true_pos  -- the number of the true positives
+%       false_pos -- the number of false positives
+%       error     -- the error of the classifier
+%                    (number of images incorrectly classified)
+%       tpp       -- true positive rate(for the ROC curve, regardles of the threshold)
+%       fpp       -- flase positive rate(for the ROC curve, regardles of the threshold) 
+function [true_pos, false_pos, error, tpp, fpp] = eval_bills(model, labels, ImgSet)
     target    = int8(labels);
     index_pos = find(target == 1); %the indexes for the positive class
     index_neg = find(target ==-1); %the indexes for the negative class
@@ -21,7 +27,7 @@ function [true_pos, false_pos, performance, tpp, fpp] = eval_bills(model, labels
     best              = sign(final_classifier - threshold_opt); %the predicted output with respect to the threshold
     true_pos          = sum(best(index_pos) == target(index_pos))/length(index_pos);
     false_pos         = 1 - sum(best(index_neg) == target(index_neg))/length(index_neg);
-    performance       = sum(best == target)/length(target);
+    error             = 1 - sum(best == target)/length(target);
 
 %{
     figure
