@@ -1,25 +1,27 @@
 %PREPROCESSES IMAGES AND SPLITS THE DATA FOR CROSSVALIDATION 
 %(resizes and stores them in a matrix)
 %INPUT: 
-%       res -- the procent to which the images should be resized
-%       train -- 1 for train / 0 for test    
-%       index -- the index of the CROSS-VALIDATION round
+%       res        -- the procent to which the images should be resized
+%       train      -- 1 for train / 0 for test    
+%       index      -- the index of the CROSS-VALIDATION round
+%       no_rounds  -- the total number of rounds for cross-validation
+%       path_fit   -- the path to the folder for the fit images
+%       path_unfit -- the path to the folder for the unfit images
 %OUTPUT:
 %       labels -- labels for the data set 
 %       ImgSet -- images for the data set as a matrix resized with the
 %                 procent res
-%       no_rounds -- the total number of rounds for cross-validation
-function [labels, ImgSet, nx, ny] = preprocess(res, index, train, no_rounds)    
+%       nx     -- resized dimension of images on x axis
+%       ny     -- resized dimension of images on x axis
+function [labels, ImgSet, nx, ny] = preprocess(res,index,train,no_rounds,path_fit,path_unfit)    
     nx         = round(120*res);
     ny         = round(85*res);
 
-    path_fit   = 'fit/';
     struct_fit = dir(path_fit);
     struct_fit = struct_fit(find(cellfun(@length,{struct_fit(:).name}))>2);
     no_fit     = size(struct_fit,1);
     slice_fit  = round(no_fit/no_rounds);
     
-    path_unfit   = 'unfit/';
     struct_unfit = dir(path_unfit);
     struct_unfit = struct_unfit(find(cellfun(@length,{struct_unfit(:).name}))>2);
     no_unfit     = size(struct_unfit,1);

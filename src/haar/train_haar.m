@@ -1,9 +1,15 @@
 %COMPUTES THE HAAR FEATURES FOR THE TRAINING SET AND RETURNS A STRUCTURE
 %CONTAINING ALL WEAK CLASSIFIERS CORRESPONDING TO THE TOP "T" BEST FEATURES
 %INPUT:
-%       T -- number of features to be used (not too large :P)
+%       T      -- number of features to be used (not too large :P)
 %       labels -- array of labels for the images
 %       ImgSet -- the images of the training set saved as a matrix   
+%OUTPUT:
+%       model      -- the structure containing the weak classifiers corresponding 
+%                     to the best features chosen in the AdaBoost algorithm
+%       rect_param -- the variable containing the parameters corresponding
+%                     to the pattern used
+%       F          -- the haar features  
 function [model, rect_param, F] = train_haar(T, labels, ImgSet)
     load haar_dico_5  %Dictionnary with 5 types of patterns
     target        = int8(labels); %targets or labels
