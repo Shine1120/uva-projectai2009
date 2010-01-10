@@ -12,20 +12,22 @@
 %       F          -- the haar features  
 function [model, rect_param, F] = train_haar(T, labels, ImgSet)
     load haar_dico_5  %Dictionnary with 5 types of patterns
-    target        = int8(labels); %targets or labels
-    II            = image_integral_standard(ImgSet); %Integral Image 
-    [Ny , Nx , P] = size(II); %P number of images
-    F             = haar_featlist(Ny , Nx , rect_param); %haar features
-    index         = randperm(length(target));
-    tic,model     = haar_adaboost_binary_model_cascade(II(: , : , index) , target(index) , rect_param , F , T);,toc  %a bit long ....%
+    target             = int8(labels); %targets or labels
+    II                 = image_integral_standard(ImgSet); %Integral Image 
+    [Ny , Nx , P]      = size(II); %P number of images
+    F                  = haar_featlist(Ny , Nx , rect_param); %haar features
+    index              = randperm(length(target));
+    options.weaklerner = 2;
+    tic,model          = haar_adaboost_binary_model_cascade(II(: , : , index) ,...
+                         target(index) , rect_param , F , T, options);,toc  %a bit long ....%
 
-%    G          = Haar_matG(Ny , Nx , rect_param);
+%    G         = Haar_matG(Ny , Nx , rect_param);
 %    tic,model = fast_haar_adaboost_binary_model_cascade(II(: , : ,index) , target(index) , G , T);,toc
 
     %plot the best features on a random image
 %{
-    Nimage   = randperm(P); %Random image index for printing the result over it
-    rand_Img = ImgSet(: , : , Nimage); %random image for ploting the features
+    Nimage     = randperm(P); %Random image index for printing the result over it
+    rand_Img   = ImgSet(: , : , Nimage); %random image for ploting the features
     figure;imagesc(rand_Img);hold on;
     best_feats = (F(: , model(1 , 1:T)));
     x          = double(best_feats(2 , :)) + 0.5 ;
