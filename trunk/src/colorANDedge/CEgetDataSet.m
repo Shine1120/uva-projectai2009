@@ -4,7 +4,7 @@ function [ allResults ] = CEgetDataSet( do, path,cannyThresh,...
   numImages=1;
   allResults=[0,0];
 
-  fprintf('\tconstructing the data set\n')
+  fprintf('\tconstructing the data set for %s\n',do)
   for i = 1:maxNrImg
     %for all images: extract the data
 
