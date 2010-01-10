@@ -40,6 +40,14 @@ function [ allResults ] = CEgetDataSet( do, path,cannyThresh,...
           rearImageCount  = doColor(nextImageRear);
         end
       end
+      if strcmp(do,'colorOfEdge')
+        if (useFront)
+          frontImageCount = doColorOfEdge(nextImageFront,cannyThresh);
+        end
+        if (useRear)
+          rearImageCount  = doColorOfEdge(nextImageRear,cannyThresh);
+        end
+      end
       if strcmp(do,'edge and color')
         if (useFront)
           frontImageCount = doEdgeColor(nextImageFront,cannyThresh);
@@ -67,8 +75,15 @@ function [ allResults ] = CEgetDataSet( do, path,cannyThresh,...
 end
 
 function edgeCount = doEdge(image,cannyThresh)
-  edgeImageFront = edge(image,'canny',cannyThresh);
-  edgeCount=sum(sum(edgeImageFront));
+  edgeImage = edge(image,'canny',cannyThresh);
+  edgeCount=sum(sum(edgeImage));
+end
+
+function edgeCount = doColorOfEdge(image,cannyThresh)
+  edgeImage = edge(image,'canny',cannyThresh);
+  mask = edgeImage==1;
+  edgeImageColor = image(mask);
+  edgeCount=sum(sum(edgeImageColor));
 end
 
 function avgColor = doColor(image)
@@ -81,4 +96,3 @@ function count = doEdgeColor(image,cannyThresh)
   %of edges. This might not be the ideal way to do this.
   count = doEdge(image,cannyThresh) + (doColor(image)*factor);
 end
-

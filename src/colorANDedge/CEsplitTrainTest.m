@@ -26,11 +26,8 @@ function [ testData, trainMean, trainCov, histogramSum ] =...
   trainCov = cov(trainData(1,:));
 
   if (doPlot>=1 & foldIter==numberOfFolds)
-%     if lastOfMultMethods==2
-%       numberOfFolds = numberOfFolds*2;
-%     end
     %calculate and plot histogram
-    figure(lastOfMultMethods+1)
+    figure(lastOfMultMethods+2)
     if strcmp(type,'fit')
       plotNr=1;
     end
@@ -50,4 +47,3 @@ function [ testData, trainMean, trainCov, histogramSum ] =...
     histogramSum = histogramSum + hist;
   end
 end
-
