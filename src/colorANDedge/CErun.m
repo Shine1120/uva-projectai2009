@@ -3,8 +3,8 @@ function [ output_args ] = CErun( input_args )
   close all
 
   %windows
-%  pathFit = '..\money\wholeplusborder\neur05\fit\';
-%  pathUnfit = '..\money\wholeplusborder\neur05\unfit\';
+  pathFit = '..\money\wholeplusborder\neur05\fit\';
+  pathUnfit = '..\money\wholeplusborder\neur05\unfit\';
 
 %  pathFit = '..\money\whitepatch\neur05\fit\';
 %  pathUnfit = '..\money\whitepatch\neur05\unfit\';
@@ -13,8 +13,8 @@ function [ output_args ] = CErun( input_args )
 %  pathUnfit = '..\money\whole\neur05\unfit\';
 
   %linux
-  pathFit = '../money/wholeplusborder/neur10/fit/';
-  pathUnfit = '../money/wholeplusborder/neur10/unfit/';
+%  pathFit = '../money/wholeplusborder/neur10/fit/';
+%  pathUnfit = '../money/wholeplusborder/neur10/unfit/';
 
 %  pathFit = '../money/whole/neur05/fit/';
 %  pathUnfit = '../money/whole/neur05/unfit/';
@@ -23,13 +23,15 @@ function [ output_args ] = CErun( input_args )
 %  pathUnfit = '../money/whitepatch/neur10/unfit/';
 
 	sizeTotalSet = 250;
-	sizeHoldoutSet = 100;
-	sizeLearnSet = sizeTotalSet-sizeHoldoutSet;
+	sizeHoldoutSetFit = round(rand(1)*99);
+	sizeHoldoutSetUnfit = 100-sizeHoldoutSetFit;
+	sizeLearnSetFit = sizeTotalSet-sizeHoldoutSetFit;
+	sizeLearnSetUnfit = sizeTotalSet-sizeHoldoutSetUnfit;
 	numberOfFolds = 10;
 
 	doEdge=1;
 	doColor=1;
-	doColorOfEdge=1;
+	doColorOfEdge=0;
 	cannyThresh=0.0355;
 
 	useFront=1;
@@ -83,34 +85,33 @@ function [ output_args ] = CErun( input_args )
 	holdoutSetUnfitE = [];
 	holdoutSetUnfitC = [];
 	holdoutSetUnfitCofE = [];
+	
+	%construct vector (length = amount of images) with randome
+    %numbers between 1 and the amout of images
+    randIndexFit = randperm(sizeTotalSet);
+	randIndexUnfit = randperm(sizeTotalSet);
   if doEdge==1
     allResultsFitE = CEgetDataSet( 'edge', pathFit,cannyThresh,...
-      sizeLearnSet, useFront, useRear, sizeHoldoutSet);
+      sizeLearnSetFit, useFront, useRear, sizeHoldoutSetFit,randIndexFit);
     holdoutSetFitE = CEgetDataSet( 'edge', pathFit,cannyThresh,...
-      sizeHoldoutSet, useFront, useRear, 0);
-    %construct vector (length = amount of images) with randome
-    %numbers between 1 and the amout of images
-    randIndexFit = randperm(size(allResultsFitE,2));
-%    [ignore, randIndexFit] = randperm(size(allResultsFitE,2));
-    %calculate how many images there are in every Kth fold
+      sizeHoldoutSetFit, useFront, useRear, 0,randIndexFit);
+	
+	%calculate how many images there are in every Kth fold
     countFoldFit = round(size(allResultsFitE,2)/numberOfFolds);
   end
   if doColor==1
     allResultsFitC = CEgetDataSet( 'color', pathFit,cannyThresh,...
-      sizeLearnSet, useFront, useRear, sizeHoldoutSet )
+      sizeLearnSetFit, useFront, useRear, sizeHoldoutSetFit,randIndexFit);
     holdoutSetFitC = CEgetDataSet( 'color', pathFit,cannyThresh,...
-      sizeHoldoutSet, useFront, useRear, 0)
-    randIndexFit = randperm(size(allResultsFitC,2));
-%    [ignore, randIndexFit] = randperm(size(allResultsFitC,2));
+      sizeHoldoutSetFit, useFront, useRear, 0,randIndexFit);
+
     countFoldFit = round(size(allResultsFitC,2)/numberOfFolds);
   end
   if doColorOfEdge==1
     allResultsFitCofE = CEgetDataSet( 'colorOfEdge', pathFit,cannyThresh,...
-      sizeLearnSet, useFront, useRear, sizeHoldoutSet );
+      sizeLearnSetFit, useFront, useRear, sizeHoldoutSetFit );
     holdoutSetFitCofE = CEgetDataSet( 'colorOfEdge', pathFit,cannyThresh,...
-      sizeHoldoutSet, useFront, useRear, 0);
-    randIndexFit = randperm(size(allResultsFitCofE,2));
-%    [ignore, randIndexFit] = randperm(size(allResultsFitCofE,2));
+      sizeHoldoutSetFit, useFront, useRear, 0,randIndexFit);
     countFoldFit = round(size(allResultsFitCofE,2)/numberOfFolds);
   end
 
@@ -118,33 +119,28 @@ function [ output_args ] = CErun( input_args )
   fprintf('processing unfit data...\n')
   if doEdge==1
     allResultsUnfitE = CEgetDataSet( 'edge', pathUnfit,cannyThresh,...
-      sizeLearnSet, useFront, useRear, sizeHoldoutSet );
+      sizeLearnSetUnfit, useFront, useRear, sizeHoldoutSetUnfit,randIndexUnfit);
     holdoutSetUnfitE = CEgetDataSet( 'edge', pathUnfit,cannyThresh,...
-      sizeHoldoutSet, useFront, useRear, 0);
-    %construct vector (length = amount of images) with randome
-    %numbers between 1 and the amout of images
-    randIndexUnfit = randperm(size(allResultsUnfitE,2));
-%    [ignore, randIndexUnfit] = randperm(size(allResultsUnfitE,2));
-    %calculate how many images there are in every Kth fold
+      sizeHoldoutSetUnfit, useFront, useRear, 0,randIndexUnfit);
+
+	%calculate how many images there are in every Kth fold
     countFoldUnfit = round(size(allResultsUnfitE,2)/numberOfFolds);
   end
   if doColor==1
     allResultsUnfitC = CEgetDataSet( 'color', pathUnfit,cannyThresh,...
-      sizeLearnSet, useFront, useRear, sizeHoldoutSet );
+      sizeLearnSetUnfit, useFront, useRear, sizeHoldoutSetUnfit,randIndexUnfit);
     holdoutSetUnfitC = CEgetDataSet( 'color', pathUnfit,cannyThresh,...
-      sizeHoldoutSet, useFront, useRear, 0);
-    randIndexUnfit = randperm(size(allResultsUnfitC,2));
-%    [ignore, randIndexUnfit] = randperm(size(allResultsUnfitC,2));
-    countFoldUnfit = round(size(allResultsUnfitC,2)/numberOfFolds);
+      sizeHoldoutSetUnfit, useFront, useRear, 0,randIndexUnfit);
+    
+	countFoldUnfit = round(size(allResultsUnfitC,2)/numberOfFolds);
   end
   if doColorOfEdge==1
     allResultsUnfitCofE = CEgetDataSet( 'colorOfEdge', pathUnfit,cannyThresh,...
-      sizeLearnSet, useFront, useRear, sizeHoldoutSet );
+      sizeLearnSetUnfit, useFront, useRear, sizeHoldoutSetUnfit,randIndexUnfit);
     holdoutSetUnfitCofE = CEgetDataSet( 'colorOfEdge', pathUnfit,cannyThresh,...
-      sizeHoldoutSet, useFront, useRear, 0);
-    randIndexUnfit = randperm(size(allResultsUnfitCofE,2));
-%    [ignore, randIndexUnfit] = randperm(size(allResultsUnfitCofE,2));
-    countFoldUnfit = round(size(allResultsUnfitCofE,2)/numberOfFolds);
+      sizeHoldoutSetUnfit, useFront, useRear, 0,randIndexUnfit);
+    
+	countFoldUnfit = round(size(allResultsUnfitCofE,2)/numberOfFolds);
   end
 
   bestTP=0;
@@ -213,8 +209,8 @@ function [ output_args ] = CErun( input_args )
       sizeTestDataUnfit = length(testDataUnfitCofE);
     end
     
-    fprintf('\n%d test items in fit\n',sizeTestDataFit)
-    fprintf('\n%d test items in unfit\n',sizeTestDataUnfit)
+%     fprintf('\n%d test items in fit\n',sizeTestDataFit)
+%     fprintf('%d test items in unfit\n',sizeTestDataUnfit)
 
     probFitBeFitE = CEgetGaussProb(testDataFitE,meanFitE,covFitE,sizeTestDataFit);
     probUnfitBeFitE = CEgetGaussProb(testDataUnfitE,meanFitE,covFitE,sizeTestDataUnfit);
@@ -286,25 +282,6 @@ function [ output_args ] = CErun( input_args )
     sumTN = sumTN + percUnfitGood;
     sumFP = sumFP + percUnfitWrong;
     
-%     fitMC=[];
-%     unfitMC=[];
-%     
-%     if doEdge==1
-% 		%add edge mean/cov to unfit and fit list
-%         fitMC = [fitMC; meanFitE covFitE];
-%         unfitMC = [unfitMC; meanUnfitE covUnfitE];
-%     end
-%     if doColor==1
-%         %add color mean/cov to unfit and fit list
-%         fitMC = [fitMC; meanFitC covFitC];
-%         unfitMC = [unfitMC; meanUnfitC covUnfitC];
-%     end
-%     if doColorOfEdge==1
-%         %add colorOfEdge mean/cov to unfit and fit list
-%         fitMC = [fitMC; meanFitCofE covFitCofE];
-%         unfitMC = [unfitMC; meanUnfitCofE covUnfitCofE];
-%     end
-  
 	if percFitGood>bestTP
 		bestTPlistE=[meanFitE covFitE];
 		bestTPlistC=[meanFitC covFitC];
@@ -315,16 +292,15 @@ function [ output_args ] = CErun( input_args )
 		bestTPlistC=[bestTPlistC; meanFitC covFitC];
 		bestTPlistCofE=[bestTPlistCofE; meanFitCofE covFitCofE];
 	end
-	addedToBestTPListE = [meanFitE covFitE]
     if percUnfitGood>bestTN
 		bestTNlistE=[meanUnfitE covUnfitE];
 		bestTNlistC=[meanUnfitC covUnfitC];
 		bestTNlistCofE=[meanUnfitCofE covUnfitCofE];
         bestTN = percUnfitGood;
     elseif percUnfitGood==bestTN
-		bestTNlistE=[bestTNlistE; meanUnfitE covUnfitE];
-		bestTNlistC=[bestTNlistC; meanUnfitC covUnfitC];
-		bestTNlistCofE=[bestTNlistCofE; meanUnfitCofE covUnfitCofE];
+        bestTNlistE=[bestTNlistE; meanUnfitE covUnfitE];
+        bestTNlistC=[bestTNlistC; meanUnfitC covUnfitC];
+        bestTNlistCofE=[bestTNlistCofE; meanUnfitCofE covUnfitCofE];
     end
     
   end
@@ -339,33 +315,45 @@ function [ output_args ] = CErun( input_args )
     sumFP/foldIter)
 
   fprintf('\n\nbest TP: %d times %d\n',length(bestTPlistC),bestTP);
-  bestEvarsTP = mean(bestTPlistE)
-  bestCvarsTP = mean(bestTPlistC)
-  bestCofEvarsTP = mean(bestTPlistCofE)
+  if size(bestTPlistE,1)>1 | size(bestTPlistC,1)>1 | size(bestTPlistCofE,1)>1
+	  bestEvarsTP    = mean(bestTPlistE);
+	  bestCvarsTP    = mean(bestTPlistC);
+	  bestCofEvarsTP = mean(bestTPlistCofE);
+  else
+	  bestEvarsTP    = bestTPlistE;
+	  bestCvarsTP    = bestTPlistC;
+	  bestCofEvarsTP = bestTPlistCofE;
+  end
   
   fprintf('best TN: %d times %d\n',length(bestTNlistC),bestTN);
-  bestEvarsTN = mean(bestTNlistE)
-  bestCvarsTN = mean(bestTNlistC)
-  bestCofEvarsTN = mean(bestTNlistCofE)
+  if size(bestTNlistE,1)>1 | size(bestTNlistC,1)>1 | size(bestTNlistCofE,1)>1
+	  bestEvarsTN    = mean(bestTNlistE);
+	  bestCvarsTN    = mean(bestTNlistC);
+	  bestCofEvarsTN = mean(bestTNlistCofE);
+  else
+	  bestEvarsTN    = bestTNlistE;
+	  bestCvarsTN    = bestTNlistC;
+	  bestCofEvarsTN = bestTNlistCofE;
+  end
 
   fprintf('\n===========FINISHED==========================\n')
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    probFitBeFitE = CEgetGaussProb(holdoutSetFitE,bestEvarsTP(1),bestEvarsTP(2),sizeHoldoutSet);
-    probUnfitBeFitE = CEgetGaussProb(holdoutSetUnfitE,bestEvarsTP(1),bestEvarsTP(2),sizeHoldoutSet);
-    probFitBeUnfitE = CEgetGaussProb(holdoutSetFitE,bestEvarsTN(1),bestEvarsTN(2),sizeHoldoutSet);
-    probUnfitBeUnfitE = CEgetGaussProb(holdoutSetUnfitE,bestEvarsTN(1),bestEvarsTN(2),sizeHoldoutSet);
+    probFitBeFitE = CEgetGaussProb(holdoutSetFitE,bestEvarsTP(1),bestEvarsTP(2),sizeHoldoutSetFit);
+    probUnfitBeFitE = CEgetGaussProb(holdoutSetUnfitE,bestEvarsTP(1),bestEvarsTP(2),sizeHoldoutSetUnfit);
+    probFitBeUnfitE = CEgetGaussProb(holdoutSetFitE,bestEvarsTN(1),bestEvarsTN(2),sizeHoldoutSetFit);
+    probUnfitBeUnfitE = CEgetGaussProb(holdoutSetUnfitE,bestEvarsTN(1),bestEvarsTN(2),sizeHoldoutSetUnfit);
 
-    probFitBeFitC = CEgetGaussProb(holdoutSetFitC,bestCvarsTP(1),bestCvarsTP(2),sizeHoldoutSet);
-    probUnfitBeFitC = CEgetGaussProb(holdoutSetUnfitC,bestCvarsTP(1),bestCvarsTP(2),sizeHoldoutSet);
-    probFitBeUnfitC = CEgetGaussProb(holdoutSetFitC,bestCvarsTN(1),bestCvarsTN(2),sizeHoldoutSet);
-    probUnfitBeUnfitC = CEgetGaussProb(holdoutSetUnfitC,bestCvarsTN(1),bestCvarsTN(2),sizeHoldoutSet);
+    probFitBeFitC = CEgetGaussProb(holdoutSetFitC,bestCvarsTP(1),bestCvarsTP(2),sizeHoldoutSetFit);
+    probUnfitBeFitC = CEgetGaussProb(holdoutSetUnfitC,bestCvarsTP(1),bestCvarsTP(2),sizeHoldoutSetUnfit);
+    probFitBeUnfitC = CEgetGaussProb(holdoutSetFitC,bestCvarsTN(1),bestCvarsTN(2),sizeHoldoutSetFit);
+    probUnfitBeUnfitC = CEgetGaussProb(holdoutSetUnfitC,bestCvarsTN(1),bestCvarsTN(2),sizeHoldoutSetUnfit);
 
-    probFitBeFitCofE = CEgetGaussProb(holdoutSetFitCofE,bestCofEvarsTP(1),bestCofEvarsTP(2),sizeHoldoutSet);
-    probUnfitBeFitCofE = CEgetGaussProb(holdoutSetUnfitCofE,bestCofEvarsTP(1),bestCofEvarsTP(2),sizeHoldoutSet);
-    probFitBeUnfitCofE = CEgetGaussProb(holdoutSetFitCofE,bestCofEvarsTN(1),bestCofEvarsTN(2),sizeHoldoutSet);
-    probUnfitBeUnfitCofE = CEgetGaussProb(holdoutSetUnfitCofE,bestCofEvarsTN(1),bestCofEvarsTN(2),sizeHoldoutSet);
+    probFitBeFitCofE = CEgetGaussProb(holdoutSetFitCofE,bestCofEvarsTP(1),bestCofEvarsTP(2),sizeHoldoutSetFit);
+    probUnfitBeFitCofE = CEgetGaussProb(holdoutSetUnfitCofE,bestCofEvarsTP(1),bestCofEvarsTP(2),sizeHoldoutSetUnfit);
+    probFitBeUnfitCofE = CEgetGaussProb(holdoutSetFitCofE,bestCofEvarsTN(1),bestCofEvarsTN(2),sizeHoldoutSetFit);
+    probUnfitBeUnfitCofE = CEgetGaussProb(holdoutSetUnfitCofE,bestCofEvarsTN(1),bestCofEvarsTN(2),sizeHoldoutSetUnfit);
 
     probFitBeFit = (probFitBeFitC.*probFitBeFitCofE).*probFitBeFitE;
     probUnfitBeFit = (probUnfitBeFitC.*probUnfitBeFitCofE).*probUnfitBeFitE;
@@ -407,7 +395,7 @@ function [ output_args ] = CErun( input_args )
     percUnfitGood = unfitGood/(unfitGood+unfitNotGood)*100;
     percUnfitWrong = unfitNotGood/(unfitGood+unfitNotGood)*100;
 
-    fprintf('\nresults of holdout set:\n')
+    fprintf('\nresults of holdout set (%d fit %d unfit):\n',sizeHoldoutSetFit,sizeHoldoutSetUnfit)
     fprintf('TP: %4.4g%% of the fit test data is classified good\n',...
       percFitGood)
     fprintf('FN: %4.4g%% of the fit test data is classified wrong\n',...
@@ -417,11 +405,10 @@ function [ output_args ] = CErun( input_args )
     fprintf('FP: %4.4g%% of the unfit test data is classified wrong\n',...
       percUnfitWrong)
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 end
 
 function p = randperm(n)
-    [ignore,p] = sort(rand(1,n));
+    [~,p] = sort(rand(1,n));
 end
