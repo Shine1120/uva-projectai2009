@@ -1,11 +1,19 @@
 function [ allResults ] = CEgetDataSet( do, path,cannyThresh,...
-  maxNrImg, useFront, useRear )
+  maxNrImg, useFront, useRear, learnSet )
 
   numImages=1;
   allResults=[0,0];
 
   fprintf('\tconstructing the data set for %s\n',do)
-  for i = 1:maxNrImg
+  if (learnSet)
+      minImage = learnSet;
+      maxImage = maxNrImg+learnSet;
+  end
+  if ~(learnSet) %holdout set
+      minImage = 1;
+      maxImage = maxNrImg;
+  end
+  for i = minImage:maxImage
     %for all images: extract the data
 
     %construct front and rear image name
