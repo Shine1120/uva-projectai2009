@@ -3,11 +3,11 @@ function [ output_args ] = CErun( input_args )
   close all
 
   %windows
-  pathFit = '..\money\wholeplusborder\neur05\fit\';
-  pathUnfit = '..\money\wholeplusborder\neur05\unfit\';
+  pathFit = '..\money\wholeplusborder\neur10\fit\';
+  pathUnfit = '..\money\wholeplusborder\neur10\unfit\';
 
-%  pathFit = '..\money\whitepatch\neur05\fit\';
-%  pathUnfit = '..\money\whitepatch\neur05\unfit\';
+%  pathFit = '..\money\whitepatch\neur10\fit\';
+%  pathUnfit = '..\money\whitepatch\neur10\unfit\';
 
 %  pathFit = '..\money\whole\neur05\fit\';
 %  pathUnfit = '..\money\whole\neur05\unfit\';
@@ -31,7 +31,7 @@ function [ output_args ] = CErun( input_args )
 
 	doEdge=1;
 	doColor=1;
-	doColorOfEdge=0;
+	doColorOfEdge=1;
 	cannyThresh=0.0355;
 
 	useFront=1;
@@ -109,7 +109,7 @@ function [ output_args ] = CErun( input_args )
   end
   if doColorOfEdge==1
     allResultsFitCofE = CEgetDataSet( 'colorOfEdge', pathFit,cannyThresh,...
-      sizeLearnSetFit, useFront, useRear, sizeHoldoutSetFit );
+      sizeLearnSetFit, useFront, useRear, sizeHoldoutSetFit,randIndexFit);
     holdoutSetFitCofE = CEgetDataSet( 'colorOfEdge', pathFit,cannyThresh,...
       sizeHoldoutSetFit, useFront, useRear, 0,randIndexFit);
     countFoldFit = round(size(allResultsFitCofE,2)/numberOfFolds);
@@ -338,7 +338,7 @@ function [ output_args ] = CErun( input_args )
 
   fprintf('\n===========FINISHED==========================\n')
 
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%%%%%%%%%%%%%TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%%%%%%
 
     probFitBeFitE = CEgetGaussProb(holdoutSetFitE,bestEvarsTP(1),bestEvarsTP(2),sizeHoldoutSetFit);
     probUnfitBeFitE = CEgetGaussProb(holdoutSetUnfitE,bestEvarsTP(1),bestEvarsTP(2),sizeHoldoutSetUnfit);
@@ -404,9 +404,7 @@ function [ output_args ] = CErun( input_args )
       percUnfitGood)
     fprintf('FP: %4.4g%% of the unfit test data is classified wrong\n',...
       percUnfitWrong)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+	%%%%%%%%%%%%%%%FINISHED TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%
 end
 
 function p = randperm(n)
