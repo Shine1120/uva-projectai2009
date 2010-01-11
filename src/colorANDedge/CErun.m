@@ -1,10 +1,10 @@
-function [ output_args ] = CErun( input_args )
+function [ percFitGood, percUnfitGood ] = CErun( input_args )
 
   close all
 
   %windows
-  pathFit = '..\money\wholeplusborder\neur10\fit\';
-  pathUnfit = '..\money\wholeplusborder\neur10\unfit\';
+   pathFit = '..\money\wholeplusborder\neur05\fit\';
+   pathUnfit = '..\money\wholeplusborder\neur05\unfit\';
 
 %  pathFit = '..\money\whitepatch\neur10\fit\';
 %  pathUnfit = '..\money\whitepatch\neur10\unfit\';
@@ -23,7 +23,7 @@ function [ output_args ] = CErun( input_args )
 %  pathUnfit = '../money/whitepatch/neur10/unfit/';
 
 	sizeTotalSet = 250;
-	sizeHoldoutSetFit = round(rand(1)*99);
+	sizeHoldoutSetFit = round(rand(1)*98)+1;
 	sizeHoldoutSetUnfit = 100-sizeHoldoutSetFit;
 	sizeLearnSetFit = sizeTotalSet-sizeHoldoutSetFit;
 	sizeLearnSetUnfit = sizeTotalSet-sizeHoldoutSetUnfit;
@@ -31,7 +31,7 @@ function [ output_args ] = CErun( input_args )
 
 	doEdge=1;
 	doColor=1;
-	doColorOfEdge=1;
+	doColorOfEdge=0;
 	cannyThresh=0.0355;
 
 	useFront=1;
