@@ -1,10 +1,13 @@
-function [ probTestData ] = CEgetGaussProb( testData, meanTrain, covTrain  )
+function [ probTestData ] = CEgetGaussProb( testData, meanTrain, covTrain,...
+  sizeTestData)
 
-  probTestData = zeros(size(testData,2));
-  for x=1:size(testData,2)
-    %for test images in test set:
-    % calculate and store probability of x according to mean and covariance
-    probTestData(x) = gaussProb(meanTrain,covTrain,testData(1,x));
+  probTestData = ones(sizeTestData);
+  if ~isempty(testData)
+    for x=1:size(testData,2)
+      %for test images in test set:
+      % calculate and store probability of x according to mean and covariance
+      probTestData(x) = gaussProb(meanTrain,covTrain,testData(1,x));
+    end
   end
 end
 
