@@ -3,8 +3,8 @@ function [] = runColorEdge()
   close all
 
   %windows
-  pathFit = '..\DirtyMoney2010\wholeplusborder\neur05\fit\';
-  pathUnFit = '..\DirtyMoney2010\wholeplusborder\neur05\unfit\';
+  pathFit = 'money\wholeplusborder\neur05\fit\';
+  pathUnFit = 'money\wholeplusborder\neur05\unfit\';
 
 %  pathFit = '..\DirtyMoney2010\whitepatch\neur05\fit\';
 %  pathUnFit = '..\DirtyMoney2010\whitepatch\neur05\unfit\';
@@ -28,9 +28,9 @@ function [] = runColorEdge()
   maxNrImg = 250;
   numberOfFolds = 10;
 
-  do = 'edge';
+%  do = 'edge';
 %  do = 'color';
-%  do = 'edge and color';
+  do = 'edge and color';
   cannyThresh=0.0355;
 
   useFront=1;
