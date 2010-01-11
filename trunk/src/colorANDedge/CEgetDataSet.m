@@ -1,5 +1,5 @@
 function [ allResults ] = CEgetDataSet( do, path,cannyThresh,...
-  maxNrImg, useFront, useRear, learnSet )
+  maxNrImg, useFront, useRear, learnSet,randIndex)
 
   numImages=1;
   allResults=[0,0];
@@ -15,10 +15,10 @@ function [ allResults ] = CEgetDataSet( do, path,cannyThresh,...
   end
   for i = minImage:maxImage
     %for all images: extract the data
-
+	id = randIndex(i);
     %construct front and rear image name
-    nextImageNameFront = [path 'f' num2str(i,'%01d') '.bmp'];
-    nextImageNameRear = [path 'r' num2str(i,'%01d') '.bmp'];
+    nextImageNameFront = [path 'f' num2str(id,'%01d') '.bmp'];
+    nextImageNameRear = [path 'r' num2str(id,'%01d') '.bmp'];
     %check if both exist in the dataset
     if exist(nextImageNameFront,'file') &&...
         exist(nextImageNameRear,'file')
@@ -74,7 +74,7 @@ function [ allResults ] = CEgetDataSet( do, path,cannyThresh,...
         allResults(1,numImages)=allResults(1,numImages)+rearImageCount;
       end
       %store image id
-      allResults(2,numImages)=i;
+      allResults(2,numImages)=id;
 
       %raise image count
       numImages=numImages+1;
