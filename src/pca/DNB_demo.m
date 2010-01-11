@@ -96,8 +96,8 @@ for q=1:repetitions
 		models = trainRegionsSVM(money_front_regions1, labels, eigen_front_regions, NumberOfEigenVectors);
 		eigen_front_regions1 = [];
 		eigen_front_regions2 = [];
-		
-		MODELS = models
+
+		save models.mat models
 		
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		
