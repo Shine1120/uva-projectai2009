@@ -17,8 +17,8 @@ function [ testData, trainMean, trainCov, histogramSum ] =...
     end
   end
   if (foldIter==1 & lastOfMultMethods>=1)
-    fprintf('\t\t%d fit train images \n\t\t%d fit test images\n',...
-    trainCount,testCount)
+    fprintf('\t\t%d %s train images \n\t\t%d %s test images\n',...
+    trainCount,type,testCount,type)
   end
 
   %calculate mean and covariance of traininsdata
@@ -27,7 +27,7 @@ function [ testData, trainMean, trainCov, histogramSum ] =...
 
   if (doPlot>=1 & foldIter==numberOfFolds)
     %calculate and plot histogram
-    figure(lastOfMultMethods+2)
+    figure(lastOfMultMethods+3)
     if strcmp(type,'fit')
       plotNr=1;
     end

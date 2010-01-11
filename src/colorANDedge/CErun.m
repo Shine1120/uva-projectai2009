@@ -27,7 +27,7 @@ function [ output_args ] = CErun( input_args )
 
   doEdge=1;
   doColor=1;
-  doColorOfEdge=0;
+  doColorOfEdge=1;
   cannyThresh=0.0355;
 
   useFront=1;
@@ -54,17 +54,21 @@ function [ output_args ] = CErun( input_args )
   sumFN=0;
   
   fprintf('\n\n===========STARTING==========================\n')
-  if doEdge==1 & doColor==0
-    do = 'edge';
+  do = []
+  if doEdge==1
+    do = [do 'edge '];
   end
-  if doEdge==0 & doColor==1
-    do = 'color';
+  if doColor==1
+    if ~isempty(do)
+      do = [do 'and ' ];
+    end
+    do = [do 'color '];
   end
-  if doEdge==0 & doColor==0 & doColorOfEdge==1
-    do = 'colorOfEdge';
-  end
-  if doEdge==1 & doColor==1
-    do = 'edge and color';
+  if doColorOfEdge==1
+    if ~isempty(do)
+      do = [do 'and ' ];
+    end
+    do = [do 'colorOfEdge '];
   end
   fprintf('\nstarting to run classification by %s...\n',do)
   fprintf('\nconstructing data set...\n')
@@ -121,201 +125,79 @@ function [ output_args ] = CErun( input_args )
     tic
     fprintf('\n%d of %d-fold cross validation running...\n',...
       foldIter, numberOfFolds)
-    %%%%%%%%%%FIT%%%%%%%%%%%%%%%%%%%
-    if doEdge==1 & doColor==0 & doColorOfEdge==0
+
+    sizeTestDataFit = 0;
+    sizeTestDataUnfit = 0;
+
+    testDataFitE = [];
+    meanFitE = 0;
+    covFitE = 0;
+    testDataUnfitE = [];
+    meanUnfitE = 0;
+    covUnfitE = 0;
+    if doEdge==1
       [ testDataFitE, meanFitE, covFitE, histogramSumFitE ] =...
         CEsplitTrainTest('fit',allResultsFitE,randIndexFit,foldIter,...
         countFoldFit,histogramSumFitE,doPlot,numberOfFolds,histBins,1);
-    end
-    if doEdge==0 & doColor==1 & doColorOfEdge==0
-      [ testDataFitC, meanFitC, covFitC, histogramSumFitC ] =...
-        CEsplitTrainTest('fit',allResultsFitC,randIndexFit,foldIter,...
-        countFoldFit,histogramSumFitC,doPlot,numberOfFolds,histBins,1);
-    end
-    if doEdge==0 & doColor==0 & doColorOfEdge==1
-      [ testDataFitCofE, meanFitCofE, covFitCofE, histogramSumFitCofE ] =...
-        CEsplitTrainTest('fit',allResultsFitCofE,randIndexFit,foldIter,...
-        countFoldFit,histogramSumFitCofE,doPlot,numberOfFolds,histBins,1);
-    end
-    if doEdge==1 & doColor==1 & doColorOfEdge==0
-      [ testDataFitE, meanFitE, covFitE, histogramSumFitE ] =...
-        CEsplitTrainTest('fit',allResultsFitE,randIndexFit,foldIter,...
-        countFoldFit,histogramSumFitE,doPlot,numberOfFolds,histBins,0);
-      [ testDataFitC, meanFitC, covFitC, histogramSumFitC ] =...
-        CEsplitTrainTest('fit',allResultsFitC,randIndexFit,foldIter,...
-        countFoldFit,histogramSumFitC,doPlot,numberOfFolds,histBins,2);
-    end
-    if doEdge==1 & doColor==0 & doColorOfEdge==1
-      [ testDataFitE, meanFitE, covFitE, histogramSumFitE ] =...
-        CEsplitTrainTest('fit',allResultsFitE,randIndexFit,foldIter,...
-        countFoldFit,histogramSumFitE,doPlot,numberOfFolds,histBins,0);
-      [ testDataFitCofE, meanFitCofE, covFitCofE, histogramSumFitCofE ] =...
-        CEsplitTrainTest('fit',allResultsFitCofE,randIndexFit,foldIter,...
-        countFoldFit,histogramSumFitCofE,doPlot,numberOfFolds,histBins,2);
-    end
-    if doEdge==0 & doColor==1 & doColorOfEdge==1
-      [ testDataFitC, meanFitC, covFitC, histogramSumFitC ] =...
-        CEsplitTrainTest('fit',allResultsFitC,randIndexFit,foldIter,...
-        countFoldFit,histogramSumFitC,doPlot,numberOfFolds,histBins,0);
-      [ testDataFitCofE, meanFitCofE, covFitCofE, histogramSumFitCofE ] =...
-        CEsplitTrainTest('fit',allResultsFitCofE,randIndexFit,foldIter,...
-        countFoldFit,histogramSumFitCofE,doPlot,numberOfFolds,histBins,2);
-    end
-    if doEdge==1 & doColor==1 & doColorOfEdge==1
-      [ testDataFitE, meanFitE, covFitE, histogramSumFitE ] =...
-        CEsplitTrainTest('fit',allResultsFitE,randIndexFit,foldIter,...
-        countFoldFit,histogramSumFitE,doPlot,numberOfFolds,histBins,-1);
-      [ testDataFitC, meanFitC, covFitC, histogramSumFitC ] =...
-        CEsplitTrainTest('fit',allResultsFitC,randIndexFit,foldIter,...
-        countFoldFit,histogramSumFitC,doPlot,numberOfFolds,histBins,0);
-      [ testDataFitCofE, meanFitCofE, covFitCofE, histogramSumFitCofE ] =...
-        CEsplitTrainTest('fit',allResultsFitCofE,randIndexFit,foldIter,...
-        countFoldFit,histogramSumFitCofE,doPlot,numberOfFolds,histBins,2);
-    end
-    %%%%%%%%%END FIT%%%%%%%%%%%%%
-    
-    %%%%%%%%%%UNFIT%%%%%%%%%%%%%
-    if doEdge==1 & doColor==0 & doColorOfEdge==0
       [ testDataUnfitE, meanUnfitE, covUnfitE, histogramSumUnfitE ] =...
         CEsplitTrainTest('unfit',allResultsUnfitE,randIndexUnfit,foldIter,...
         countFoldUnfit,histogramSumUnfitE,doPlot,numberOfFolds,histBins,1);
+      sizeTestDataFit = length(testDataFitE);
+      sizeTestDataUnfit = length(testDataUnfitE);
     end
-    if doEdge==0 & doColor==1 & doColorOfEdge==0
+    testDataFitC = [];
+    meanFitC = 0;
+    covFitC = 0;
+    testDataUnfitC = [];
+    meanUnfitC = 0;
+    covUnfitC = 0;
+    if doColor==1
+      [ testDataFitC, meanFitC, covFitC, histogramSumFitC ] =...
+        CEsplitTrainTest('fit',allResultsFitC,randIndexFit,foldIter,...
+        countFoldFit,histogramSumFitC,doPlot,numberOfFolds,histBins,-1);
       [ testDataUnfitC, meanUnfitC, covUnfitC, histogramSumUnfitC ] =...
         CEsplitTrainTest('unfit',allResultsUnfitC,randIndexUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitC,doPlot,numberOfFolds,histBins,1);
+        countFoldUnfit,histogramSumUnfitC,doPlot,numberOfFolds,histBins,-1);
+      sizeTestDataFit = length(testDataFitC);
+      sizeTestDataUnfit = length(testDataUnfitC);
     end
-    if doEdge==0 & doColor==0 & doColorOfEdge==1
+    testDataFitCofE = [];
+    meanFitCofE = 0;
+    covFitCofE = 0;
+    testDataUnfitCofE = [];
+    meanUnfitCofE = 0;
+    covUnfitCofE = 0;
+    if doColorOfEdge==1
+      [ testDataFitCofE, meanFitCofE, covFitCofE, histogramSumFitCofE ] =...
+        CEsplitTrainTest('fit',allResultsFitCofE,randIndexFit,foldIter,...
+        countFoldFit,histogramSumFitCofE,doPlot,numberOfFolds,histBins,-2);
       [ testDataUnfitCofE, meanUnfitCofE, covUnfitCofE, histogramSumUnfitCofE ] =...
         CEsplitTrainTest('unfit',allResultsUnfitCofE,randIndexUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitCofE,doPlot,numberOfFolds,histBins,1);
+        countFoldUnfit,histogramSumUnfitCofE,doPlot,numberOfFolds,histBins,-2);
+      sizeTestDataFit = length(testDataFitCofE);
+      sizeTestDataUnfit = length(testDataUnfitCofE);
     end
-    if doEdge==1 & doColor==1 & doColorOfEdge==0
-      [ testDataUnfitE, meanUnfitE, covUnfitE, histogramSumUnfitE ] =...
-        CEsplitTrainTest('unfit',allResultsUnfitE,randIndexUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitE,doPlot,numberOfFolds,histBins,0);
-      [ testDataUnfitC, meanUnfitC, covUnfitC, histogramSumUnfitC ] =...
-        CEsplitTrainTest('unfit',allResultsUnfitC,randIndexUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitC,doPlot,numberOfFolds,histBins,2);
-    end
-    if doEdge==1 & doColor==0 & doColorOfEdge==1
-      [ testDataUnfitE, meanUnfitE, covUnfitE, histogramSumUnfitE ] =...
-        CEsplitTrainTest('unfit',allResultsUnfitE,randIndexUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitE,doPlot,numberOfFolds,histBins,0);
-      [ testDataUnfitCofE, meanUnfitCofE, covUnfitCofE, histogramSumUnfitCofE] =...
-        CEsplitTrainTest('unfit',allResultsUnfitCofE,randIndexUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitCofE,doPlot,numberOfFolds,histBins,2);
-    end
-    if doEdge==0 & doColor==1 & doColorOfEdge==1
-      [ testDataUnfitC, meanUnfitC, covUnfitC, histogramSumUnfitC ] =...
-        CEsplitTrainTest('unfit',allResultsUnfitC,randIndexUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitC,doPlot,numberOfFolds,histBins,0);
-      [ testDataUnfitCofE, meanUnfitCofE, covUnfitCofE, histogramSumUnfitCofE] =...
-        CEsplitTrainTest('unfit',allResultsUnfitCofE,randIndexUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitCofE,doPlot,numberOfFolds,histBins,2);
-    end
-    if doEdge==1 & doColor==1 & doColorOfEdge==1
-      [ testDataUnfitE, meanUnfitE, covUnfitE, histogramSumUnfitE ] =...
-        CEsplitTrainTest('unfit',allResultsUnfitE,randIndexUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitE,doPlot,numberOfFolds,histBins,-1);
-      [ testDataUnfitC, meanUnfitC, covUnfitC, histogramSumUnfitC ] =...
-        CEsplitTrainTest('unfit',allResultsUnfitC,randIndexUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitC,doPlot,numberOfFolds,histBins,0);
-      [ testDataUnfitCofE, meanUnfitCofE, covUnfitCofE, histogramSumUnfitCofE] =...
-        CEsplitTrainTest('unfit',allResultsUnfitCofE,randIndexUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitCofE,doPlot,numberOfFolds,histBins,2);
-    end
-    %%%%%%%%%END UNFIT%%%%%%%%%%%%%
+
+    probFitBeFitE = CEgetGaussProb(testDataFitE,meanFitE,covFitE,sizeTestDataFit);
+    probUnfitBeFitE = CEgetGaussProb(testDataUnfitE,meanFitE,covFitE,sizeTestDataUnfit);
+    probFitBeUnfitE = CEgetGaussProb(testDataFitE,meanUnfitE,covUnfitE,sizeTestDataFit);
+    probUnfitBeUnfitE = CEgetGaussProb(testDataUnfitE,meanUnfitE,covUnfitE,sizeTestDataUnfit);
+
+    probFitBeFitC = CEgetGaussProb(testDataFitC,meanFitC,covFitC,sizeTestDataFit);
+    probUnfitBeFitC = CEgetGaussProb(testDataUnfitC,meanFitC,covFitC,sizeTestDataUnfit);
+    probFitBeUnfitC = CEgetGaussProb(testDataFitC,meanUnfitC,covUnfitC,sizeTestDataFit);
+    probUnfitBeUnfitC = CEgetGaussProb(testDataUnfitC,meanUnfitC,covUnfitC,sizeTestDataUnfit);
+
+    probFitBeFitCofE = CEgetGaussProb(testDataFitCofE,meanFitCofE,covFitCofE,sizeTestDataFit);
+    probUnfitBeFitCofE = CEgetGaussProb(testDataUnfitCofE,meanFitCofE,covFitCofE,sizeTestDataUnfit);
+    probFitBeUnfitCofE = CEgetGaussProb(testDataFitCofE,meanUnfitCofE,covUnfitCofE,sizeTestDataFit);
+    probUnfitBeUnfitCofE = CEgetGaussProb(testDataUnfitCofE,meanUnfitCofE,covUnfitCofE,sizeTestDataUnfit);
+
+    probFitBeFit = (probFitBeFitC.*probFitBeFitCofE).*probFitBeFitE;
+    probUnfitBeFit = (probUnfitBeFitC.*probUnfitBeFitCofE).*probUnfitBeFitE;
+    probFitBeUnfit = (probFitBeUnfitC.*probFitBeUnfitCofE).*probFitBeUnfitE;
+    probUnfitBeUnfit = (probUnfitBeUnfitC.*probUnfitBeUnfitCofE).*probUnfitBeUnfitE;
     
-    if doEdge==1 & doColor==0 & doColorOfEdge==0
-      probFitBeFit = CEgetGaussProb(testDataFitE,meanFitE,covFitE);
-      probUnfitBeFit = CEgetGaussProb(testDataUnfitE,meanFitE,covFitE);
-      probFitBeUnfit = CEgetGaussProb(testDataFitE,meanUnfitE,covUnfitE);
-      probUnfitBeUnfit = CEgetGaussProb(testDataUnfitE,meanUnfitE,covUnfitE);
-    end
-    if doEdge==0 & doColor==1 & doColorOfEdge==0
-      probFitBeFit = CEgetGaussProb(testDataFitC,meanFitC,covFitC);
-      probUnfitBeFit = CEgetGaussProb(testDataUnfitC,meanFitC,covFitC);
-      probFitBeUnfit = CEgetGaussProb(testDataFitC,meanUnfitC,covUnfitC);
-      probUnfitBeUnfit = CEgetGaussProb(testDataUnfitC,meanUnfitC,covUnfitC);
-    end
-    if doEdge==0 & doColor==0 & doColorOfEdge==1
-      probFitBeFit = CEgetGaussProb(testDataFitCofE,meanFitCofE,covFitCofE);
-      probUnfitBeFit = CEgetGaussProb(testDataUnfitCofE,meanFitCofE,covFitCofE);
-      probFitBeUnfit = CEgetGaussProb(testDataFitCofE,meanUnfitCofE,covUnfitCofE);
-      probUnfitBeUnfit = CEgetGaussProb(testDataUnfitCofE,meanUnfitCofE,covUnfitCofE);
-    end
-    if doEdge==1 & doColor==1 & doColorOfEdge==0
-      probFitBeFitE = CEgetGaussProb(testDataFitE,meanFitE,covFitE);
-      probUnfitBeFitE = CEgetGaussProb(testDataUnfitE,meanFitE,covFitE);
-      probFitBeUnfitE = CEgetGaussProb(testDataFitE,meanUnfitE,covUnfitE);
-      probUnfitBeUnfitE = CEgetGaussProb(testDataUnfitE,meanUnfitE,covUnfitE);
-
-      probFitBeFitC = CEgetGaussProb(testDataFitC,meanFitC,covFitC);
-      probUnfitBeFitC = CEgetGaussProb(testDataUnfitC,meanFitC,covFitC);
-      probFitBeUnfitC = CEgetGaussProb(testDataFitC,meanUnfitC,covUnfitC);
-      probUnfitBeUnfitC = CEgetGaussProb(testDataUnfitC,meanUnfitC,covUnfitC);
-      
-      probFitBeFit = probFitBeFitE.*probFitBeFitC;
-      probUnfitBeFit = probUnfitBeFitE.*probUnfitBeFitC;
-      probFitBeUnfit = probFitBeUnfitE.*probFitBeUnfitC;
-      probUnfitBeUnfit = probUnfitBeUnfitE.*probUnfitBeUnfitC;
-    end
-    if doEdge==1 & doColor == 0 & doColorOfEdge==1
-      probFitBeFitE = CEgetGaussProb(testDataFitE,meanFitE,covFitE);
-      probUnfitBeFitE = CEgetGaussProb(testDataUnfitE,meanFitE,covFitE);
-      probFitBeUnfitE = CEgetGaussProb(testDataFitE,meanUnfitE,covUnfitE);
-      probUnfitBeUnfitE = CEgetGaussProb(testDataUnfitE,meanUnfitE,covUnfitE);
-
-      probFitBeFitCofE = CEgetGaussProb(testDataFitCofE,meanFitCofE,covFitCofE);
-      probUnfitBeFitCofE = CEgetGaussProb(testDataUnfitCofE,meanFitCofE,covFitCofE);
-      probFitBeUnfitCofE = CEgetGaussProb(testDataFitCofE,meanUnfitCofE,covUnfitCofE);
-      probUnfitBeUnfitCofE = CEgetGaussProb(testDataUnfitCofE,meanUnfitCofE,covUnfitCofE);
-      
-      probFitBeFit = probFitBeFitE.*probFitBeFitCofE;
-      probUnfitBeFit = probUnfitBeFitE.*probUnfitBeFitCofE;
-      probFitBeUnfit = probFitBeUnfitE.*probFitBeUnfitCofE;
-      probUnfitBeUnfit = probUnfitBeUnfitE.*probUnfitBeUnfitCofE;
-    end
-    if doEdge==0 & doColor == 1 & doColorOfEdge==1
-      probFitBeFitC = CEgetGaussProb(testDataFitC,meanFitC,covFitC);
-      probUnfitBeFitC = CEgetGaussProb(testDataUnfitC,meanFitC,covFitC);
-      probFitBeUnfitC = CEgetGaussProb(testDataFitC,meanUnfitC,covUnfitC);
-      probUnfitBeUnfitC = CEgetGaussProb(testDataUnfitC,meanUnfitC,covUnfitC);
-
-      probFitBeFitCofE = CEgetGaussProb(testDataFitCofE,meanFitCofE,covFitCofE);
-      probUnfitBeFitCofE = CEgetGaussProb(testDataUnfitCofE,meanFitCofE,covFitCofE);
-      probFitBeUnfitCofE = CEgetGaussProb(testDataFitCofE,meanUnfitCofE,covUnfitCofE);
-      probUnfitBeUnfitCofE = CEgetGaussProb(testDataUnfitCofE,meanUnfitCofE,covUnfitCofE);
-      
-      probFitBeFit = probFitBeFitC.*probFitBeFitCofE;
-      probUnfitBeFit = probUnfitBeFitC.*probUnfitBeFitCofE;
-      probFitBeUnfit = probFitBeUnfitC.*probFitBeUnfitCofE;
-      probUnfitBeUnfit = probUnfitBeUnfitC.*probUnfitBeUnfitCofE;
-    end
-    if doEdge==1 & doColor == 1 & doColorOfEdge==1
-      probFitBeFitE = CEgetGaussProb(testDataFitE,meanFitE,covFitE);
-      probUnfitBeFitE = CEgetGaussProb(testDataUnfitE,meanFitE,covFitE);
-      probFitBeUnfitE = CEgetGaussProb(testDataFitE,meanUnfitE,covUnfitE);
-      probUnfitBeUnfitE = CEgetGaussProb(testDataUnfitE,meanUnfitE,covUnfitE);
-
-      probFitBeFitC = CEgetGaussProb(testDataFitC,meanFitC,covFitC);
-      probUnfitBeFitC = CEgetGaussProb(testDataUnfitC,meanFitC,covFitC);
-      probFitBeUnfitC = CEgetGaussProb(testDataFitC,meanUnfitC,covUnfitC);
-      probUnfitBeUnfitC = CEgetGaussProb(testDataUnfitC,meanUnfitC,covUnfitC);
-
-      probFitBeFitCofE = CEgetGaussProb(testDataFitCofE,meanFitCofE,covFitCofE);
-      probUnfitBeFitCofE = CEgetGaussProb(testDataUnfitCofE,meanFitCofE,covFitCofE);
-      probFitBeUnfitCofE = CEgetGaussProb(testDataFitCofE,meanUnfitCofE,covUnfitCofE);
-      probUnfitBeUnfitCofE = CEgetGaussProb(testDataUnfitCofE,meanUnfitCofE,covUnfitCofE);
-      
-      probFitBeFit = (probFitBeFitC.*probFitBeFitCofE).*probFitBeFitE;
-      probUnfitBeFit = (probUnfitBeFitC.*probUnfitBeFitCofE).*probUnfitBeFitE;
-      probFitBeUnfit = (probFitBeUnfitC.*probFitBeUnfitCofE).*probFitBeUnfitE;
-      probUnfitBeUnfit = (probUnfitBeUnfitC.*probUnfitBeUnfitCofE).*probUnfitBeUnfitE;
-    end
-
-
     %initialize variables to calculate results
     fitGood=0;
     fitNotGood=0;
