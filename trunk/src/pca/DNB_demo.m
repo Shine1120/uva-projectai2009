@@ -1,4 +1,4 @@
-function DNB_demo(all_money_front, all_money_rear, all_labels)
+function DNB_demo()%(all_money_front, all_money_rear, all_labels)
 
 
 dotrain = 1;
@@ -42,9 +42,20 @@ for q=1:repetitions
 		trainProjection_front = []; trainProjection_rear = [];
 	end
 
+	load all_labels.mat
+	load all_money_front.mat
+	load all_money_rear.mat
+	
+	
 	allidx = randperm(length(all_labels));
 	holdoutset = allidx(1:hold_n_out);
 	allidx = allidx(hold_n_out+1:end);
+
+
+	money_front_holdout = all_money_front(holdoutset,:);
+	money_rear_holdout = all_money_rear(holdoutset,:);
+
+	holdout_labels = all_labels(holdoutset);
 
 	%% ------------- TRAINING PART -------------------
 
@@ -53,13 +64,16 @@ for q=1:repetitions
 	% leave-one-out...
 	correct_front = [0 0];
 	correct_rear = [0 0];
-	correct_both = [0 0];
 	correctbayes = [0 0];
-	%    correctall = [0 0];
 	correctbest = [1 1];
 	n = [0 0];
 
 	for i=1:trials
+		if i > 1
+			load all_money_front.mat
+			load all_money_rear.mat
+		end
+		
 		thisbayes = [0 0];
 		thisn = [0 0];
 		if (trials == length(allidx) && leave_n_out == 1)
@@ -76,14 +90,25 @@ for q=1:repetitions
 
 		money_front = all_money_front(trainset,:);
 		money_rear = all_money_rear(trainset,:);
-		labels = all_labels(trainset);
+		
+		money_front_test = all_money_front(testset,:);
+		money_rear_test = all_money_rear(testset,:);
+
+		train_labels = all_labels(trainset);
+		test_labels = all_labels(testset);
+		
+		
+		clear all_money_front
+		clear all_money_rear
+		
+		%labels = all_labels(trainset);
 
 		% determine EigenMoney - from the fit class or from all data?
 		%l = find(labels==1, EigenConstructFrom);
 		l = 1:EigenConstructFrom;
 		
 		
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%   ADABOOST  %%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%  ADABOOST  %%%%%%%%%%%%%%%%%%%%%%%%%%%
 		% create image regions 
 		fprintf('Generate Image Regions... \n')
 		money_front_regions = genImageRegions(money_front,1);		
@@ -110,14 +135,14 @@ for q=1:repetitions
 		eigen_rear_regions = genEigenFaceRegions(money_rear_regions(l,:,:));
 
 		% for each eigen region, train a model
-		models_front = trainRegionsSVM(money_front_regions, labels, eigen_front_regions, NumberOfEigenVectors);
-		models_rear = trainRegionsSVM(money_rear_regions, labels, eigen_rear_regions, NumberOfEigenVectors);
+		models_front = trainRegionsSVM(money_front_regions, train_labels, eigen_front_regions, NumberOfEigenVectors);
+		models_rear = trainRegionsSVM(money_rear_regions, train_labels, eigen_rear_regions, NumberOfEigenVectors);
 		
 		%save models.mat models
 		
 
-		model_front = adaboostSVM(models_front, money_front_regions, labels);
-		model_rear = adaboostSVM(models_rear, money_rear_regions, labels);
+		model_front = adaboostSVM(models_front, money_front_regions, train_labels);
+		model_rear = adaboostSVM(models_rear, money_rear_regions, train_labels);
 		
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		
@@ -139,12 +164,15 @@ for q=1:repetitions
 
 		%% -------------- TEST PART ----------------
 
-		%% project on training eigenvectors
-		for j=testset
-			testnote_front = all_money_front(j,:);
-			testnote_rear = all_money_rear(j,:);
-			testlabel = all_labels(j);
-
+% 		for j=testset
+% 			testnote_front = all_money_front(j,:);
+% 			testnote_rear = all_money_rear(j,:);
+% 			testlabel = all_labels(j);
+		for j=1:length(test_labels)
+			testlabel = test_labels(j);
+			testnote_front = money_front_test(j,:);
+			testnote_rear = money_rear_test(j,:);
+			
 			testnote_front_regions = genImageRegions(testnote_front,1);
 			testnote_rear_regions = genImageRegions(testnote_rear,2);
 			
@@ -212,8 +240,16 @@ for q=1:repetitions
 				best_model_front = model_front;
 				best_model_rear = model_rear;
 			end
-		end;
-
+		end
+		
+		clear money_front_regions
+		clear money_rear_regions;
+% 		clear eigen_front_regions;
+% 		clear eigen_rear_regions;
+		clear money_front;
+		clear money_rear;
+		clear money_front_test;
+		clear money_rear_test;
 	end; % trials
 	n
 	%    error_naive_Bayes_all = 1-correctall./n
@@ -239,11 +275,16 @@ for q=1:repetitions
 	n = [0 0];
 
 	%% project on training eigenvectors
-	for j=holdoutset
-		testnote_front = all_money_front(j,:);
-		testnote_rear = all_money_rear(j,:);
-		testlabel = all_labels(j);
-
+% 	for j=holdoutset
+% 		testnote_front = all_money_front(j,:);
+% 		testnote_rear = all_money_rear(j,:);
+% 		testlabel = all_labels(j);
+	for j=1:length(holdout_labels)
+		testlabel = holdout_labels(j);
+		testnote_front = money_front_holdout(j,:);
+		testnote_rear = money_rear_holdout(j,:);
+		
+		
 		
 		testnote_front_regions = genImageRegions(testnote_front,1);
 		testnote_rear_regions = genImageRegions(testnote_rear,2);
