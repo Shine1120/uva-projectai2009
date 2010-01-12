@@ -102,7 +102,7 @@ for q=1:repetitions
 		l = 1:EigenConstructFrom;
 		
 		
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%  ADABOOST  %%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%  ADABOOST  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		
 		% for each image region, calculate the eigen faces
 		fprintf('Generate Eigenface Regions... \n')
@@ -115,26 +115,11 @@ for q=1:repetitions
 		
 		%save models.mat models
 		
-
 		model_front = adaboostSVM(models_front, money_front_train, train_labels);
 		model_rear = adaboostSVM(models_rear, money_rear_train, train_labels);
 		
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		
-% 		eigen_front = genEigenFaces(money_front(l,:));
-% 		eigen_rear = genEigenFaces(money_rear(l,:));
-% 		
-% 		%% Take vectors with n largest eigenvalues
-% 		eigen_front = eigen_front(:, 1:NumberOfEigenVectors);
-% 		eigen_rear = eigen_rear(:, 1:NumberOfEigenVectors);
-% 
-% 		%% project training data on eigenvectors
-% 		trainProjection_front = money_front*eigen_front;
-% 		trainProjection_rear = money_rear*eigen_rear;
-% 		money_front = []; money_rear = [];
-% 		model_front = svmtrain(labels, trainProjection_front, '-t 0 -q -b 0'); % '-t 1 -q -b 1'
-% 		model_rear = svmtrain(labels, trainProjection_rear, '-t 0 -q -b 0');		
-% 		trainProjection_front = []; trainProjection_rear = [];
 
 
 		%% -------------- TEST PART ----------------
