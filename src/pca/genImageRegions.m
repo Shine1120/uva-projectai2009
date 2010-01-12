@@ -1,6 +1,5 @@
 function img_regions = genImageRegions(imgVecs, fr)
 
-	fprintf('Generate Image Regions... \n')
 
 	for i=1:size(imgVecs,1)
 		img = imgVecs(i,:);
