@@ -7,8 +7,8 @@ function recognized = adaboostSVMPredict(testnote_regions, eigen_regions, Model)
 % 	
 % 	Model
 
-	testnote_region = testnote_regions(:,:,1);
-	eigen_region = eigen_regions(:,:,1);
+	testnote_region = testnote_regions(:,:,2);
+	eigen_region = eigen_regions(:,:,2);
 	
 	testnoteProjection = testnote_region * eigen_region;
 	

@@ -5,7 +5,7 @@ function [weights] = adaboostSVM(models, traindata, labels)
 
 	
 	
-	weights = models(1);
+	weights = models(2);
 
 
 
