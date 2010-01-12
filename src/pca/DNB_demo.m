@@ -7,7 +7,7 @@ dotrain = 1;
 leave_n_out = 50;  % experiment for DNB newdata
 hold_n_out = 100;  % experiment for DNB newdata
 trials = 20; % 20 for DNB newdata
-repetitions = 1; % 20 for DNB newdata
+repetitions = 20; % 20 for DNB newdata
 unfitaccept = 0.04; % ensures better than 5% error on unfit class
 
 % how many eigenvectors to use
@@ -26,12 +26,16 @@ hn = [0 0];
 
 
 
-
-
-
-
-
-
+fprintf('Creating Image Regions... ');
+tic;
+load all_labels.mat
+load all_money_front.mat
+load all_money_rear.mat
+all_money_front_regions = genImageRegions(all_money_front,1);		
+clear all_money_front
+all_money_rear_regions = genImageRegions(all_money_rear,2);		
+clear all_money_rear
+toc;
 
 for q=1:repetitions
 
@@ -42,9 +46,6 @@ for q=1:repetitions
 		trainProjection_front = []; trainProjection_rear = [];
 	end
 
-	load all_labels.mat
-	load all_money_front.mat
-	load all_money_rear.mat
 	
 	
 	allidx = randperm(length(all_labels));
@@ -52,8 +53,8 @@ for q=1:repetitions
 	allidx = allidx(hold_n_out+1:end);
 
 
-	money_front_holdout = all_money_front(holdoutset,:);
-	money_rear_holdout = all_money_rear(holdoutset,:);
+	money_front_holdout = all_money_front_regions(holdoutset,:,:);
+	money_rear_holdout = all_money_rear_regions(holdoutset,:,:);
 
 	holdout_labels = all_labels(holdoutset);
 
@@ -69,11 +70,6 @@ for q=1:repetitions
 	n = [0 0];
 
 	for i=1:trials
-		if i > 1
-			load all_money_front.mat
-			load all_money_rear.mat
-		end
-		
 		thisbayes = [0 0];
 		thisn = [0 0];
 		if (trials == length(allidx) && leave_n_out == 1)
@@ -88,18 +84,16 @@ for q=1:repetitions
 			trainset = allidx(idx(leave_n_out+1:end));
 		end;
 
-		money_front = all_money_front(trainset,:);
-		money_rear = all_money_rear(trainset,:);
+		money_front_train = all_money_front_regions(trainset,:,:);
+		money_rear_train = all_money_rear_regions(trainset,:,:);
 		
-		money_front_test = all_money_front(testset,:);
-		money_rear_test = all_money_rear(testset,:);
+		money_front_test = all_money_front_regions(testset,:,:);
+		money_rear_test = all_money_rear_regions(testset,:,:);
 
 		train_labels = all_labels(trainset);
 		test_labels = all_labels(testset);
 		
 		
-		clear all_money_front
-		clear all_money_rear
 		
 		%labels = all_labels(trainset);
 
@@ -109,40 +103,21 @@ for q=1:repetitions
 		
 		
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%  ADABOOST  %%%%%%%%%%%%%%%%%%%%%%%%%%%
-		% create image regions 
-		fprintf('Generate Image Regions... \n')
-		money_front_regions = genImageRegions(money_front,1);		
-		money_front = [];
-		money_rear_regions = genImageRegions(money_rear,2);
-		money_rear = [];
-		
-% 		save money_front_regions.mat money_front_regions
-% 		save money_rear_regions.mat money_rear_regions
-		
-% 		fprintf('Loading Image Regions... \n')
-% 		load money_front_regions.mat
-% 		load money_rear_regions.mat
-% 		fprintf('Image Regions loaded! \n')
-		
-		%MFR = size(money_front_regions)
-		
-		% create image regions for eigenfaces (front) 
-		%money_front_regions2 = genImageRegions(money_front(l,:),1);
 		
 		% for each image region, calculate the eigen faces
 		fprintf('Generate Eigenface Regions... \n')
-		eigen_front_regions = genEigenFaceRegions(money_front_regions(l,:,:));
-		eigen_rear_regions = genEigenFaceRegions(money_rear_regions(l,:,:));
+		eigen_front_regions = genEigenFaceRegions(money_front_train(l,:,:));
+		eigen_rear_regions = genEigenFaceRegions(money_rear_train(l,:,:));
 
 		% for each eigen region, train a model
-		models_front = trainRegionsSVM(money_front_regions, train_labels, eigen_front_regions, NumberOfEigenVectors);
-		models_rear = trainRegionsSVM(money_rear_regions, train_labels, eigen_rear_regions, NumberOfEigenVectors);
+		models_front = trainRegionsSVM(money_front_train, train_labels, eigen_front_regions, NumberOfEigenVectors);
+		models_rear = trainRegionsSVM(money_rear_train, train_labels, eigen_rear_regions, NumberOfEigenVectors);
 		
 		%save models.mat models
 		
 
-		model_front = adaboostSVM(models_front, money_front_regions, train_labels);
-		model_rear = adaboostSVM(models_rear, money_rear_regions, train_labels);
+		model_front = adaboostSVM(models_front, money_front_train, train_labels);
+		model_rear = adaboostSVM(models_rear, money_rear_train, train_labels);
 		
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		
@@ -164,33 +139,13 @@ for q=1:repetitions
 
 		%% -------------- TEST PART ----------------
 
-% 		for j=testset
-% 			testnote_front = all_money_front(j,:);
-% 			testnote_rear = all_money_rear(j,:);
-% 			testlabel = all_labels(j);
 		for j=1:length(test_labels)
 			testlabel = test_labels(j);
-			testnote_front = money_front_test(j,:);
-			testnote_rear = money_rear_test(j,:);
-			
-			testnote_front_regions = genImageRegions(testnote_front,1);
-			testnote_rear_regions = genImageRegions(testnote_rear,2);
-			
+			testnote_front_regions = money_front_test(j,:,:);
+			testnote_rear_regions = money_rear_test(j,:,:);
+						
 			recognized_front = adaboostSVMPredict(testnote_front_regions, eigen_front_regions, model_front);
 			recognized_rear = adaboostSVMPredict(testnote_rear_regions, eigen_rear_regions, model_rear);
-
-% 			TFR = size(testnote_front_regions)
-			
-			
-% 			testProjection_front = testnote_front*eigen_front;
-% 			testProjection_rear = testnote_rear*eigen_rear;
-
-			
-			
-			%% predict using support vector machine
-
-% 			[recognized_front, accuracy, prob_est_front] = svmpredict(1,testProjection_front, model_front, '-b 0');
-% 			[recognized_rear, accuracy, prob_est_rear] = svmpredict(1,testProjection_rear, model_rear, '-b 0');
 
 			n(testlabel+1) = n(testlabel+1)+1;
 			thisn(testlabel+1) = thisn(testlabel+1)+1;
@@ -198,8 +153,6 @@ for q=1:repetitions
 			class = recognized_front;
 			correct_front(testlabel+1) = correct_front(testlabel+1) + (testlabel==class);
 
-			%fprintf('rear: %d ', recognized_rear);
-			%prob_est_rear
 			class = recognized_rear;
 			correct_rear(testlabel+1) = correct_rear(testlabel+1) + (testlabel==class);
 
@@ -227,27 +180,23 @@ for q=1:repetitions
 		if (thisbayes(2) < unfitaccept)
 			if (thisbayes(1)<correctbest(1) || correctbest(2)>=unfitaccept)
 				correctbest = thisbayes;
-				best_eigen_front = eigen_front;
-				best_eigen_rear = eigen_rear;
+				best_eigen_front = eigen_front_regions;
+				best_eigen_rear = eigen_rear_regions;
 				best_model_front = model_front;
 				best_model_rear = model_rear;
 			end;
 		else
 			if (thisbayes(2) < correctbest(2))
 				correctbest = thisbayes;
-				best_eigen_front = eigen_front;
-				best_eigen_rear = eigen_rear;
+				best_eigen_front = eigen_front_regions;
+				best_eigen_rear = eigen_rear_regions;
 				best_model_front = model_front;
 				best_model_rear = model_rear;
 			end
 		end
 		
-		clear money_front_regions
-		clear money_rear_regions;
-% 		clear eigen_front_regions;
-% 		clear eigen_rear_regions;
-		clear money_front;
-		clear money_rear;
+		clear money_front_train;
+		clear money_rear_train;
 		clear money_front_test;
 		clear money_rear_test;
 	end; % trials
@@ -266,29 +215,19 @@ for q=1:repetitions
 
 	model_front = best_model_front;
 	model_rear = best_model_rear;
-	eigen_front = best_eigen_front;
-	eigen_rear = best_eigen_rear;
+	eigen_front_regions = best_eigen_front;
+	eigen_rear_regions = best_eigen_rear;
 
 	correct_front = [0 0];
 	correct_rear = [0 0];
 	correctbayes = [0 0];
 	n = [0 0];
 
-	%% project on training eigenvectors
-% 	for j=holdoutset
-% 		testnote_front = all_money_front(j,:);
-% 		testnote_rear = all_money_rear(j,:);
-% 		testlabel = all_labels(j);
 	for j=1:length(holdout_labels)
 		testlabel = holdout_labels(j);
-		testnote_front = money_front_holdout(j,:);
-		testnote_rear = money_rear_holdout(j,:);
+		testnote_front_regions = money_front_holdout(j,:,:);
+		testnote_rear_regions = money_rear_holdout(j,:,:);
 		
-		
-		
-		testnote_front_regions = genImageRegions(testnote_front,1);
-		testnote_rear_regions = genImageRegions(testnote_rear,2);
-
 		recognized_front = adaboostSVMPredict(testnote_front_regions, eigen_front_regions, model_front);
 		recognized_rear = adaboostSVMPredict(testnote_rear_regions, eigen_rear_regions, model_rear);
 		
