@@ -49,15 +49,13 @@ function [ percFitGood, percUnfitGood ] = CErun( input_args )
 	histogramSumUnfitC = zeros(histBins,1);
 	histogramSumFitCofE = zeros(histBins,1);
 	histogramSumUnfitCofE = zeros(histBins,1);
-	histogramSumFitCE = zeros(histBins,1);
-	histogramSumUnfitCE = zeros(histBins,1);
 
 	sumTP=0;
 	sumTN=0;
 	sumFP=0;
 	sumFN=0;
 
-	fprintf('\n\n===========STARTING==========================\n')
+	fprintf('\n==================STARTING==================\n')
 	do = [];
   if doEdge==1
     do = [do 'edge '];
@@ -153,7 +151,6 @@ function [ percFitGood, percUnfitGood ] = CErun( input_args )
   bestTNlistCofE=[];
   
   for foldIter=1:numberOfFolds
-    tic
     fprintf('\n%d of %d-fold cross validation running...\n',...
       foldIter, numberOfFolds)
 
@@ -336,8 +333,8 @@ function [ percFitGood, percUnfitGood ] = CErun( input_args )
 	  bestCofEvarsTN = bestTNlistCofE;
   end
 
-  fprintf('\n===========FINISHED==========================\n')
-
+    fprintf('\n==================FINISHED==================\n')
+	
   %%%%%%%%%%%%%%%%TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%%%%%%
 
     probFitBeFitE = CEgetGaussProb(holdoutSetFitE,bestEvarsTP(1),bestEvarsTP(2),sizeHoldoutSetFit);
