@@ -8,11 +8,11 @@
 %       path_fit   -- the path to the folder for the fit images
 %       path_unfit -- the path to the folder for the unfit images
 %OUTPUT:
-%       labels -- labels for the data set 
-%       ImgSet -- images for the data set as a matrix resized with the
-%                 procent res
-%       nx     -- resized dimension of images on x axis
-%       ny     -- resized dimension of images on x axis
+%       labels     -- labels for the data set 
+%       ImgSet     -- images for the data set as a matrix resized with the
+%                     procent res
+%       nx         -- resized dimension of images on x axis
+%       ny         -- resized dimension of images on x axis
 function [labels, ImgSet, nx, ny] = preprocess(res,index,train,no_rounds,path_fit,path_unfit)    
     nx         = round(120*res);
     ny         = round(85*res);
@@ -21,7 +21,7 @@ function [labels, ImgSet, nx, ny] = preprocess(res,index,train,no_rounds,path_fi
     struct_fit = struct_fit(find(cellfun(@length,{struct_fit(:).name}))>2);
     no_fit     = size(struct_fit,1);
     if(no_rounds == 1) 
-        slice_fit  = round(no_fit/7);
+        slice_fit  = round(no_fit/4);
     else    
         slice_fit  = round(no_fit/no_rounds);
     end
@@ -30,7 +30,7 @@ function [labels, ImgSet, nx, ny] = preprocess(res,index,train,no_rounds,path_fi
     struct_unfit = struct_unfit(find(cellfun(@length,{struct_unfit(:).name}))>2);
     no_unfit     = size(struct_unfit,1);
     if(no_rounds == 1)
-        slice_unfit  = round(no_unfit/7);
+        slice_unfit  = round(no_unfit/4);
     else 
         slice_unfit  = round(no_unfit/no_rounds);
     end
@@ -61,7 +61,7 @@ function [labels, ImgSet, nx, ny] = preprocess(res,index,train,no_rounds,path_fi
         Img = imread([path_unfit struct_unfit(i).name]);
         Img = imresize(Img, [round(85*res) round(120*res)]);
         ImgSet(:,:,i+no_fit) = Img;  
-    end
+	end
 
-    labels = [ones(1,no_fit) -1*ones(1,no_unfit)];
+	labels = [ones(1,no_fit) -1*ones(1,no_unfit)];
 end
