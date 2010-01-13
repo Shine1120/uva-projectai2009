@@ -5,10 +5,10 @@
 %       rounds -- number of rounds for cross-validation
 function classification_haar(T, rounds)
     % Do the CROSS-VALIDATION loop
-    money_dir = 'neur10'; % 'neur05';
+    money_dir  = 'neur10'; % 'neur05';  
     fit_path   = {'/fit/fit_front/', '/fit/fit_rear/'};
     unfit_path = {'/unfit/unfit_front/', '/unfit/unfit_rear/'};
-%{
+ 
     %TRAIN - COMMENT OUT WHEN THE MODELS ARE SAVED_________________________
     for i=1:rounds
         for j=1:size(fit_path,2)         
@@ -16,11 +16,10 @@ function classification_haar(T, rounds)
             unfit = [money_dir char(unfit_path(j))];
             [labels, ImgSet, nx, ny] = preprocess(0.75,i,1,rounds,fit,unfit); % get the train matrix   
             %the result structure retrieved from the AdaBoost cascade
-            [model, rect_param, F]   = train_haar(T, labels, ImgSet);
-
+            [alpha_weights, best_feature_indexs, rect_patterns, F, model] = train_haar(T, labels, ImgSet);
             %save the obtained model(the weak classifiers corresponding to the features chosen)
-            model = struct('param',model,'weaklearner',1,'dimsItraining', ...
-                    [ny nx],'rect_param',rect_param,'F',F,'cascade_type',0,'postprocessing',1);
+            model = struct('model',model, 'weights',alpha_weights,'best_feature_id', ...
+					best_feature_indexs,'patterns',rect_patterns,'features',F);
             %classify the new data using another cascade and evaluate             
             if (mod(j,2)==0)                 
                 string_name = ['model_' money_dir sprintf('_rear%d.mat', i)];
@@ -31,7 +30,7 @@ function classification_haar(T, rounds)
             end
         end
     end
-%}    
+
     %EVALUATION____________________________________________________________
     for i=1:rounds         
         for j=1:size(fit_path,2)
@@ -50,10 +49,18 @@ function classification_haar(T, rounds)
                 load(string_name);
                 [tp_front(i), fp_front(i), error_front(i), tpp_front(:,i), fpp_front(:,i), classifier_front]...
                                         = eval_bills(model, labels, ImgSet,0);
-            end
-        end
-        [tp_both(i), fp_both(i), error_both(i), tpp_both(:,i), fpp_both(:,i), classifier_both]...
-        = eval_bills(model, labels, ImgSet, (classifier_rear.*classifier_front));       
+			end;
+		end
+	        
+		%PROBABILITIES OF BOTH FRONT AND REAR
+%          [tp_both(i), fp_both(i), error_both(i), tpp_both(:,i), fpp_both(:,i), classifier_both]...
+%          = eval_bills(model, labels, ImgSet, (classifier_rear+classifier_front)./2);
+  
+        %CHANGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+         both_val  = (abs(classifier_rear)>abs(classifier_front)).*classifier_rear...
+ 					+(abs(classifier_rear)<=abs(classifier_front)).*classifier_front
+         [tp_both(i), fp_both(i), error_both(i), tpp_both(:,i), fpp_both(:,i), classifier_both]...
+         = eval_bills(model, labels, ImgSet, both_val);				
     end
     
     %average over all results to obtain the performance of the classifier
@@ -71,8 +78,12 @@ function classification_haar(T, rounds)
     
     tpp_rear  = mean(tpp_rear,2);
     fpp_rear  = mean(fpp_rear,2);
+	
     tpp_front = mean(tpp_front,2);
     fpp_front = mean(fpp_front,2);
+    
+	tpp_both = mean(tpp_both,2);
+    fpp_both = mean(fpp_both,2);
     
     figure; hold on;
     plot(fpp_rear , tpp_rear ,'r' , 'linewidth' , 2)
