@@ -1,7 +1,7 @@
 
 doread = 0;
 
-moneydir = 'whole/neur10';
+moneydir = '../whole/neur10';
 
 if (doread)
 	all_money_front = []; all_money_rear = []; all_labels = [];

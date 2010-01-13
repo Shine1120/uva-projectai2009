@@ -3,12 +3,12 @@ function DNB_demo()%(all_money_front, all_money_rear, all_labels)
 
 dotrain = 1;
 
-
-leave_n_out = 50;  % experiment for DNB newdata
-hold_n_out = 100;  % experiment for DNB newdata
-trials = 20; % 20 for DNB newdata
-repetitions = 20; % 20 for DNB newdata
-unfitaccept = 0.04; % ensures better than 5% error on unfit class
+T				= 5;	% number of hypothesis for AdaBoost	
+leave_n_out		= 50;	% size of test-set
+hold_n_out		= 100;  % size of validation-set
+trials			= 20;	% 20 fold experiment
+repetitions		= 20;	% 20 for repeating the k-fold experiment
+unfitaccept		= 0.04; % ensures better than 5% error on unfit class
 
 % how many eigenvectors to use
 NumberOfEigenVectors = 30;
@@ -26,15 +26,24 @@ hn = [0 0];
 
 
 
-fprintf('Creating Image Regions... ');
+% fprintf('Creating Image Regions... ');
+% tic;
+% load all_labels.mat
+% load all_money_front.mat
+% load all_money_rear.mat
+% all_money_front_regions = genImageRegions(all_money_front,1);		
+% clear all_money_front
+% save all_money_front_regions.mat all_money_front_regions;
+% all_money_rear_regions = genImageRegions(all_money_rear,2);		
+% clear all_money_rear
+% save all_money_rear_regions.mat all_money_rear_regions;
+% toc;
+
+fprintf('Loading Image Regions... ');
 tic;
 load all_labels.mat
-load all_money_front.mat
-load all_money_rear.mat
-all_money_front_regions = genImageRegions(all_money_front,1);		
-clear all_money_front
-all_money_rear_regions = genImageRegions(all_money_rear,2);		
-clear all_money_rear
+load all_money_front_regions.mat
+load all_money_rear_regions
 toc;
 
 for q=1:repetitions
@@ -114,10 +123,12 @@ for q=1:repetitions
 		models_rear = trainRegionsSVM(money_rear_train, train_labels, eigen_rear_regions, NumberOfEigenVectors);
 		
 		%save models.mat models
-		
-		model_front = adaboostSVM(models_front, money_front_train, train_labels);
-		model_rear = adaboostSVM(models_rear, money_rear_train, train_labels);
-		
+
+		fprintf('AdaBoost using SVM for %d hypothesis... \n', T)		
+		tic;		
+		[alpha1 modelIdx1 model_front] = AdaBoostSVM(models_front, money_front_train, eigen_front_regions, train_labels, T);
+		[alpha2 modelIdx2 model_rear] = AdaBoostSVM(models_rear, money_rear_train, eigen_rear_regions, train_labels, T);
+		toc;
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		
 
@@ -129,8 +140,8 @@ for q=1:repetitions
 			testnote_front_regions = money_front_test(j,:,:);
 			testnote_rear_regions = money_rear_test(j,:,:);
 						
-			recognized_front = adaboostSVMPredict(testnote_front_regions, eigen_front_regions, model_front);
-			recognized_rear = adaboostSVMPredict(testnote_rear_regions, eigen_rear_regions, model_rear);
+			recognized_front = AdaBoostSVMPredict(testnote_front_regions, eigen_front_regions, alpha1, modelIdx1, model_front);
+			recognized_rear = AdaBoostSVMPredict(testnote_rear_regions, eigen_rear_regions, alpha2, modelIdx2, model_rear);
 
 			n(testlabel+1) = n(testlabel+1)+1;
 			thisn(testlabel+1) = thisn(testlabel+1)+1;
@@ -169,6 +180,10 @@ for q=1:repetitions
 				best_eigen_rear = eigen_rear_regions;
 				best_model_front = model_front;
 				best_model_rear = model_rear;
+				best_alpha1 = alpha1;
+				best_alpha2 = alpha2;
+				best_modelIdx1 = modelIdx1
+				best_modelIdx2 = modelIdx2				
 			end;
 		else
 			if (thisbayes(2) < correctbest(2))
@@ -177,6 +192,10 @@ for q=1:repetitions
 				best_eigen_rear = eigen_rear_regions;
 				best_model_front = model_front;
 				best_model_rear = model_rear;
+				best_alpha1 = alpha1;
+				best_alpha2 = alpha2;
+				best_modelIdx1 = modelIdx1
+				best_modelIdx2 = modelIdx2				
 			end
 		end
 		
@@ -203,6 +222,12 @@ for q=1:repetitions
 	eigen_front_regions = best_eigen_front;
 	eigen_rear_regions = best_eigen_rear;
 
+	
+	alpha1 = best_alpha1;
+	alpha2 = best_alpha2;
+	modelIdx1 = best_modelIdx1;
+	modelIdx2 =	best_modelIdx2;
+	
 	correct_front = [0 0];
 	correct_rear = [0 0];
 	correctbayes = [0 0];
@@ -213,18 +238,9 @@ for q=1:repetitions
 		testnote_front_regions = money_front_holdout(j,:,:);
 		testnote_rear_regions = money_rear_holdout(j,:,:);
 		
-		recognized_front = adaboostSVMPredict(testnote_front_regions, eigen_front_regions, model_front);
-		recognized_rear = adaboostSVMPredict(testnote_rear_regions, eigen_rear_regions, model_rear);
+		recognized_front = AdaBoostSVMPredict(testnote_front_regions, eigen_front_regions, alpha1, modelIdx1, model_front);
+		recognized_rear = AdaBoostSVMPredict(testnote_rear_regions, eigen_rear_regions, alpha2, modelIdx2, model_rear);
 		
-		
-% 		testProjection_front = testnote_front*eigen_front;
-% 		testProjection_rear = testnote_rear*eigen_rear;
-
-
-		%% predict using support vector machine
-% 		[recognized_front, accuracy, prob_est_front] = svmpredict(1,testProjection_front, model_front, '-b 0');
-% 		[recognized_rear, accuracy, prob_est_rear] = svmpredict(1,testProjection_rear, model_rear, '-b 0');
-
 		hn(testlabel+1) = hn(testlabel+1)+1;
 		n(testlabel+1) = n(testlabel+1)+1;
 
