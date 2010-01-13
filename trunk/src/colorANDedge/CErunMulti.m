@@ -2,6 +2,14 @@ function [ output_args ] = CErunMulti( n )
 
 sumTP=0;
 sumTN=0;
+allDataFitE    = [];
+allDataFitC    = [];
+allDataFitCofE = [];
+allDataUnfitE    = [];
+allDataUnfitC    = [];
+allDataUnfitCofE = [];
+nrIndxesFit    = 0;
+nrIndxesUnfit  = 0;
 for i=1:n
 	tic
 	fprintf('\n*********************************************\n')
@@ -9,7 +17,10 @@ for i=1:n
 	fprintf('\t\t\tstarting run number %d\n', i)
 	fprintf('\t**************************************\n')
 	fprintf('*********************************************\n')
-	[TP, TN] = CErun();
+	[TP,TN,allDataFitE,allDataFitC,allDataFitCofE,allDataUnfitE,...
+		allDataUnfitC,allDataUnfitCofE,nrIndxesFit,nrIndxesUnfit] =...
+		CErun(allDataFitE,allDataFitC,allDataFitCofE,allDataUnfitE,...
+		allDataUnfitC,allDataUnfitCofE,nrIndxesFit,nrIndxesUnfit,i-1);
 	sumTP = sumTP + TP;
 	sumTN = sumTN + TN;
 	toc

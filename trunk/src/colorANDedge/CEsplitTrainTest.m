@@ -4,16 +4,16 @@ function [ testData, trainMean, trainCov, histogramSum ] =...
 
   trainCount=0;
   testCount=0;
-  for i=1:size(allData,2)
+  for i=1:length(randIndex)
     if randIndex(i) > (itemsInFold*(foldIter-1)) &...
         randIndex(i)<=itemsInFold*foldIter
       %get items for the Kth fold given by foldIter from allResults
       testCount = testCount+1;
-      testData(:,testCount) = allData(:,i);
+      testData(:,testCount) = allData(:,randIndex(i));
     else
       %item belongs to train set
       trainCount = trainCount+1;
-      trainData(:,trainCount) = allData(:,i);
+      trainData(:,trainCount) = allData(:,randIndex(i));
     end
   end
   if (foldIter==1 & lastOfMultMethods>=1)

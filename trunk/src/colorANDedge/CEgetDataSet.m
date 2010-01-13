@@ -1,85 +1,76 @@
-function [ allResults ] = CEgetDataSet( do, path,cannyThresh,...
-  maxNrImg, useFront, useRear, learnSet,randIndex)
+function [ allResults ] = CEgetDataSet2( do, path,cannyThresh,...
+  useFront, useRear)
 
   numImages=1;
   allResults=[0,0];
 
   fprintf('\tconstructing the data set for %s\n',do)
-  if (learnSet)
-      minImage = learnSet;
-      maxImage = maxNrImg+learnSet;
-  end
-  if ~(learnSet) %holdout set
-      minImage = 1;
-      maxImage = maxNrImg;
-  end
-  for i = minImage:maxImage
-    %for all images: extract the data
-	id = randIndex(i);
-    %construct front and rear image name
-    nextImageNameFront = [path 'f' num2str(id,'%01d') '.bmp'];
-    nextImageNameRear = [path 'r' num2str(id,'%01d') '.bmp'];
-    %check if both exist in the dataset
-    if exist(nextImageNameFront,'file') &&...
-        exist(nextImageNameRear,'file')
+	maxImage=250;
+	for i = 1:maxImage
+		%for all images: extract the data
 
-      %load images as required in the initialization at the top
-      if (useFront)
-        nextImageFront = imread(nextImageNameFront);
-      end
-      if (useRear)
-        nextImageRear = imread(nextImageNameRear);
-      end
+		%construct front and rear image name
+		nextImageNameFront = [path 'f' num2str(i,'%01d') '.bmp'];
+		nextImageNameRear = [path 'r' num2str(i,'%01d') '.bmp'];
+		%check if both exist in the dataset
+		if exist(nextImageNameFront,'file') &&...
+			exist(nextImageNameRear,'file')
 
-      %get the data for classification
-      if strcmp(do,'edge')
-        if (useFront)
-          frontImageCount = doEdge(nextImageFront,cannyThresh);
-        end
-        if (useRear)
-          rearImageCount  = doEdge(nextImageRear,cannyThresh);
-        end
-      end
-      if strcmp(do,'color')
-        if (useFront)
-          frontImageCount = doColor(nextImageFront);
-        end
-        if (useRear)
-          rearImageCount  = doColor(nextImageRear);
-        end
-      end
-      if strcmp(do,'colorOfEdge')
-        if (useFront)
-          frontImageCount = doColorOfEdge(nextImageFront,cannyThresh);
-        end
-        if (useRear)
-          rearImageCount  = doColorOfEdge(nextImageRear,cannyThresh);
-        end
-      end
-      if strcmp(do,'edge and color')
-        if (useFront)
-          frontImageCount = doEdgeColor(nextImageFront,cannyThresh);
-        end
-        if (useRear)
-          rearImageCount = doEdgeColor(nextImageRear,cannyThresh);
-        end
-      end
+		  %load images as required in the initialization at the top
+		  if (useFront)
+			nextImageFront = imread(nextImageNameFront);
+		  end
+		  if (useRear)
+			nextImageRear = imread(nextImageNameRear);
+		  end
 
-      %add count of front and rear image to results
-      allResults(1,numImages)=0;
-      if (useFront)
-        allResults(1,numImages)=allResults(1,numImages)+frontImageCount;
-      end
-      if (useRear)
-        allResults(1,numImages)=allResults(1,numImages)+rearImageCount;
-      end
-      %store image id
-      allResults(2,numImages)=id;
+		  %get the data for classification
+		  if strcmp(do,'edge')
+			if (useFront)
+			  frontImageCount = doEdge(nextImageFront,cannyThresh);
+			end
+			if (useRear)
+			  rearImageCount  = doEdge(nextImageRear,cannyThresh);
+			end
+		  end
+		  if strcmp(do,'color')
+			if (useFront)
+			  frontImageCount = doColor(nextImageFront);
+			end
+			if (useRear)
+			  rearImageCount  = doColor(nextImageRear);
+			end
+		  end
+		  if strcmp(do,'colorOfEdge')
+			if (useFront)
+			  frontImageCount = doColorOfEdge(nextImageFront,cannyThresh);
+			end
+			if (useRear)
+			  rearImageCount  = doColorOfEdge(nextImageRear,cannyThresh);
+			end
+		  end
+		  if strcmp(do,'edge and color')
+			if (useFront)
+			  frontImageCount = doEdgeColor(nextImageFront,cannyThresh);
+			end
+			if (useRear)
+			  rearImageCount = doEdgeColor(nextImageRear,cannyThresh);
+			end
+		  end
 
-      %raise image count
-      numImages=numImages+1;
-    end %if fileExists
-  end %for imgaes
+		  %add count of front and rear image to results
+		  allResults(1,numImages)=0;
+		  if (useFront)
+			allResults(1,numImages)=allResults(1,numImages)+frontImageCount;
+		  end
+		  if (useRear)
+			allResults(1,numImages)=allResults(1,numImages)+rearImageCount;
+		  end
+		  
+		  %raise image count
+		  numImages=numImages+1;
+		end %if fileExists
+	end %for imgaes
 end
 
 function edgeCount = doEdge(image,cannyThresh)
