@@ -4,6 +4,7 @@
 %       T      -- number of features to be used (not too large :P)
 %       rounds -- number of rounds for cross-validation
 function classification_haar(T, rounds)
+	save_patterns %generate the patterns
     % Do the CROSS-VALIDATION loop
     money_dir  = 'neur10'; % 'neur05';  
     fit_path   = {'/fit/fit_front/', '/fit/fit_rear/'};

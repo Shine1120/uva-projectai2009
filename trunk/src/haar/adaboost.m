@@ -6,9 +6,10 @@
 %						 pattern_id(=id)	
 %		labels        -- the labels corresponding to the 
 %OUTPUT:
-%		alpha         -- the weights of the features  
+%		alpha         -- the weights of the features (alpha_t from algorithm)  
 %		indexs        -- index of the best features  
-%		best_model    -- best SVM model 
+%		best_model    -- the array containing the best SVM models corresponding to 
+%						 the best features
 function [alpha, indexs, best_model] = adaboost(F, Images, T, rect_patterns, labels)
 	positives = sum(sum(labels == 1)); 
 	negatives = sum(sum(labels == -1));
@@ -27,12 +28,14 @@ function [alpha, indexs, best_model] = adaboost(F, Images, T, rect_patterns, lab
 			height          = size(rect_patterns(F(i).pattern_id).rectangles,1);			
 			values          = reshape(sum(sum(double(Images(F(i).y_top: F(i).y_top+height-1,F(i).x_top: F(i).x_top+width-1, :))...
   							  .* double(patterns))), 1, size(Images,3));										
-			model(i)        = svmtrain(double(labels'), values', '-t 0 -q -b 0');			
-			values          = values(randperm(size(values,1)),:);
-			[recognized, accuracy, probability] = svmpredict(double(labels'), values', model(i), '-b 0');
+			model(i)        = svmtrain(double(labels'), values', '-t 0 -q -b 0');		
+			rand_index      = randperm(size(values,2));			
+			values          = values(rand_index);
+			rand_labels     = labels(rand_index);
+			[recognized, accuracy, probability] = svmpredict(double(rand_labels'), values', model(i), '-b 0');
 			%compute the error
-			error(i)        = sum(weights(t,:) .* abs(probability' - double(labels)));			
-			ei(i,:)         = sign(probability' .* double(labels));
+			error(i)        = sum(weights(t,:) .* abs(probability' - double(rand_labels)));			
+			ei(i,:)         = sign(probability' .* double(rand_labels));
 			%switch to 0/1 labeling from 1/-1 labeling
 			ei(i,:)         = (ei(i,:)==0) + (ei(i,:) == 1);
 		end

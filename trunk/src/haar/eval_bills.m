@@ -19,9 +19,7 @@ function [true_pos, false_pos, error, tpp, fpp, classifier] = eval_bills(model, 
     index_pos = find(target == 1); %the indexes for the positive class
     index_neg = find(target == -1); %the indexes for the negative class
 
-%	model = struct('model',model,'weights',alph_weights,'best_feature_id', best_feature_indexs, ...
-%                    'patterns',rect_patterns,'features',F);
-    if(classifier == 0)
+	if classifier == 0
 		for i=1:size(model.best_feature_id,2)
 			%compute the values for the test images
 			id                     = model.best_feature_id(i);
@@ -50,10 +48,10 @@ function [true_pos, false_pos, error, tpp, fpp, classifier] = eval_bills(model, 
  	else
  	    threshold = thresh(index);  	
 	end
-    best               = sign(classifier - threshold);
-	true_pos           = sum(best(index_pos) == target(index_pos)')/length(index_pos);
-    false_pos          = 1 - sum(best(index_neg) == target(index_neg)')/length(index_neg);
-    error              = 1 - sum(best == target')/length(target); 	
+    best      = sign(classifier - threshold);
+	true_pos  = sum(best(index_pos) == target(index_pos)')/length(index_pos);
+    false_pos = 1 - sum(best(index_neg) == target(index_neg)')/length(index_neg);
+    error     = 1 - sum(best == target')/length(target); 	
 	
 %   
 %SIMPLE CASCADE________________________________
