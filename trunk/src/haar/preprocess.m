@@ -15,8 +15,8 @@
 %       nx         -- resized dimension of images on x axis
 %       ny         -- resized dimension of images on x axis
 function [labels, ImgSet, nx, ny] = preprocess(res,index,train,no_rounds,path_fit,path_unfit,side)    
-    nx         = round(120*res);
-    ny         = round(85*res);
+    nx = round(120*res);
+    ny = round(85*res);
 	if (mod(side,2)==0)
 		struct_fit = dir([path_fit 'r*.bmp']);
 	else
@@ -44,15 +44,16 @@ function [labels, ImgSet, nx, ny] = preprocess(res,index,train,no_rounds,path_fi
         struct_fit   = struct_fit(1:slice_fit);
         struct_unfit = struct_unfit(1:slice_unfit);
     elseif(~train)
-        struct_fit   = struct_fit((index-1)*slice_fit:index*slice_fit);    
-        struct_unfit = struct_unfit((index-1)*slice_unfit:index*slice_unfit);
+        struct_fit   = struct_fit((index-1)*slice_fit+1:index*slice_fit);    
+        struct_unfit = struct_unfit((index-1)*slice_unfit+1:index*slice_unfit);
     elseif(train && index==1) %for the training set 
         struct_fit   = struct_fit(slice_fit+1:end);
         struct_unfit = struct_unfit(slice_unfit+1:end);
     elseif(train)
-        struct_fit   = [struct_fit(1:(index-1)*slice_fit-1); struct_fit(index*slice_fit+1:end)];
-        struct_unfit = [struct_unfit(1:(index-1)*slice_unfit-1); struct_unfit(index*slice_unfit+1:end)];
-    end
+		struct_fit   = [struct_fit(1:((index-1)*slice_fit)); struct_fit((index*slice_fit+1):end)];
+        struct_unfit = [struct_unfit(1:((index-1)*slice_unfit)); struct_unfit((index*slice_unfit+1):end)];
+	end	
+        
     no_fit   = size(struct_fit,1); %update the number of total fit images
     no_unfit = size(struct_unfit,1); %update the number of total unfit images
 
