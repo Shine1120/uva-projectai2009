@@ -63,5 +63,5 @@ function [labels, ImgSet, nx, ny] = preprocess(res,index,train,no_rounds,path_fi
         ImgSet(:,:,i+no_fit) = Img;  
 	end
 
-	labels = [ones(1,no_fit) -1*ones(1,no_unfit)];
+	labels = [ones(1,no_fit) zeros(1,no_unfit)];
 end
