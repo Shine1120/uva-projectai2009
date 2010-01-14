@@ -17,7 +17,7 @@
 function [true_pos, false_pos, error, tpp, fpp, classifier] = eval_bills(model, labels, ImgSet, classifier)
     target    = int8(labels);
     index_pos = find(target == 1); %the indexes for the positive class
-    index_neg = find(target == -1); %the indexes for the negative class
+    index_neg = find(target == 0); %the indexes for the negative class
 
 	if classifier == 0
 		for i=1:size(model.best_feature_id,2)
@@ -32,13 +32,12 @@ function [true_pos, false_pos, error, tpp, fpp, classifier] = eval_bills(model, 
 					   model.features(id).x_top: model.features(id).x_top+width-1, :)).* ...
 					   double(repeat_patterns))), 1, size(ImgSet,3));															   
 			[recognized, accuracy, probability(i,:)] = svmpredict(double(labels'), values', model.model, '-b 0');
-			probability(i,:) = sign(probability(i,:));
-			probability(i,:) = (probability(i,:)==1) + (probability(i,:)==0);
+			probability(i,:) = recognized;
 		end		
 		repeat_weights(1,:) = model.weights;
 		repeat_weights      = repeat_weights(ones(1,size(probability,2)),:);
-		classifier          = sign(sum((repeat_weights .* probability') - 1/2*(repeat_weights),2));			
-		classifier          = classifier + (classifier==0) 
+		classifier          = sign(sum((repeat_weights .* recognized') - 1/2*(repeat_weights),2));			
+		classifier          = (classifier==1) + (classifier==0) 
 	end
 	[tpp, fpp, thresh] = basicroc(target, classifier);
 	error_cascade      = (1-tpp(2:end-1)) + fpp(2:end-1);
