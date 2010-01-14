@@ -9,11 +9,13 @@ function classification_haar(T, rounds)
     % Do the CROSS-VALIDATION loop
     money_dir  = 'neur10'; % 'neur05';  
     fit   = [money_dir '/fit/'];
-    unfit = [money_dir '/unfit/'];
+    unfit = [money_dir '/unfit/'];	
+	
+	
     %TRAIN - COMMENT OUT WHEN THE MODELS ARE SAVED_________________________
     for i=1:rounds
         for j=1:2 % loop for front and rear                  
-            [labels, ImgSet, nx, ny] = preprocess(0.75,i,1,rounds,fit,unfit,j); % get the train matrix   
+            [labels, ImgSet, nx, ny] = preprocess(1,i,1,rounds,fit,unfit,j); % get the train matrix   
             %the result structure retrieved from the AdaBoost cascade
             [alpha_weights, best_feature_indexs, rect_patterns, F, model] = train_haar(T, labels, ImgSet);
             %save the obtained model(the weak classifiers corresponding to the features chosen)
@@ -33,7 +35,7 @@ function classification_haar(T, rounds)
     %EVALUATION____________________________________________________________
     for i=1:rounds         
         for j=1:2 % loop for front and rear 
-            [labels, ImgSet, nx, ny] = preprocess(0.75,i,0,rounds,fit,unfit,j); % get the test matrix   
+            [labels, ImgSet, nx, ny] = preprocess(1,i,0,rounds,fit,unfit,j); % get the test matrix   
 
             %load the corresponding model
             if (mod(j,2)==0)                 

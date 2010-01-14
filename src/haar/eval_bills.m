@@ -31,13 +31,14 @@ function [true_pos, false_pos, error, classifier] = eval_bills(model, labels, Im
 			end	
 			repeat_patterns(:,:,1) = patterns;
 			repeat_patterns        = repeat_patterns(:,:,ones(1,size(ImgSet,3)));			
-			values   = reshape(sum(sum(double(ImgSet(model.features(id).y_top: model.features(id).y_top+height-1, ...
-					   model.features(id).x_top: model.features(id).x_top+width-1, :)).* ...
-					   double(repeat_patterns))), 1, size(ImgSet,3));															   
+			pre_values = double(ImgSet(model.features(id).y_top: model.features(id).y_top+height-1, ...
+						   model.features(id).x_top: model.features(id).x_top+width-1, :)).* ...
+						   double(repeat_patterns);
+			values   = reshape(sum(sum(pre_values,1),2),1,size(ImgSet,3));															   
 			[recognized(i,:), accuracy, probability] = svmpredict(double(labels'), values',model.model(i), '-b 0');
 		end		
-		classifier = sign((model.weights * recognized) - sum(1/2*(model.weights)));			
-		classifier = (classifier==1) + (classifier==0) 
+		classifier = (model.weights * recognized) >= sum(0.5*(model.weights));			
+		%classifier = (classifier==1) + (classifier==0) 
 	end
 	true_pos  = sum(classifier(index_pos) == target(index_pos))/length(index_pos);
     false_pos = 1 - sum(classifier(index_neg) == target(index_neg))/length(index_neg);
