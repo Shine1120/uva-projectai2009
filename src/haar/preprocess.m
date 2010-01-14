@@ -7,27 +7,33 @@
 %       no_rounds  -- the total number of rounds for cross-validation
 %       path_fit   -- the path to the folder for the fit images
 %       path_unfit -- the path to the folder for the unfit images
+%		j          -- 1 for front/ 2 for rear    
 %OUTPUT:
 %       labels     -- labels for the data set 
 %       ImgSet     -- images for the data set as a matrix resized with the
 %                     procent res
 %       nx         -- resized dimension of images on x axis
 %       ny         -- resized dimension of images on x axis
-function [labels, ImgSet, nx, ny] = preprocess(res,index,train,no_rounds,path_fit,path_unfit)    
+function [labels, ImgSet, nx, ny] = preprocess(res,index,train,no_rounds,path_fit,path_unfit,side)    
     nx         = round(120*res);
     ny         = round(85*res);
-
-    struct_fit = dir(path_fit);
-    struct_fit = struct_fit(find(cellfun(@length,{struct_fit(:).name}))>2);
+	if (mod(side,2)==0)
+		struct_fit = dir([path_fit 'r*.bmp']);
+	else
+		struct_fit = dir([path_fit 'f*.bmp']);		
+	end
     no_fit     = size(struct_fit,1);
     if(no_rounds == 1) 
         slice_fit  = round(no_fit/4);
     else    
         slice_fit  = round(no_fit/no_rounds);
-    end
+	end
     
-    struct_unfit = dir(path_unfit);
-    struct_unfit = struct_unfit(find(cellfun(@length,{struct_unfit(:).name}))>2);
+	if (mod(side,2)==0)
+		struct_unfit = dir([path_unfit 'r*.bmp']);
+	else
+		struct_unfit = dir([path_unfit 'f*.bmp']);		
+	end    
     no_unfit     = size(struct_unfit,1);
     if(no_rounds == 1)
         slice_unfit  = round(no_unfit/4);
