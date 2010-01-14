@@ -2,48 +2,58 @@ function [ percFitGood, percUnfitGood,allDataFitE,...
 	allDataFitC,allDataFitCofE,allDataUnfitE,allDataUnfitC,...
 	allDataUnfitCofE,nrIndxesFit,nrIndxesUnfit ] = CErun( allDataFitE,...
 	allDataFitC,allDataFitCofE,allDataUnfitE,allDataUnfitC,...
-	allDataUnfitCofE,nrIndxesFit,nrIndxesUnfit,dataKnown )
+	allDataUnfitCofE,nrIndxesFit,nrIndxesUnfit,runNumberMin1,runs)
 
-  close all
+	close all;
 
-  %windows
-	pathFit = '..\money\wholeplusborder\neur10\fit\';
-	pathUnfit = '..\money\wholeplusborder\neur10\unfit\';
-
-% 	pathFit = '..\money\whitepatch\neur10\fit\';
-% 	pathUnfit = '..\money\whitepatch\neur10\unfit\';
-% 
-% 	pathFit = '..\money\whole\neur05\fit\';
-% 	pathUnfit = '..\money\whole\neur05\unfit\';
-% 
-% 	linux
-% 	pathFit = '../money/wholeplusborder/neur10/fit/';
-% 	pathUnfit = '../money/wholeplusborder/neur10/unfit/';
-% 
-% 	pathFit = '../money/whole/neur05/fit/';
-% 	pathUnfit = '../money/whole/neur05/unfit/';
-% 
-% 	pathFit = '../money/whitepatch/neur10/fit/';
-% 	pathUnfit = '../money/whitepatch/neur10/unfit/';
-
-	sizeHoldoutSetFit = round(rand(1)*98)+1;
-	sizeHoldoutSetUnfit = 100-sizeHoldoutSetFit;
-
-	numberOfFolds = 10;
-
-	doEdge=1;
-	doColor=1;
-	doColorOfEdge=0;
+	windows               = 1;
 	
-	cannyThresh=0.0355;
+	do5Euro               = 1;
+	do10Euro              = 0;
 
-	useFront=1;
-	useRear=1;
+	doWholeNote           = 1;
+	doWholeNotePB         = 0;
+	doWhitePatchNote      = 0;
+
+	path = '../money/';
+	if (doWholeNote)
+		path      = [path 'whole/'];
+	elseif (doWholeNotePB)
+		path      = [path 'wholeplusborder/'];
+	elseif (doWhitePatchNote)
+		path      = [path 'whitepatch/'];
+	end
+	if (do5Euro)
+		path      = [path 'neur05/'];
+	elseif (do10Euro)
+		path	  = [path 'neur10/'];
+	end
+	pathFit		  = [path 'fit/'];
+	pathUnfit	  = [path 'unfit/'];
+
+	if (windows)
+		pathFit   = regexprep(pathFit, '/', '\');
+		pathUnfit = regexprep(pathUnfit, '/', '\');
+	end
+  
+	sizeHoldoutSetFit     = round(rand(1)*98)+1;
+	sizeHoldoutSetUnfit   = 100-sizeHoldoutSetFit;
+
+	numberOfFolds         = 10;
+
+	doEdge			      = 1;
+	doIntensity		      = 1;
+	doIntensityOfEdge     = 0;
+	
+	cannyThresh           = 0.0355;
+
+	useFront              = 1;
+	useRear               = 1;
 
 	% doPlot = 0: no plot
 	% doPlot = 1: plots histogram of trainingdata
 	% doPlot = 2: plots also all the testData (1 plot per iteration)
-	doPlot=1;
+	doPlot                = 1;
 
 	histBins = 25;
 	histogramSumFitE      = zeros(histBins,1);
@@ -58,28 +68,24 @@ function [ percFitGood, percUnfitGood,allDataFitE,...
 	sumFP = 0;
 	sumFN = 0;
 
-	fprintf('\n==================STARTING==================\n')
 	do = [];
 	if doEdge==1
 		do = [do 'edge '];
 	end
-	if doColor==1
+	if doIntensity==1
 		if ~isempty(do)
 			do = [do 'and ' ];
 		end
-		do = [do 'color '];
+		do = [do 'Intensity '];
 	end
-	if doColorOfEdge==1
+	if doIntensityOfEdge==1
 		if ~isempty(do)
 			do = [do 'and ' ];
 		end
-		do = [do 'colorOfEdge '];
+		do = [do 'IntensityOfEdge '];
 	end
-	fprintf('\nstarting to run classification by %s...\n',do)
-	fprintf('\nconstructing data set...\n')
 
 	%construct train and test set for Fit
-	fprintf('processing data...\n')
     holdoutSetFitE      = [];
     holdoutSetFitC      = [];
     holdoutSetFitCofE   = [];
@@ -89,31 +95,29 @@ function [ percFitGood, percUnfitGood,allDataFitE,...
 	
 	%construct vector (length = amount of images) with randome
     %numbers between 1 and the amout of images
-	if ~(dataKnown)
+	if ~(runNumberMin1)
+		fprintf('\nconstructing data set...\n')
 		if doEdge==1
 			allDataFitE      = CEgetDataSet( 'edge', pathFit,cannyThresh,...
 							   useFront, useRear);
 			allDataUnfitE    = CEgetDataSet( 'edge', pathUnfit,cannyThresh,...
 							   useFront, useRear);
-
 			nrIndxesFit      = length(allDataFitE);
 			nrIndxesUnfit    = length(allDataUnfitE);
 		end
-		if doColor==1
-			allDataFitC		 = CEgetDataSet( 'color', pathFit,cannyThresh,...
+		if doIntensity==1
+			allDataFitC		 = CEgetDataSet( 'Intensity', pathFit,cannyThresh,...
 							   useFront, useRear);
-			allDataUnfitC    = CEgetDataSet( 'color', pathUnfit,cannyThresh,...
+			allDataUnfitC    = CEgetDataSet( 'Intensity', pathUnfit,cannyThresh,...
 							   useFront, useRear);
-
 			nrIndxesFit      = length(allDataFitC);
 			nrIndxesUnfit    = length(allDataUnfitC);
 		end
-		if doColorOfEdge==1
-			allDataFitCofE   = CEgetDataSet( 'colorOfEdge', pathFit,cannyThresh,...
+		if doIntensityOfEdge==1
+			allDataFitCofE   = CEgetDataSet( 'IntensityOfEdge', pathFit,cannyThresh,...
 							   useFront, useRear);
-			allDataUnfitCofE = CEgetDataSet( 'colorOfEdge', pathUnfit,cannyThresh,...
+			allDataUnfitCofE = CEgetDataSet( 'IntensityOfEdge', pathUnfit,cannyThresh,...
 							   useFront, useRear);
-
 			nrIndxesFit      = length(allDataFitCofE);
 			nrIndxesUnfit    = length(allDataUnfitCofE);
 		end
@@ -129,17 +133,15 @@ function [ percFitGood, percUnfitGood,allDataFitE,...
 	countFoldFit     = round(length(randIndexTTFit)/numberOfFolds);
 	countFoldUnfit   = round(length(randIndexTTUnfit)/numberOfFolds);
 
-	%construct train and test set for Unfit
-	fprintf('processing unfit data...\n')
 	if doEdge==1
 		holdoutSetFitE      = allDataFitE(randIndexHOFit);
 		holdoutSetUnfitE    = allDataUnfitE(randIndexHOUnfit);
 	end
-	if doColor==1
+	if doIntensity==1
 		holdoutSetFitC      = allDataFitC(randIndexHOFit);
 		holdoutSetUnfitC    = allDataUnfitC(randIndexHOUnfit);
 	end
-	if doColorOfEdge==1
+	if doIntensityOfEdge==1
 		holdoutSetFitCofE   = allDataFitCofE(randIndexHOFit);
 		holdoutSetUnfitCofE = allDataUnfitCofE(randIndexHOUnfit);
 	end
@@ -154,86 +156,90 @@ function [ percFitGood, percUnfitGood,allDataFitE,...
 	bestTNlistCofE = [];
   
   for foldIter=1:numberOfFolds
-%    fprintf('\n%d of %d-fold cross validation running...\n',...
-%      foldIter, numberOfFolds)
 
-    sizeTestDataFit = 0;
+	sizeTestDataFit   = 0;
     sizeTestDataUnfit = 0;
 
-    testDataFitE = [];
-    meanFitE = 0;
-    covFitE = 0;
-    testDataUnfitE = [];
-    meanUnfitE = 0;
-    covUnfitE = 0;
+    testDataFitE	= [];
+    testDataUnfitE  = [];
+    meanFitE		= 0;
+    covFitE			= 0;
+    meanUnfitE		= 0;
+    covUnfitE		= 0;
     if doEdge==1
-      [ testDataFitE, meanFitE, covFitE, histogramSumFitE ] =...
+      [testDataFitE, meanFitE, covFitE, histogramSumFitE] =...
         CEsplitTrainTest('fit',allDataFitE,randIndexTTFit,foldIter,...
-        countFoldFit,histogramSumFitE,doPlot,numberOfFolds,histBins,1);
-      [ testDataUnfitE, meanUnfitE, covUnfitE, histogramSumUnfitE ] =...
+        countFoldFit,histogramSumFitE,doPlot,numberOfFolds,histBins,1,...
+		runNumberMin1,runs);
+      [testDataUnfitE, meanUnfitE, covUnfitE, histogramSumUnfitE] =...
         CEsplitTrainTest('unfit',allDataUnfitE,randIndexTTUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitE,doPlot,numberOfFolds,histBins,1);
+        countFoldUnfit,histogramSumUnfitE,doPlot,numberOfFolds,histBins,1,...
+		runNumberMin1,runs);
       sizeTestDataFit = length(testDataFitE);
       sizeTestDataUnfit = length(testDataUnfitE);
     end
-    testDataFitC = [];
-    meanFitC = 0;
-    covFitC = 0;
-    testDataUnfitC = [];
-    meanUnfitC = 0;
-    covUnfitC = 0;
-    if doColor==1
-      [ testDataFitC, meanFitC, covFitC, histogramSumFitC ] =...
+    testDataFitC	= [];
+    testDataUnfitC	= [];
+    meanFitC		= 0;
+    covFitC			= 0;
+    meanUnfitC		= 0;
+    covUnfitC		= 0;
+	if doIntensity==1
+      [testDataFitC, meanFitC, covFitC, histogramSumFitC] =...
         CEsplitTrainTest('fit',allDataFitC,randIndexTTFit,foldIter,...
-        countFoldFit,histogramSumFitC,doPlot,numberOfFolds,histBins,-1);
-      [ testDataUnfitC, meanUnfitC, covUnfitC, histogramSumUnfitC ] =...
+        countFoldFit,histogramSumFitC,doPlot,numberOfFolds,histBins,-1,...
+		runNumberMin1,runs);
+      [testDataUnfitC, meanUnfitC, covUnfitC, histogramSumUnfitC] =...
         CEsplitTrainTest('unfit',allDataUnfitC,randIndexTTUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitC,doPlot,numberOfFolds,histBins,-1);
-      sizeTestDataFit = length(testDataFitC);
+        countFoldUnfit,histogramSumUnfitC,doPlot,numberOfFolds,histBins,-1,...
+		runNumberMin1,runs);
+      sizeTestDataFit   = length(testDataFitC);
       sizeTestDataUnfit = length(testDataUnfitC);
 	end
-    testDataFitCofE = [];
-    meanFitCofE = 0;
-    covFitCofE = 0;
-    testDataUnfitCofE = [];
-    meanUnfitCofE = 0;
-    covUnfitCofE = 0;
-    if doColorOfEdge==1
-      [ testDataFitCofE, meanFitCofE, covFitCofE, histogramSumFitCofE ] =...
+    testDataFitCofE		= [];
+    testDataUnfitCofE	= [];
+    meanFitCofE			= 0;
+    covFitCofE			= 0;
+    meanUnfitCofE		= 0;
+    covUnfitCofE		= 0;
+    if doIntensityOfEdge==1
+      [testDataFitCofE, meanFitCofE, covFitCofE, histogramSumFitCofE] =...
         CEsplitTrainTest('fit',allDataFitCofE,randIndexTTFit,foldIter,...
-        countFoldFit,histogramSumFitCofE,doPlot,numberOfFolds,histBins,-2);
-      [ testDataUnfitCofE, meanUnfitCofE, covUnfitCofE, histogramSumUnfitCofE ] =...
+        countFoldFit,histogramSumFitCofE,doPlot,numberOfFolds,histBins,-2,...
+		runNumberMin1,runs);
+      [testDataUnfitCofE, meanUnfitCofE, covUnfitCofE, histogramSumUnfitCofE] =...
         CEsplitTrainTest('unfit',allDataUnfitCofE,randIndexTTUnfit,foldIter,...
-        countFoldUnfit,histogramSumUnfitCofE,doPlot,numberOfFolds,histBins,-2);
-      sizeTestDataFit = length(testDataFitCofE);
+        countFoldUnfit,histogramSumUnfitCofE,doPlot,numberOfFolds,histBins,-2,...
+		runNumberMin1,runs);
+      sizeTestDataFit   = length(testDataFitCofE);
       sizeTestDataUnfit = length(testDataUnfitCofE);
 	end
     
-	probFitBeFitE = CEgetGaussProb(testDataFitE,meanFitE,covFitE,sizeTestDataFit);
-	probUnfitBeFitE = CEgetGaussProb(testDataUnfitE,meanFitE,covFitE,sizeTestDataUnfit);
-	probFitBeUnfitE = CEgetGaussProb(testDataFitE,meanUnfitE,covUnfitE,sizeTestDataFit);
+	probFitBeFitE	  = CEgetGaussProb(testDataFitE,meanFitE,covFitE,sizeTestDataFit);
+	probUnfitBeFitE   = CEgetGaussProb(testDataUnfitE,meanFitE,covFitE,sizeTestDataUnfit);
+	probFitBeUnfitE   = CEgetGaussProb(testDataFitE,meanUnfitE,covUnfitE,sizeTestDataFit);
 	probUnfitBeUnfitE = CEgetGaussProb(testDataUnfitE,meanUnfitE,covUnfitE,sizeTestDataUnfit);
 
-	probFitBeFitC = CEgetGaussProb(testDataFitC,meanFitC,covFitC,sizeTestDataFit);
-	probUnfitBeFitC = CEgetGaussProb(testDataUnfitC,meanFitC,covFitC,sizeTestDataUnfit);
-	probFitBeUnfitC = CEgetGaussProb(testDataFitC,meanUnfitC,covUnfitC,sizeTestDataFit);
+	probFitBeFitC	  = CEgetGaussProb(testDataFitC,meanFitC,covFitC,sizeTestDataFit);
+	probUnfitBeFitC   = CEgetGaussProb(testDataUnfitC,meanFitC,covFitC,sizeTestDataUnfit);
+	probFitBeUnfitC   = CEgetGaussProb(testDataFitC,meanUnfitC,covUnfitC,sizeTestDataFit);
 	probUnfitBeUnfitC = CEgetGaussProb(testDataUnfitC,meanUnfitC,covUnfitC,sizeTestDataUnfit);
 
-	probFitBeFitCofE = CEgetGaussProb(testDataFitCofE,meanFitCofE,covFitCofE,sizeTestDataFit);
-	probUnfitBeFitCofE = CEgetGaussProb(testDataUnfitCofE,meanFitCofE,covFitCofE,sizeTestDataUnfit);
-	probFitBeUnfitCofE = CEgetGaussProb(testDataFitCofE,meanUnfitCofE,covUnfitCofE,sizeTestDataFit);
+	probFitBeFitCofE     = CEgetGaussProb(testDataFitCofE,meanFitCofE,covFitCofE,sizeTestDataFit);
+	probUnfitBeFitCofE   = CEgetGaussProb(testDataUnfitCofE,meanFitCofE,covFitCofE,sizeTestDataUnfit);
+	probFitBeUnfitCofE   = CEgetGaussProb(testDataFitCofE,meanUnfitCofE,covUnfitCofE,sizeTestDataFit);
 	probUnfitBeUnfitCofE = CEgetGaussProb(testDataUnfitCofE,meanUnfitCofE,covUnfitCofE,sizeTestDataUnfit);
 
-	probFitBeFit = (probFitBeFitC.*probFitBeFitCofE).*probFitBeFitE;
-	probUnfitBeFit = (probUnfitBeFitC.*probUnfitBeFitCofE).*probUnfitBeFitE;
-	probFitBeUnfit = (probFitBeUnfitC.*probFitBeUnfitCofE).*probFitBeUnfitE;
+	probFitBeFit	 = (probFitBeFitC.*probFitBeFitCofE).*probFitBeFitE;
+	probUnfitBeFit	 = (probUnfitBeFitC.*probUnfitBeFitCofE).*probUnfitBeFitE;
+	probFitBeUnfit	 = (probFitBeUnfitC.*probFitBeUnfitCofE).*probFitBeUnfitE;
 	probUnfitBeUnfit = (probUnfitBeUnfitC.*probUnfitBeUnfitCofE).*probUnfitBeUnfitE;
 
 	%initialize variables to calculate results
-	fitGood=0;
-	fitNotGood=0;
-	unfitGood=0;
-	unfitNotGood=0;
+	fitGood		 = 0;
+	fitNotGood	 = 0;
+	unfitGood	 = 0;
+	unfitNotGood = 0;
 
     %for the fit test data
     for x=1:size(probFitBeFit,2)
@@ -259,59 +265,38 @@ function [ percFitGood, percUnfitGood,allDataFitE,...
     end
 
     %calculate results
-    percFitGood = fitGood/(fitGood+fitNotGood)*100;
-    percFitWrong = fitNotGood/(fitGood+fitNotGood)*100;
-    percUnfitGood = unfitGood/(unfitGood+unfitNotGood)*100;
-    percUnfitWrong = unfitNotGood/(unfitGood+unfitNotGood)*100;
+    percFitGood		= fitGood/(fitGood+fitNotGood)*100;
+    percFitWrong	= fitNotGood/(fitGood+fitNotGood)*100;
+    percUnfitGood	= unfitGood/(unfitGood+unfitNotGood)*100;
+    percUnfitWrong	= unfitNotGood/(unfitGood+unfitNotGood)*100;
 
-%     fprintf('\nresults:\n')
-%     fprintf('TP: %4.4g%% of the fit test data is classified good\n',...
-%       percFitGood)
-%     fprintf('FN: %4.4g%% of the fit test data is classified wrong\n',...
-%       percFitWrong)
-%     fprintf('TN: %4.4g%% of the unfit test data is classified good\n',...
-%       percUnfitGood)
-%     fprintf('FP: %4.4g%% of the unfit test data is classified wrong\n',...
-%       percUnfitWrong)
-    
     sumTP = sumTP + percFitGood;
     sumFN = sumFN + percFitWrong;
     sumTN = sumTN + percUnfitGood;
     sumFP = sumFP + percUnfitWrong;
     
 	if percFitGood>bestTP
-		bestTPlistE=[meanFitE covFitE];
-		bestTPlistC=[meanFitC covFitC];
-		bestTPlistCofE=[meanFitCofE covFitCofE];
-		bestTP = percFitGood;
+		bestTPlistE		= [meanFitE covFitE];
+		bestTPlistC		= [meanFitC covFitC];
+		bestTPlistCofE	= [meanFitCofE covFitCofE];
+		bestTP			= percFitGood;
     elseif percFitGood==bestTP
-		bestTPlistE=[bestTPlistE; meanFitE covFitE];
-		bestTPlistC=[bestTPlistC; meanFitC covFitC];
-		bestTPlistCofE=[bestTPlistCofE; meanFitCofE covFitCofE];
+		bestTPlistE		= [bestTPlistE; meanFitE covFitE];
+		bestTPlistC		= [bestTPlistC; meanFitC covFitC];
+		bestTPlistCofE	= [bestTPlistCofE; meanFitCofE covFitCofE];
 	end
     if percUnfitGood>bestTN
-		bestTNlistE=[meanUnfitE covUnfitE];
-		bestTNlistC=[meanUnfitC covUnfitC];
-		bestTNlistCofE=[meanUnfitCofE covUnfitCofE];
-        bestTN = percUnfitGood;
+		bestTNlistE		= [meanUnfitE covUnfitE];
+		bestTNlistC		= [meanUnfitC covUnfitC];
+		bestTNlistCofE	= [meanUnfitCofE covUnfitCofE];
+        bestTN			= percUnfitGood;
     elseif percUnfitGood==bestTN
-        bestTNlistE=[bestTNlistE; meanUnfitE covUnfitE];
-        bestTNlistC=[bestTNlistC; meanUnfitC covUnfitC];
-        bestTNlistCofE=[bestTNlistCofE; meanUnfitCofE covUnfitCofE];
+        bestTNlistE		= [bestTNlistE; meanUnfitE covUnfitE];
+        bestTNlistC		= [bestTNlistC; meanUnfitC covUnfitC];
+        bestTNlistCofE	= [bestTNlistCofE; meanUnfitCofE covUnfitCofE];
     end
-    
   end
-  fprintf('\naverage result:\n')
-  fprintf('TP: %4.4g%% of the fit test data is classified good\n',...
-    sumTP/foldIter)
-  fprintf('FN: %4.4g%% of the fit test data is classified wrong\n',...
-    sumFN/foldIter)
-  fprintf('TN: %4.4g%% of the unfit test data is classified good\n',...
-    sumTN/foldIter)
-  fprintf('FP: %4.4g%% of the utfit test data is classified wrong\n',...
-    sumFP/foldIter)
 
-  fprintf('\n\nbest TP: %d times %d\n',length(bestTPlistC),bestTP);
   if size(bestTPlistE,1)>1 | size(bestTPlistC,1)>1 | size(bestTPlistCofE,1)>1
 	  bestEvarsTP    = mean(bestTPlistE);
 	  bestCvarsTP    = mean(bestTPlistC);
@@ -322,7 +307,6 @@ function [ percFitGood, percUnfitGood,allDataFitE,...
 	  bestCofEvarsTP = bestTPlistCofE;
   end
   
-  fprintf('best TN: %d times %d\n',length(bestTNlistC),bestTN);
   if size(bestTNlistE,1)>1 | size(bestTNlistC,1)>1 | size(bestTNlistCofE,1)>1
 	  bestEvarsTN    = mean(bestTNlistE);
 	  bestCvarsTN    = mean(bestTNlistC);
@@ -333,35 +317,33 @@ function [ percFitGood, percUnfitGood,allDataFitE,...
 	  bestCofEvarsTN = bestTNlistCofE;
   end
 
-    fprintf('\n==================FINISHED==================\n')
-	
   %%%%%%%%%%%%%%%%TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    probFitBeFitE = CEgetGaussProb(holdoutSetFitE,bestEvarsTP(1),bestEvarsTP(2),sizeHoldoutSetFit);
-    probUnfitBeFitE = CEgetGaussProb(holdoutSetUnfitE,bestEvarsTP(1),bestEvarsTP(2),sizeHoldoutSetUnfit);
-    probFitBeUnfitE = CEgetGaussProb(holdoutSetFitE,bestEvarsTN(1),bestEvarsTN(2),sizeHoldoutSetFit);
-    probUnfitBeUnfitE = CEgetGaussProb(holdoutSetUnfitE,bestEvarsTN(1),bestEvarsTN(2),sizeHoldoutSetUnfit);
+    probFitBeFitE		= CEgetGaussProb(holdoutSetFitE,bestEvarsTP(1),bestEvarsTP(2),sizeHoldoutSetFit);
+    probUnfitBeFitE		= CEgetGaussProb(holdoutSetUnfitE,bestEvarsTP(1),bestEvarsTP(2),sizeHoldoutSetUnfit);
+    probFitBeUnfitE		= CEgetGaussProb(holdoutSetFitE,bestEvarsTN(1),bestEvarsTN(2),sizeHoldoutSetFit);
+    probUnfitBeUnfitE	= CEgetGaussProb(holdoutSetUnfitE,bestEvarsTN(1),bestEvarsTN(2),sizeHoldoutSetUnfit);
 
-    probFitBeFitC = CEgetGaussProb(holdoutSetFitC,bestCvarsTP(1),bestCvarsTP(2),sizeHoldoutSetFit);
-    probUnfitBeFitC = CEgetGaussProb(holdoutSetUnfitC,bestCvarsTP(1),bestCvarsTP(2),sizeHoldoutSetUnfit);
-    probFitBeUnfitC = CEgetGaussProb(holdoutSetFitC,bestCvarsTN(1),bestCvarsTN(2),sizeHoldoutSetFit);
-    probUnfitBeUnfitC = CEgetGaussProb(holdoutSetUnfitC,bestCvarsTN(1),bestCvarsTN(2),sizeHoldoutSetUnfit);
+    probFitBeFitC		= CEgetGaussProb(holdoutSetFitC,bestCvarsTP(1),bestCvarsTP(2),sizeHoldoutSetFit);
+    probUnfitBeFitC		= CEgetGaussProb(holdoutSetUnfitC,bestCvarsTP(1),bestCvarsTP(2),sizeHoldoutSetUnfit);
+    probFitBeUnfitC		= CEgetGaussProb(holdoutSetFitC,bestCvarsTN(1),bestCvarsTN(2),sizeHoldoutSetFit);
+    probUnfitBeUnfitC	= CEgetGaussProb(holdoutSetUnfitC,bestCvarsTN(1),bestCvarsTN(2),sizeHoldoutSetUnfit);
 
-    probFitBeFitCofE = CEgetGaussProb(holdoutSetFitCofE,bestCofEvarsTP(1),bestCofEvarsTP(2),sizeHoldoutSetFit);
-    probUnfitBeFitCofE = CEgetGaussProb(holdoutSetUnfitCofE,bestCofEvarsTP(1),bestCofEvarsTP(2),sizeHoldoutSetUnfit);
-    probFitBeUnfitCofE = CEgetGaussProb(holdoutSetFitCofE,bestCofEvarsTN(1),bestCofEvarsTN(2),sizeHoldoutSetFit);
+    probFitBeFitCofE	 = CEgetGaussProb(holdoutSetFitCofE,bestCofEvarsTP(1),bestCofEvarsTP(2),sizeHoldoutSetFit);
+    probUnfitBeFitCofE	 = CEgetGaussProb(holdoutSetUnfitCofE,bestCofEvarsTP(1),bestCofEvarsTP(2),sizeHoldoutSetUnfit);
+    probFitBeUnfitCofE	 = CEgetGaussProb(holdoutSetFitCofE,bestCofEvarsTN(1),bestCofEvarsTN(2),sizeHoldoutSetFit);
     probUnfitBeUnfitCofE = CEgetGaussProb(holdoutSetUnfitCofE,bestCofEvarsTN(1),bestCofEvarsTN(2),sizeHoldoutSetUnfit);
 
-    probFitBeFit = (probFitBeFitC.*probFitBeFitCofE).*probFitBeFitE;
-    probUnfitBeFit = (probUnfitBeFitC.*probUnfitBeFitCofE).*probUnfitBeFitE;
-    probFitBeUnfit = (probFitBeUnfitC.*probFitBeUnfitCofE).*probFitBeUnfitE;
+    probFitBeFit	 = (probFitBeFitC.*probFitBeFitCofE).*probFitBeFitE;
+    probUnfitBeFit	 = (probUnfitBeFitC.*probUnfitBeFitCofE).*probUnfitBeFitE;
+    probFitBeUnfit	 = (probFitBeUnfitC.*probFitBeUnfitCofE).*probFitBeUnfitE;
     probUnfitBeUnfit = (probUnfitBeUnfitC.*probUnfitBeUnfitCofE).*probUnfitBeUnfitE;
     
     %initialize variables to calculate results
-    fitGood=0;
-    fitNotGood=0;
-    unfitGood=0;
-    unfitNotGood=0;
+    fitGood		 = 0;
+    fitNotGood	 = 0;
+    unfitGood	 = 0;
+    unfitNotGood = 0;
 
     %for the fit test data
     for x=1:size(probFitBeFit,2)
@@ -387,20 +369,18 @@ function [ percFitGood, percUnfitGood,allDataFitE,...
     end
 
     %calculate results
-    percFitGood = fitGood/(fitGood+fitNotGood)*100;
-    percFitWrong = fitNotGood/(fitGood+fitNotGood)*100;
-    percUnfitGood = unfitGood/(unfitGood+unfitNotGood)*100;
+    percFitGood    = fitGood/(fitGood+fitNotGood)*100;
+    percFitWrong   = fitNotGood/(fitGood+fitNotGood)*100;
+    percUnfitGood  = unfitGood/(unfitGood+unfitNotGood)*100;
     percUnfitWrong = unfitNotGood/(unfitGood+unfitNotGood)*100;
 
-    fprintf('\nresults of holdout set (%d fit %d unfit):\n',sizeHoldoutSetFit,sizeHoldoutSetUnfit)
-    fprintf('TP: %4.4g%% of the fit test data is classified good\n',...
-      percFitGood)
-    fprintf('FN: %4.4g%% of the fit test data is classified wrong\n',...
-      percFitWrong)
-    fprintf('TN: %4.4g%% of the unfit test data is classified good\n',...
-      percUnfitGood)
-    fprintf('FP: %4.4g%% of the unfit test data is classified wrong\n',...
-      percUnfitWrong)
+    fprintf('\nresults run %d (%d fit %d unfit):\n',runNumberMin1+1,...
+		sizeHoldoutSetFit,sizeHoldoutSetUnfit)
+	fprintf('TP: %0.4g%% ', percFitGood)
+	fprintf('\tFN: %0.4g%% ', percFitWrong)
+	fprintf('\tTN: %0.4g%% ', percUnfitGood)
+	fprintf('\tFP: %0.4g%% \n', percUnfitWrong)
+  
 	%%%%%%%%%%%%%%%FINISHED TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%
 end
 
