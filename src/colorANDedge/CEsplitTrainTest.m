@@ -36,17 +36,12 @@ function [ testData, trainMean, trainCov, histogramSum ] =...
     end
     if strcmp(type,'unfit')
       plotNr=2;
-    end
-    subplot(1,2,plotNr)
-    [hist, binSize,mini] = constrHistogram(trainData(1,:),histBins);
-    histogramSum = histogramSum + hist;
-    histogramSum = histogramSum/numberOfFolds;
-    x = 1:histBins;
-    x = (x.*binSize)+mini;
-    bar(x,histogramSum);
-    title(['Histogram ' type ' train'])
+	end
+	subplot(1,2,plotNr)
+	hist(trainData(1,:), histBins);
+	title(['Histogram ' type ' train'])
   else
-    [hist, binSize,mini] = constrHistogram(trainData(1,:),histBins);
-    histogramSum = histogramSum + hist;
+    [histogram, binSize,mini] = constrHistogram(trainData(1,:),histBins);
+    histogramSum = histogramSum + histogram;
   end
 end
