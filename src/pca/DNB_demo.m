@@ -3,11 +3,11 @@ function DNB_demo()%(all_money_front, all_money_rear, all_labels)
 
 dotrain = 1;
 
-T				= 5;	% number of hypothesis for AdaBoost	
+T				= 10;	% number of hypothesis for AdaBoost	
 leave_n_out		= 50;	% size of test-set
 hold_n_out		= 100;  % size of validation-set
 trials			= 20;	% 20 fold experiment
-repetitions		= 20;	% 20 for repeating the k-fold experiment
+repetitions		= 1;	% 20 for repeating the k-fold experiment
 unfitaccept		= 0.04; % ensures better than 5% error on unfit class
 
 % how many eigenvectors to use
