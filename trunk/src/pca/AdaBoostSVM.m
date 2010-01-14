@@ -23,25 +23,37 @@ function [alpha, modelIdx, models] = AdaBoostSVM(models, traindata, eigen_region
 		for j=1:length(models)
 			model = models(j);
 			error_j = 0;
-			for k=1:size(traindata,1)
-				
-				image_region = traindata(k,:,j);
-				eigen_region = eigen_regions(:,:,j);
-				imageProjection = image_region * eigen_region;
-				
-				[recognized, accuracy, prob_est_front] = svmpredict(1,imageProjection, model, '-b 0');
+			
+			images_region = traindata(:,:,j);
+			eigen_region = eigen_regions(:,:,j);
+			
+			imagesProjection = images_region * eigen_region;
 
-				recognized_list(k) = recognized;
-				
-				% calculate total error for classifier k
-				error_j = error_j + Dt(k)*(labels(k) ~= recognized);
-				
-			end
+			[recognized, accuracy, prob_est_front] = svmpredict(labels,imagesProjection, model, '-b 0');
+						
+			error_j = sum(Dt'.* (labels ~= recognized));
+			
+			
+			
+			
+% 			for k=1:size(traindata,1)
+% 				image_region = traindata(k,:,j);
+% 				eigen_region = eigen_regions(:,:,j);
+% 				imageProjection = image_region * eigen_region;
+% 				
+% 				[recognized, accuracy, prob_est_front] = svmpredict(1,imageProjection, model, '-b 0');
+% 
+% 				recognized_list(k) = recognized;
+% 				
+% 				% calculate total error for classifier k
+% 				error_j = error_j + Dt(k)*(labels(k) ~= recognized);
+% 				
+% 			end
 			fprintf('\t\tError model %d is %f\n',j,error_j)
 			if (error_j < smallest_error)
 				smallest_error = error_j;
 				best_model = j;
-				best_recognized_list = recognized_list;
+				best_recognized_list = recognized;
 			end
 		end
 		fprintf('\tBest model for t=%d is %d\n',i, best_model)

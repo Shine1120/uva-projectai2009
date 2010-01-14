@@ -1,9 +1,9 @@
-function DNB_demo()%(all_money_front, all_money_rear, all_labels)
+function DNB_demo(docreate)%(all_money_front, all_money_rear, all_labels)
 
 
 dotrain = 1;
 
-T				= 10;	% number of hypothesis for AdaBoost	
+T				= 15;	% number of hypothesis for AdaBoost	
 leave_n_out		= 50;	% size of test-set
 hold_n_out		= 100;  % size of validation-set
 trials			= 20;	% 20 fold experiment
@@ -25,26 +25,28 @@ hcorrectbayes = [0 0];
 hn = [0 0];
 
 
+if docreate
+	fprintf('Creating Image Regions... ');
+	tic;
+	load all_labels.mat
+	load all_money_front.mat
+	load all_money_rear.mat
+	all_money_front_regions = genImageRegions(all_money_front,1);		
+	clear all_money_front
+	save all_money_front_regions.mat all_money_front_regions;
+	all_money_rear_regions = genImageRegions(all_money_rear,2);		
+	clear all_money_rear
+	save all_money_rear_regions.mat all_money_rear_regions;
+	toc;
+else
+	fprintf('Loading Image Regions... ');
+	tic;
+	load all_labels.mat
+	load all_money_front_regions.mat
+	load all_money_rear_regions
+	toc;
+end
 
-% fprintf('Creating Image Regions... ');
-% tic;
-% load all_labels.mat
-% load all_money_front.mat
-% load all_money_rear.mat
-% all_money_front_regions = genImageRegions(all_money_front,1);		
-% clear all_money_front
-% save all_money_front_regions.mat all_money_front_regions;
-% all_money_rear_regions = genImageRegions(all_money_rear,2);		
-% clear all_money_rear
-% save all_money_rear_regions.mat all_money_rear_regions;
-% toc;
-
-fprintf('Loading Image Regions... ');
-tic;
-load all_labels.mat
-load all_money_front_regions.mat
-load all_money_rear_regions
-toc;
 
 for q=1:repetitions
 
