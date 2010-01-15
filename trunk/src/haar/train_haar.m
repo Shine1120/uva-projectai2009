@@ -19,7 +19,6 @@ function [alpha_weights, best_feature_indexs, patterns, F, model] = train_haar(T
     F             = generate_features(Ny , Nx , patterns, 20); %haar features	
 	[alpha_weights, best_feature_indexs, model] = adaboost(F, ImgSet, T, patterns, target);
 		
-	
 	best_feature_indexs
 	
     %plot the best features on a random image
