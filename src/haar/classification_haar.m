@@ -5,7 +5,7 @@
 %       rounds -- number of rounds for cross-validation
 function classification_haar(T, rounds)
 	close all;
-	save_patterns %generate the patterns
+	save_patterns(120,85) %generate the patterns
     % Do the CROSS-VALIDATION loop
     money_dir  = 'neur10'; % 'neur05';  
     fit   = [money_dir '/fit/'];
@@ -50,10 +50,11 @@ function classification_haar(T, rounds)
                                         = eval_bills(model, labels, ImgSet,0);
 			end;
 		end
-		both_val = 1-(1-classifier_front).*(1-classifier_rear); 
-        [tp_both(i), fp_both(i), error_both(i), classifier_both]...
-							 = eval_bills(model, labels, ImgSet, both_val);				
-    end
+		both_val = 1-(1-classifier_front).*(1-classifier_rear); 				
+	end
+	
+	[tp_both(i), fp_both(i), error_both(i), classifier_both]...
+							 = eval_bills(model, labels, ImgSet, both_val);
     
     %average over all results to obtain the performance of the classifier
     true_positive_rear  = mean(tp_rear)

@@ -31,13 +31,10 @@ function [alpha, indexs, best_model] = adaboost(F, Images, T, rect_patterns, lab
 			pre_values      = double(Images(F(i).y_top: F(i).y_top+height-1,F(i).x_top: ...
 								F(i).x_top+width-1, :)).* double(patterns);
 			values          = reshape(sum(sum(pre_values,1),2),1,size(Images,3));
-			model(i)        = svmtrain(double(labels'), values', '-t 0 -q -b 0');		
+			model(i)        = svmtrain(double(labels'), values', '-t 3 -q -b 0');		
 			[recognized, accuracy, probability] = svmpredict(double(labels'), values', model(i), '-b 0');
 			%compute the error
-			error(i)        = sum(weights .* abs(recognized' - double(labels)));	
-			
-			simple_error(i) = sum(abs(recognized' - double(labels)))/size(labels,2);
-			
+			error(i)        = sum(weights .* abs(recognized' - double(labels)));				
 			ei(i,:)         = abs(recognized' - double(labels));
 		end
 		%choose the classifier with the minimum error
@@ -46,10 +43,7 @@ function [alpha, indexs, best_model] = adaboost(F, Images, T, rect_patterns, lab
 		while (sum(ismember(indexs, sortedindex(index_sorted)))>0 && index_sorted<size(error,2))
 			index_sorted = index_sorted + 1;
 		end
-		indexs(t) = sortedindex(index_sorted);
-		
-		simple_error(indexs(t))
-		
+		indexs(t)      = sortedindex(index_sorted);		
 		%update the weights		
 		beta(t)        = error(indexs(t))/(1-error(indexs(t)));
 		alpha(t)	   = log(1/beta(t))

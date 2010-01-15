@@ -36,9 +36,8 @@ function [true_pos, false_pos, error, classifier] = eval_bills(model, labels, Im
 						   double(repeat_patterns);
 			values   = reshape(sum(sum(pre_values,1),2),1,size(ImgSet,3));															   
 			[recognized(i,:), accuracy, probability] = svmpredict(double(labels'), values',model.model(i), '-b 0');
-		end		
-		classifier = (model.weights * recognized) >= sum(0.5*(model.weights));			
-		%classifier = (classifier==1) + (classifier==0) 
+		end	
+ 		classifier = (model.weights * recognized) >= sum(0.5*(model.weights))			
 	end
 	true_pos  = sum(classifier(index_pos) == target(index_pos))/length(index_pos);
     false_pos = 1 - sum(classifier(index_neg) == target(index_neg))/length(index_neg);
