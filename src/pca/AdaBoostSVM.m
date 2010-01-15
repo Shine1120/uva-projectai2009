@@ -33,9 +33,6 @@ function [alpha, modelIdx, models] = AdaBoostSVM(models, traindata, eigen_region
 						
 			error_j = sum(Dt'.* (labels ~= recognized));
 			
-			
-			
-			
 % 			for k=1:size(traindata,1)
 % 				image_region = traindata(k,:,j);
 % 				eigen_region = eigen_regions(:,:,j);
@@ -49,15 +46,15 @@ function [alpha, modelIdx, models] = AdaBoostSVM(models, traindata, eigen_region
 % 				error_j = error_j + Dt(k)*(labels(k) ~= recognized);
 % 				
 % 			end
-			fprintf('\t\tError model %d is %f\n',j,error_j)
+% 			fprintf('\t\tError model %d is %f\n',j,error_j)
 			if (error_j < smallest_error)
 				smallest_error = error_j;
 				best_model = j;
 				best_recognized_list = recognized;
 			end
 		end
-		fprintf('\tBest model for t=%d is %d\n',i, best_model)
-		fprintf('\t\tUpdate weights\n')
+% 		fprintf('\tBest model for t=%d is %d\n',i, best_model)
+% 		fprintf('\t\tUpdate weights\n')
 		modelIdx(i) = best_model;
 		
 		% update alpha weights

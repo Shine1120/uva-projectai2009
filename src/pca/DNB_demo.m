@@ -3,11 +3,11 @@ function DNB_demo(docreate)%(all_money_front, all_money_rear, all_labels)
 
 dotrain = 1;
 
-T				= 15;	% number of hypothesis for AdaBoost	
+T				= 1;	% number of hypothesis for AdaBoost	
 leave_n_out		= 50;	% size of test-set
 hold_n_out		= 100;  % size of validation-set
 trials			= 20;	% 20 fold experiment
-repetitions		= 1;	% 20 for repeating the k-fold experiment
+repetitions		= 20;	% 20 for repeating the k-fold experiment
 unfitaccept		= 0.04; % ensures better than 5% error on unfit class
 
 % how many eigenvectors to use
@@ -24,6 +24,10 @@ hcorrectbayes = [0 0];
 %hcorrectall = [0 0];
 hn = [0 0];
 
+best_model_list1 = [];
+best_alpha_list1 = [];
+best_model_list2 = [];
+best_alpha_list2 = [];
 
 if docreate
 	fprintf('Creating Image Regions... ');
@@ -184,8 +188,13 @@ for q=1:repetitions
 				best_model_rear = model_rear;
 				best_alpha1 = alpha1;
 				best_alpha2 = alpha2;
-				best_modelIdx1 = modelIdx1
-				best_modelIdx2 = modelIdx2				
+				best_modelIdx1 = modelIdx1;
+				best_modelIdx2 = modelIdx2;
+				
+				best_model_list1 = [best_model_list1; modelIdx1];
+				best_alpha_list1 = [best_alpha_list1; alpha1];
+				best_model_list2 = [best_model_list2; modelIdx2];
+				best_alpha_list2 = [best_alpha_list2; alpha2];
 			end;
 		else
 			if (thisbayes(2) < correctbest(2))
@@ -196,8 +205,13 @@ for q=1:repetitions
 				best_model_rear = model_rear;
 				best_alpha1 = alpha1;
 				best_alpha2 = alpha2;
-				best_modelIdx1 = modelIdx1
-				best_modelIdx2 = modelIdx2				
+				best_modelIdx1 = modelIdx1;
+				best_modelIdx2 = modelIdx2;				
+
+				best_model_list1 = [best_model_list1; modelIdx1];
+				best_alpha_list1 = [best_alpha_list1; alpha1];
+				best_model_list2 = [best_model_list2; modelIdx2];
+				best_alpha_list2 = [best_alpha_list2; alpha2];
 			end
 		end
 		
@@ -279,6 +293,10 @@ for q=1:repetitions
 end; % repetitions
 
 fprintf( 'Final:\n' );
+Model_Front = best_model_list1
+Alpha_Front = best_alpha_list1
+Model_Rear = best_model_list2
+Alpha_Rear = best_alpha_list2
 
 n=hn
 %error_naive_Bayes_all = 1-hcorrectall./hn
