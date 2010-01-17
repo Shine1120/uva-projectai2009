@@ -70,7 +70,7 @@ function classification_haar(T, rounds)
             %the result structure retrieved from the AdaBoost cascade
             [alpha_weights, best_feature_indexs, rect_patterns, F, all_models] = train_haar(T, labels_train, ImgTrain);
             %save the obtained model(the weak classifiers corresponding to the features chosen)
-            model = struct('model',all_models, 'weights',alpha_weights,'best_feature_id', ...
+            model = struct('model',all_models,'weights',alpha_weights,'best_feature_id', ...
 					best_feature_indexs,'patterns',rect_patterns,'features',F);
 		if (i==1 && j==1)
 			voted_rear  = zeros(1, size(F,2)); 
@@ -90,6 +90,7 @@ function classification_haar(T, rounds)
 				%load(string_name);
                 [tp_front(i),fp_front(i),error_front(i),classifier_front]=eval_bills(model,labels_test_front,ImgTest_front,0);
 			end
+			
 		%VOTE THE BEST FEATURES TO BUILD THE BEST MODEL EVER_____________________
  			if (mod(j,2)==0)
  				voted_rear(best_feature_indexs) = voted_rear(best_feature_indexs)+1;   
@@ -117,20 +118,25 @@ function classification_haar(T, rounds)
 	
     %EVAL THE BEST MODEL FRONT, THE BEST MODEL REAR AND THE BEST MODEL BOTH
 	%Test on the hold out
-	labels_holdout = all_labels(holdout_id);
+	labels_holdout             = all_labels(holdout_id);
 	[ImgHoldout_front, nx, ny] = preprocess(1,names_front(holdout_id));
 	[ImgHoldout_rear, nx, ny]  = preprocess(1,names_rear(holdout_id)); 
 	
-	[sorted indexes_rear]  = sort(voted_rear,'descend'); 
- 	[sorted indexes_front] = sort(voted_front,'descend');
 	
-	model = struct('model', all_models, 'weights', repmat(1,1,T), 'best_feature_id', ...
+	
+	[sorted_rear indexes_rear]   = sort(voted_rear,'descend'); 
+ 	[sorted_front indexes_front] = sort(voted_front,'descend');
+	sorted_rear(1:T)
+	indexes_rear(1:T)
+	sorted_front(1:T)
+	indexes_front(1:T)
+	model = struct('model', all_models, 'weights', [T-1:-1:1 0.5]./T, 'best_feature_id', ...
 					indexes_rear(1:T),'patterns',rect_patterns,'features',F);
 	save(['model_' money_dir '_handout_rear'], 'model');
 	[true_positive_holdout_rear, false_postive_holdout_rear, error_holdout_rear, ...
 		classifier_holdout_rear] = eval_bills(model,labels_holdout,ImgHoldout_rear,0);
 
-	model = struct('model', all_models, 'weights', repmat(1,1,T), 'best_feature_id', ...
+	model = struct('model', all_models, 'weights', [T-1:-1:1 0.5]./T, 'best_feature_id', ...
 					indexes_front(1:T),'patterns',rect_patterns,'features',F);
 	save(['model_' money_dir '_handout_front'], 'model');
 	[true_positive_holdout_front, false_postive_holdout_front, error_holdout_front, ...
