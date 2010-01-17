@@ -20,9 +20,9 @@ function save_patterns(imsize_x, imsize_y)
 		randsize_x = randperm(round(imsize_x/width)-10);
 		randsize_y = randperm(round(imsize_y/height)-10);
 		
-		size_x     = randsize_x(randsize_x>10);
-		size_y     = randsize_y(randsize_y>10);
-		number     = min(20, length(size_x));
+		size_x     = randsize_x(randsize_x>20);
+		size_y     = randsize_y(randsize_y>20);
+		number     = min(20, length(size_x)); 
 		number     = min(number, length(size_y));
 		for j=1:number
 			index           = size_patt + number*(i-1)+j;
