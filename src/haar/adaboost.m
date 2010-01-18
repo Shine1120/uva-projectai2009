@@ -16,7 +16,7 @@ function [alpha, indexs, model] = adaboost(F, Images, T, rect_patterns, labels)
 	weights   = 2/positives .* (labels==1) + 2/negatives .* (labels==0); 
 	indexs    = [];
 	for t=1:T
-		fprintf('\t t=%d\n',t)
+		fprintf('\t AdaBoost t=%d\n',t)
 		%normalize the weights
 		weights = weights ./ sum(weights);			
 		for i=1:size(F,2)
@@ -31,11 +31,14 @@ function [alpha, indexs, model] = adaboost(F, Images, T, rect_patterns, labels)
 			pre_values             = double(Images(F(i).y_top: F(i).y_top+height-1,F(i).x_top: ...
 							    	 F(i).x_top+width-1, :)).* double(patterns);
 			values                 = reshape(sum(sum(pre_values,1),2),1,size(Images,3));
-			model(F(i).feature_id) = svmtrain(double(labels'), values', '-t 3 -q -b 0');		
-			[recognized, accuracy, probability] = svmpredict(double(labels'), values', model(F(i).feature_id), '-b 0');
+			
+			model(F(i).feature_id) = svmtrain(labels, values', '-t 2 -q -b 0');		
+			[recognized, accuracy, probability] = svmpredict(labels, values', model(F(i).feature_id), '-b 0');
 			%compute the error
-			error(i)        = sum(weights .* abs(recognized' - double(labels)));				
-			ei(i,:)         = abs(recognized' - double(labels));
+			error(i) = sum(weights .* abs(recognized - labels));				
+			ei(i,:)  = abs(recognized - labels);
+			
+			fprintf('\t\t Error for model %d is %f\n',i,error(i));
 		end
 		%choose the classifier with the minimum error
 		[sorted_error sortedindex]= sort(error);
@@ -44,9 +47,10 @@ function [alpha, indexs, model] = adaboost(F, Images, T, rect_patterns, labels)
 			index_sorted = index_sorted + 1;
 		end
 		indexs(t)      = sortedindex(index_sorted);		
+		
 		%update the weights		
 		beta(t)        = error(indexs(t))/(1-error(indexs(t)));
 		alpha(t)	   = log(1/beta(t))
-		weights        = weights .* (1 .*(ei(indexs(t),:) == 1) + beta(t).*(ei(indexs(t),:) == 0));	
+		weights        = weights .* (1 .*(ei(indexs(t),:) == 1)' + beta(t).*(ei(indexs(t),:) == 0)');	
 	end
 end

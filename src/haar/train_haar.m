@@ -12,11 +12,10 @@
 %       F                   -- the whole feature structure: x_top, y_top(=top coordinates), 
 %							   pattern_id(=corresponding pattern id), feature_id
 %		model               -- the model returned by svmtrain for each feature
-function [alpha_weights, best_feature_indexs, patterns, F, model] = train_haar(T, labels, ImgSet)
+function [alpha_weights, best_feature_indexs, patterns, F, model] = train_haar(T, target, ImgSet)
 	load patterns	
-	target        = int8(labels); %targets or labels
     [Ny , Nx , P] = size(ImgSet); %P number of images
-    F             = generate_features(Ny , Nx , patterns, 20); %haar features       	
+    F             = generate_features(Ny , Nx , patterns, 2); %haar features       	
 	[alpha_weights, best_feature_indexs, model] = adaboost(F, ImgSet, T, patterns, target);
 		
 	best_feature_indexs	
