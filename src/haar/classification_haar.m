@@ -133,12 +133,14 @@ function classification_haar(T, rounds)
 	model = struct('model', all_models, 'weights', [T-1:-1:1 0.5]./T, 'best_feature_id', ...
 					indexes_rear(1:T),'patterns',rect_patterns,'features',F);
 	save(['model_' money_dir '_handout_rear'], 'model');
+	plot_features(ImgHoldout_rear,indexes_rear(1:T),F,rect_patterns,'rear',T);
 	[true_positive_holdout_rear, false_postive_holdout_rear, error_holdout_rear, ...
 		classifier_holdout_rear] = eval_bills(model,labels_holdout,ImgHoldout_rear,0);
 
 	model = struct('model', all_models, 'weights', [T-1:-1:1 0.5]./T, 'best_feature_id', ...
 					indexes_front(1:T),'patterns',rect_patterns,'features',F);
 	save(['model_' money_dir '_handout_front'], 'model');
+	plot_features(ImgHoldout_front,indexes_front(1:T),F,rect_patterns,'front',T);
 	[true_positive_holdout_front, false_postive_holdout_front, error_holdout_front, ...
 		classifier_holdout_front] = eval_bills(model,labels_holdout,ImgHoldout_front,0);
 	

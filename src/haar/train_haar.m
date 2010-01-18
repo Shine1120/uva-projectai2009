@@ -19,24 +19,5 @@ function [alpha_weights, best_feature_indexs, patterns, F, model] = train_haar(T
     F             = generate_features(Ny , Nx , patterns, 20); %haar features       	
 	[alpha_weights, best_feature_indexs, model] = adaboost(F, ImgSet, T, patterns, target);
 		
-	best_feature_indexs
-	
-    %plot the best features on a random image
-	Nimage   = randperm(P); %Random image index for printing the result over it
-    rand_Img = ImgSet(: , : , Nimage(1)); %random image for ploting the features
-	figure;imshow(rand_Img,'DisplayRange', [0 255]);hold on;
-	for f = 1:size(best_feature_indexs,2)
-		x_top  = double(F(best_feature_indexs(f)).x_top); 
-		y_top  = double(F(best_feature_indexs(f)).y_top);		
-		width  = size(patterns(F(best_feature_indexs(f)).pattern_id).rectangles,2);
-		height = size(patterns(F(best_feature_indexs(f)).pattern_id).rectangles,1);	
-		h = imshow((patterns(F(best_feature_indexs(f)).pattern_id).rectangles+1).*255/2, ...
-			'XData', [x_top x_top+width],'YData', [y_top y_top+height], 'Border', 'tight', 'DisplayRange', [0 255]);
-		plot(x_top,y_top,'r*');
-	end
-%	h = imshow(rand_Img,'DisplayRange', [0 255]);
-%	set(h,'AlphaData', 0.1)	
-    hold off;
-    title(sprintf('Best %d Haar features with Adaboost' , T) , 'fontsize' , 13)
-    colormap(gray)
+	best_feature_indexs	
 end
