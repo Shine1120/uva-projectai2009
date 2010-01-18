@@ -6,7 +6,7 @@
 function classification_haar(T, rounds)
 	close all;
 %	save_patterns(120,85,10) %generate the patterns
-	save_patterns(350,190,2);
+	save_patterns(350,190,3);
     % Do the CROSS-VALIDATION loop
     money_dir  = 'neur10'; % 'neur05';  
     fit        = [money_dir '/fit/'];
@@ -118,15 +118,14 @@ function classification_haar(T, rounds)
 	voted_indexes_rear  = indexes_rear(1:T)
 	voted_weights_front = sorted_front(1:T)
 	voted_indexes_front =indexes_front(1:T)
-	
-	model = struct('model', all_models, 'weights', [T:-0.5:1]./T, 'best_feature_id', ...
+	model = struct('model', all_models, 'weights', [1:(-0.5/(T-1)):0.5], 'best_feature_id', ...
 					indexes_rear(1:T),'patterns',rect_patterns,'features',F);
 	save(['model_' money_dir '_handout_rear'], 'model');
 	plot_features(ImgHoldout_rear,indexes_rear(1:T),F,rect_patterns,'rear',T);
 	[tp_holdout_rear, fp_holdout_rear, error_holdout_rear, ...
 		classifier_holdout_rear] = eval_bills(model,labels_holdout,ImgHoldout_rear,0);
 
-	model = struct('model', all_models, 'weights', [T:-0.5:1]./T, 'best_feature_id', ...
+	model = struct('model', all_models, 'weights',[1:(-0.5/(T-1)):0.5], 'best_feature_id', ...
 					indexes_front(1:T),'patterns',rect_patterns,'features',F);
 	save(['model_' money_dir '_handout_front'], 'model');
 	plot_features(ImgHoldout_front,indexes_front(1:T),F,rect_patterns,'front',T);

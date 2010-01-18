@@ -25,7 +25,7 @@ function plot_features(ImgSet,best_feature_indexs,F,patterns, side, T)
 		plot(x_top,y_top,'r*');
 	end
 	h = imshow(rand_Img,[]);
-	set(h,'AlphaData', 0.1)	
+	set(h,'AlphaData', 0.2)	
     hold off;
     title(sprintf('Best %d %s Haar features with Adaboost' , T, side) , 'fontsize' , 13)
     colormap(gray)
