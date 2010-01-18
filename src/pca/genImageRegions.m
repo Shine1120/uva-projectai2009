@@ -7,11 +7,14 @@ function img_regions = genImageRegions(imgVecs, fr)
 		% fr switch: f = front, r = rear
 		switch fr
 			case 1
-				img = reshape(img,[350,190]);
+				%img = reshape(img,[350,190]);
+				img = reshape(img,[400,250]);
+				img = imresize_old(img,[350 190]);
 			case 2
-				img = reshape(img,[340,190]);
+				%img = reshape(img,[340,190]);
 % 				imshow(img)
 % 				size(img)
+				img = reshape(img,[410,250]);
 				img = imresize_old(img,[350 190]);
 		end
 
