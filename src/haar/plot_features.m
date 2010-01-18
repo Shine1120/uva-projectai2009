@@ -9,10 +9,9 @@
 %		side                -- 'rear'/'front' 
 %		T                   -- number of features to be used (not too large :P)
 function plot_features(ImgSet,best_feature_indexs,F,patterns, side, T)
-	%plot the best features on a random image
 	[Ny , Nx , P] = size(ImgSet); %P number of images   
-	Nimage   = randperm(P); %Random image index for printing the result over it
-    rand_Img = ImgSet(:, :, Nimage(1)); %random image for ploting the features
+	Nimage        = randperm(P); %Random image index for printing the result over it
+    rand_Img      = ImgSet(:, :, Nimage(1)); %random image for ploting the features
 	
 	figure;imshow(rand_Img,[]);hold on;	
 	for f = 1:size(best_feature_indexs,2)

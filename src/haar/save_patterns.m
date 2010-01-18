@@ -1,3 +1,12 @@
+%CREATES AND STORES PATTERS OF DIFFERENT SIZES, STARTING WITH A FIX NUMBER
+%OF BASIS PATTERNS (PRE_PATTERNS)
+%INPUT:
+%		imsize_y -- Y dimension of one image 
+%		imsize_x -- X dimension of one image 
+%		scale    -- number of different scales to be generated for each pattern
+%OUTPUT:
+%		patters  -- the structure containing the patterns: 
+%					rectangles(=matrix), pattern_id(=id)	
 function patterns = save_patterns(imsize_y,imsize_x,scale)
 	%DEFINE BASIC PATTERNS
  	pre_patterns(1) = struct('pattern_id',1, 'rectangles', [1 -1;1 -1]);

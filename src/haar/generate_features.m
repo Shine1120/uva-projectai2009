@@ -5,8 +5,8 @@
 %							   pattern_id(=id)	
 %		nr_random_locations -- number of random locations/bill
 %OUTPUT:
-%		F -- features: x_top, y_top(=top coordinates), 
-%			 pattern_id(=corresponding pattern id), feature_id
+%		F                   -- features: x_top, y_top(=top coordinates), 
+%			                   pattern_id(=corresponding pattern id), feature_id
 function F = generate_features(Ny, Nx, rect_patterns, nr_random_locations)
 	for i=1:size(rect_patterns,2)
 		width  = size(rect_patterns(i).rectangles,2);
