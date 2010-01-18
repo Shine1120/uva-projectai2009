@@ -49,6 +49,6 @@ function [alpha, indexs, model] = adaboost(F, Images, T, rect_patterns, labels)
 		%update the weights		
 		beta(t)        = error(indexs(t))/(1-error(indexs(t)));
 		alpha(t)	   = log(1/beta(t))
-		weights        = weights .* (1 .*(ei(indexs(t),:) == 1) + beta(t).*(ei(indexs(t),:) == 0));	
+		weights        = weights .* (1 .*(ei(indexs(t),:) == 1)' + beta(t).*(ei(indexs(t),:) == 0)');	
 	end
 end
