@@ -2,7 +2,7 @@
 doread = 0;
 docreate = 0;
 
-moneydir = '../money/whole/neur10';
+moneydir = '../money/wholeplusborder/neur10';
 
 if (doread)
 	all_money_front = []; all_money_rear = []; all_labels = [];
