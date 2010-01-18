@@ -3,10 +3,10 @@ function DNB_demo(docreate)%(all_money_front, all_money_rear, all_labels)
 
 dotrain = 1;
 
-T				= 1;	% number of hypothesis for AdaBoost	
+T				= 10;	% number of hypothesis for AdaBoost	
 leave_n_out		= 50;	% size of test-set
 hold_n_out		= 100;  % size of validation-set
-trials			= 10;	% 20 fold experiment
+trials			= 2;	% 20 fold experiment
 repetitions		= 1;	% 20 for repeating the k-fold experiment
 unfitaccept		= 0.04; % ensures better than 5% error on unfit class
 nr_random_loc	= 2;
@@ -34,7 +34,7 @@ toc;
 
 if (docreate)
 	fprintf('Generate Rectangle Patterns... \n')
-	patterns = save_patterns(190,340); %generate the patterns
+	patterns = save_patterns(190,350); %generate the patterns
 else
 	fprintf('Loading Rectangle Patterns... \n')
 	load patterns.mat
@@ -44,6 +44,10 @@ size(all_money_front)
 size(all_money_rear)
 
 for q=1:repetitions
+	if q ~= 1
+		load all_money_front.mat
+		load all_money_rear.mat
+	end
 
 	fprintf('Run %d of %d\n', q, repetitions);
 
@@ -76,6 +80,11 @@ for q=1:repetitions
 	n = [0 0];
 
 	for i=1:trials
+		if i ~= 1
+			load all_money_front.mat
+			load all_money_rear.mat
+		end
+		
 		thisbayes = [0 0];
 		thisn = [0 0];
 		if (trials == length(allidx) && leave_n_out == 1)
@@ -99,7 +108,9 @@ for q=1:repetitions
 		train_labels = all_labels(trainset);
 		test_labels = all_labels(testset);
 		
-		
+		clear all_money_front
+		clear all_money_rear
+
 		
 		%labels = all_labels(trainset);
 
@@ -116,10 +127,16 @@ for q=1:repetitions
 		
 		fprintf('AdaBoost using SVM for %d hypothesis... \n', T)		
 		tic;		
-		[alpha1, modelIdx1, model_front] = adaboost(F, money_front_train, T, patterns, train_labels);
-		[alpha2, modelIdx2, model_rear] = adaboost(F, money_rear_train, T, patterns, train_labels);
+		[alpha1, modelIdx1, model1] = adaboost(F, money_front_train, T, patterns, train_labels);
+		[alpha2, modelIdx2, model2] = adaboost(F, money_rear_train, T, patterns, train_labels);
 		toc;
+
+		model_front = struct('model',model1,'weights',alpha1,'best_feature_id', ...
+			modelIdx1,'patterns',patterns,'features',F);
 		
+		model_rear = struct('model',model2,'weights',alpha2,'best_feature_id', ...
+			modelIdx2,'patterns',patterns,'features',F);
+
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		
 
@@ -128,11 +145,11 @@ for q=1:repetitions
 
 		for j=1:length(test_labels)
 			testlabel = test_labels(j);
-			testnote_front_regions = money_front_test(j,:,:);
-			testnote_rear_regions = money_rear_test(j,:,:);
+			testnote_front = money_front_test(:,:,j);
+			testnote_rear = money_rear_test(:,:,j);
 						
-			recognized_front = AdaBoostSVMPredict(testnote_front_regions, eigen_front_regions, alpha1, modelIdx1, model_front);
-			recognized_rear = AdaBoostSVMPredict(testnote_rear_regions, eigen_rear_regions, alpha2, modelIdx2, model_rear);
+			recognized_front = eval_bills(model_front, testlabel, testnote_front);		
+			recognized_rear = eval_bills(model_rear, testlabel, testnote_rear);		
 
 			n(testlabel+1) = n(testlabel+1)+1;
 			thisn(testlabel+1) = thisn(testlabel+1)+1;
@@ -167,14 +184,13 @@ for q=1:repetitions
 		if (thisbayes(2) < unfitaccept)
 			if (thisbayes(1)<correctbest(1) || correctbest(2)>=unfitaccept)
 				correctbest = thisbayes;
-				best_eigen_front = eigen_front_regions;
-				best_eigen_rear = eigen_rear_regions;
 				best_model_front = model_front;
 				best_model_rear = model_rear;
 				best_alpha1 = alpha1;
 				best_alpha2 = alpha2;
 				best_modelIdx1 = modelIdx1;
 				best_modelIdx2 = modelIdx2;
+				Best_F = F;
 				
 				best_model_list1 = [best_model_list1; modelIdx1];
 				best_alpha_list1 = [best_alpha_list1; alpha1];
@@ -184,14 +200,13 @@ for q=1:repetitions
 		else
 			if (thisbayes(2) < correctbest(2))
 				correctbest = thisbayes;
-				best_eigen_front = eigen_front_regions;
-				best_eigen_rear = eigen_rear_regions;
 				best_model_front = model_front;
 				best_model_rear = model_rear;
 				best_alpha1 = alpha1;
 				best_alpha2 = alpha2;
 				best_modelIdx1 = modelIdx1;
-				best_modelIdx2 = modelIdx2;				
+				best_modelIdx2 = modelIdx2;
+				Best_F = F;
 
 				best_model_list1 = [best_model_list1; modelIdx1];
 				best_alpha_list1 = [best_alpha_list1; alpha1];
@@ -220,10 +235,8 @@ for q=1:repetitions
 
 	model_front = best_model_front;
 	model_rear = best_model_rear;
-	eigen_front_regions = best_eigen_front;
-	eigen_rear_regions = best_eigen_rear;
 
-	
+	F = Best_F;
 	alpha1 = best_alpha1;
 	alpha2 = best_alpha2;
 	modelIdx1 = best_modelIdx1;
@@ -236,11 +249,11 @@ for q=1:repetitions
 
 	for j=1:length(holdout_labels)
 		testlabel = holdout_labels(j);
-		testnote_front_regions = money_front_holdout(j,:,:);
-		testnote_rear_regions = money_rear_holdout(j,:,:);
+		testnote_front = money_front_holdout(:,:,j);
+		testnote_rear = money_rear_holdout(:,:,j);
 		
-		recognized_front = AdaBoostSVMPredict(testnote_front_regions, eigen_front_regions, alpha1, modelIdx1, model_front);
-		recognized_rear = AdaBoostSVMPredict(testnote_rear_regions, eigen_rear_regions, alpha2, modelIdx2, model_rear);
+		recognized_front = eval_bills(model_front, testlabel, testnote_front);		
+		recognized_rear = eval_bills(model_rear, testlabel, testnote_rear);		
 		
 		hn(testlabel+1) = hn(testlabel+1)+1;
 		n(testlabel+1) = n(testlabel+1)+1;

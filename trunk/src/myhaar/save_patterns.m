@@ -22,7 +22,7 @@ function patterns = save_patterns(imsize_x, imsize_y)
 		
 		size_x     = randsize_x(randsize_x>10);
 		size_y     = randsize_y(randsize_y>10);
-		number     = min(20, length(size_x)); 
+		number     = min(2, length(size_x));	% 20
 		number     = min(number, length(size_y));
 		for j=1:number
 			index           = number*(i-1)+j; %size_patt + number*(i-1)+j;
