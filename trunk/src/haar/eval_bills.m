@@ -11,8 +11,6 @@
 %       false_pos  -- the number of false positives
 %       error      -- the error of the classifier
 %                     (number of images incorrectly classified)
-%       tpp        -- true positive rate(for the ROC curve, regardles of the threshold)
-%       fpp        -- flase positive rate(for the ROC curve, regardles of the threshold)
 %       classifier -- the vector of with the final probabilities of the test set   
 function [true_pos, false_pos, error, classifier] = eval_bills(model, target, ImgSet, classifier)
     index_pos = find(target == 1); %the indexes for the positive class

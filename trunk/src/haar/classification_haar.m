@@ -1,12 +1,14 @@
 %CLASSIFIES THE DATA BASED ON THE HAAR FEATURES AND USING ADABOOST CASCADE 
 %FOR SELECTING THE BEST FEATURES TO BE USED
 %INPUT:
-%       T      -- number of features to be used (not too large :P)
-%       rounds -- number of rounds for cross-validation
-function classification_haar(T, rounds)
+%       T              -- number of features to be used (not too large :P)
+%       rounds         -- number of rounds for cross-validation
+%		pattern_scales -- number of different scales generated for each	pattern
+%		locations_nr   -- total number of different locations fr each pattern
+function classification_haar(T, rounds, pattern_scales, locations_nr)
 	close all;
 %	save_patterns(120,85,10) %generate the patterns
-	save_patterns(350,190,3);
+	save_patterns(350,190,pattern_scales);
     % Do the CROSS-VALIDATION loop
     money_dir  = 'neur10'; % 'neur05';  
     fit        = [money_dir '/fit/'];
@@ -63,7 +65,7 @@ function classification_haar(T, rounds)
  				ImgTest  = preprocess(1,names_front(testset)); 
 			end;			
             %the result structure retrieved from the AdaBoost cascade
-            [alpha_weights, best_feature_indexs, rect_patterns, F, all_models] = train_haar(T, labels_train, ImgTrain);
+            [alpha_weights, best_feature_indexs, rect_patterns, F, all_models] = train_haar(T, labels_train, ImgTrain,locations_nr);
             %save the obtained model(the weak classifiers corresponding to the features chosen)
             model = struct('model',all_models,'weights',alpha_weights,'best_feature_id', ...
 					best_feature_indexs,'patterns',rect_patterns,'features',F);
