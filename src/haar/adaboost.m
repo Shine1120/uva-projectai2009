@@ -11,46 +11,48 @@
 %		best_model    -- the array containing the best SVM models corresponding to 
 %						 the best features
 function [alpha, indexs, model] = adaboost(F, Images, T, rect_patterns, labels)
+	%switch the labels: 1 -- fit, 0 -- unfit!!!
+	mask = (labels == 0);
+	labels(mask)  = 1;
+	labels(~mask) = 0;
+	
 	positives = sum(sum(labels == 1)); 
 	negatives = sum(sum(labels == 0));
 	weights   = 2/positives .* (labels==1) + 2/negatives .* (labels==0); 
+%	weights   = 2/length(labels); 
 	indexs    = [];
 	for t=1:T
 		fprintf('\t AdaBoost t=%d\n',t)
 		%normalize the weights
 		weights = weights ./ sum(weights);			
 		for i=1:size(F,2)
-			%trains SVM
-			if exist('patterns') 
-				clear patterns
-			end	
-			patterns(:,:,1)        = rect_patterns(F(i).pattern_id).rectangles;
-			patterns               = patterns(:,:,ones(1,size(Images,3)));
-			width                  = size(rect_patterns(F(i).pattern_id).rectangles,2);
-			height                 = size(rect_patterns(F(i).pattern_id).rectangles,1);			
-			pre_values             = double(Images(F(i).y_top: F(i).y_top+height-1,F(i).x_top: ...
-							    	 F(i).x_top+width-1, :)).* double(patterns);
-			values                 = reshape(sum(sum(pre_values,1),2),1,size(Images,3));
-			
-			model(F(i).feature_id) = svmtrain(labels, values', '-t 2 -q -b 0');		
-			[recognized, accuracy, probability] = svmpredict(labels, values', model(F(i).feature_id), '-b 0');
-			%compute the error
-			error(i) = sum(weights .* abs(recognized - labels));				
-			ei(i,:)  = abs(recognized - labels);
-			
-			fprintf('\t\t Error for model %d is %f\n',i,error(i));
+			if (sum(indexs==i)==0)
+				%trains SVM
+				if exist('patterns') 
+					clear patterns
+				end	
+				patterns(:,:,1)        = rect_patterns(F(i).pattern_id).rectangles;
+				patterns               = patterns(:,:,ones(1,size(Images,3)));
+				width                  = size(rect_patterns(F(i).pattern_id).rectangles,2);
+				height                 = size(rect_patterns(F(i).pattern_id).rectangles,1);			
+				pre_values             = double(Images(F(i).y_top: F(i).y_top+height-1,F(i).x_top: ...
+											 F(i).x_top+width-1, :)).* double(patterns);
+				values                 = reshape(sum(sum(pre_values,1),2),1,size(Images,3));
+
+				model(F(i).feature_id) = svmtrain(labels, values', '-t 2 -q -b 0');		
+				[recognized, accuracy, probability] = svmpredict(labels, values', model(F(i).feature_id), '-b 0');
+				%compute the error
+				error(i) = sum(weights .* abs(recognized - labels));				
+				ei(i,:)  = abs(recognized - labels);
+				fprintf('\t\t Error for model %d is %f\n',i,error(i));
+			else
+				error(i) = 1;
+			end
 		end
-		%choose the classifier with the minimum error
-		[sorted_error sortedindex]= sort(error);
-		index_sorted = 1;
-		while (sum(ismember(indexs, sortedindex(index_sorted)))>0 && index_sorted<size(error,2))
-			index_sorted = index_sorted + 1;
-		end
-		indexs(t)      = sortedindex(index_sorted);		
-		
+ 		[minimum indexs(t)]= min(error);		
 		%update the weights		
-		beta(t)        = error(indexs(t))/(1-error(indexs(t)));
-		alpha(t)	   = log(1/beta(t))
-		weights        = weights .* (1 .*(ei(indexs(t),:) == 1)' + beta(t).*(ei(indexs(t),:) == 0)');	
+		beta(t)  = error(indexs(t))/(1-error(indexs(t)));
+		alpha(t) = log(1/beta(t))
+		weights  = weights .* (1 .*(ei(indexs(t),:) == 1)' + beta(t).*(ei(indexs(t),:) == 0)');	
 	end
 end

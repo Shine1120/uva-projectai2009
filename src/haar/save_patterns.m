@@ -18,7 +18,24 @@ function patterns = save_patterns(imsize_y,imsize_x,scale)
  	pre_patterns(7) = struct('pattern_id',7, 'rectangles', [1 -1 1;1 -1 1]);
  	pre_patterns(8) = struct('pattern_id',8, 'rectangles', [-1 1 -1;-1 1 -1]);
  	pre_patterns(9) = struct('pattern_id',9, 'rectangles', [-1 -1;1 1;-1 -1]);
- 	pre_patterns(10) = struct('pattern_id',10, 'rectangles', [1 1;-1 -1;1 1]);	
+ 	pre_patterns(10) = struct('pattern_id',10, 'rectangles', [1 1;-1 -1;1 1]);
+	
+	pre_patterns(11) = struct('pattern_id',11, 'rectangles', [-1 1 -1 1;1 -1 1 -1]);
+	pre_patterns(12) = struct('pattern_id',12, 'rectangles', [1 -1 1 -1;-1 1 -1 1]);
+	pre_patterns(13) = struct('pattern_id',13, 'rectangles', [1 1 -1-1 1 1 -1 -1 1 1]);
+	pre_patterns(14) = struct('pattern_id',14, 'rectangles', [-1 -1 1 1 -1 -1 1 1 -1 -1]);
+	pre_patterns(15) = struct('pattern_id',15, 'rectangles', [1 -1 1 -1 1 -1;...
+															  -1 1 -1 1 -1 1;...
+															  1 -1 1 -1 1 -1;...
+															  -1 1 -1 1 -1 1]);
+	pre_patterns(16) = struct('pattern_id',16, 'rectangles', [-1 1 -1 1 -1 1;...
+															  1 -1 1 -1 1 -1;...
+															  -1 1 -1 1 -1 1;...
+															  1 -1 1 -1 1 -1]);
+	pre_patterns(17) = struct('pattern_id',17, 'rectangles', [1 1; -1 -1;1 1;-1 -1;1 1]);
+	pre_patterns(18) = struct('pattern_id',18, 'rectangles', [-1 -1;1 1; -1 -1;1 1;-1 -1]);
+		
+	
 	size_patt = size(pre_patterns,2);
 	
 	%RESIZE THE BASIC PATTERNS
@@ -26,11 +43,11 @@ function patterns = save_patterns(imsize_y,imsize_x,scale)
 	for i=1:size_patt
 		width      = size(pre_patterns(i).rectangles,2);
 		height     = size(pre_patterns(i).rectangles,1);
-		randsize_x = randperm(round(imsize_x/width)-10);
-		randsize_y = randperm(round(imsize_y/height)-10);
+		randsize_x = randperm(round(imsize_x/(2*width)));
+		randsize_y = randperm(round(imsize_y/(2*height)));
 		
-		size_x     = randsize_x(randsize_x>2);
-		size_y     = randsize_y(randsize_y>2);
+		size_x     = randsize_x(randsize_x>5);
+		size_y     = randsize_y(randsize_y>5);
 		number     = min(scale, length(size_x)); 
 		number     = min(number, length(size_y));
 		for j=1:number
