@@ -33,20 +33,6 @@ function [alpha, modelIdx, models] = AdaBoostSVM(models, traindata, eigen_region
 						
 			error_j = sum(Dt'.* (labels ~= recognized));
 			
-% 			for k=1:size(traindata,1)
-% 				image_region = traindata(k,:,j);
-% 				eigen_region = eigen_regions(:,:,j);
-% 				imageProjection = image_region * eigen_region;
-% 				
-% 				[recognized, accuracy, prob_est_front] = svmpredict(1,imageProjection, model, '-b 0');
-% 
-% 				recognized_list(k) = recognized;
-% 				
-% 				% calculate total error for classifier k
-% 				error_j = error_j + Dt(k)*(labels(k) ~= recognized);
-% 				
-% 			end
-% 			fprintf('\t\tError model %d is %f\n',j,error_j)
 			if (error_j < smallest_error)
 				smallest_error = error_j;
 				best_model = j;
@@ -62,8 +48,13 @@ function [alpha, modelIdx, models] = AdaBoostSVM(models, traindata, eigen_region
 		
 		% update instance weights
 		
-		for n=1:size(traindata,1)
-			Dt(n) = (Dt(n)*exp(-alpha(i)*labels_masked(n)*best_recognized_list(n)));
+		
+		% TODO: in case the best_recognized_list is empty... how is this
+		% possible?
+		if numel(best_recognized_list) ~= 0
+			for n=1:size(traindata,1)
+				Dt(n) = (Dt(n)*exp(-alpha(i)*labels_masked(n)*best_recognized_list(n)));
+			end
 		end
 		
 		% normalize Dt so it will be a probability distribution (it sums up

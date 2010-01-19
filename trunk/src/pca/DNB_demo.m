@@ -1,13 +1,10 @@
 function DNB_demo(docreate)%(all_money_front, all_money_rear, all_labels)
 
-
-dotrain = 1;
-
-T				= 5;	% number of hypothesis for AdaBoost
+T				= 2;	% number of hypothesis for AdaBoost
 leave_n_out		= 50;	% size of test-set
 hold_n_out		= 100;  % size of validation-set
 trials			= 20;	% 20 fold experiment
-repetitions		= 5;	% 20 for repeating the k-fold experiment
+repetitions		= 20;	% 20 for repeating the k-fold experiment
 unfitaccept		= 0.04; % ensures better than 5% error on unfit class
 
 % how many eigenvectors to use
@@ -19,9 +16,7 @@ EigenConstructFrom = 50;
 
 hcorrect_front = [0 0];
 hcorrect_rear = [0 0];
-hcorrect_both = [0 0];
 hcorrectbayes = [0 0];
-%hcorrectall = [0 0];
 hn = [0 0];
 
 best_model_list1 = [];
@@ -55,13 +50,6 @@ end
 for q=1:repetitions
 	
 	fprintf('Run %d of %d\n', q, repetitions);
-	
-	if (dotrain)
-		money_front = []; money_rear = []; eigen_front = []; eigen_rear = [];
-		trainProjection_front = []; trainProjection_rear = [];
-	end
-	
-	
 	
 	allidx = randperm(length(all_labels));
 	holdoutset = allidx(1:hold_n_out);
