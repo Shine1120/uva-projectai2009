@@ -13,9 +13,12 @@
 %                     (number of images incorrectly classified)
 %       classifier -- the vector of with the final probabilities of the test set   
 function [true_pos, false_pos, error, classifier] = eval_bills(model, target, ImgSet, classifier)
-    index_pos = find(target == 1); %the indexes for the positive class
-    index_neg = find(target == 0); %the indexes for the negative class
-
+	%switch the labels: 1 -- fit, 0 -- unfit!!!
+	mask = (target == 0);
+	labels(mask)  = 1;
+	labels(~mask) = 0;
+	labels = labels'; 
+	
 	if classifier == 0
 		for i=1:size(model.best_feature_id,2)
 			%compute the values for the test images
@@ -31,11 +34,19 @@ function [true_pos, false_pos, error, classifier] = eval_bills(model, target, Im
 			pre_values = double(ImgSet(model.features(id).y_top: model.features(id).y_top+height-1, ...
 						   model.features(id).x_top: model.features(id).x_top+width-1, :)).* ...
 						   double(repeat_patterns);
-			values   = reshape(sum(sum(pre_values,1),2),1,size(ImgSet,3));															   
-			[recognized(i,:), accuracy, probability] = svmpredict(target, values',model.model(id), '-b 0');
+			values     = reshape(sum(sum(pre_values,1),2),1,size(ImgSet,3));		
+			[recognized(i,:), accuracy, probability] = svmpredict(labels, values',model.model(id), '-b 0');
 		end	
- 		classifier = ((model.weights * recognized) >= sum(0.5*(model.weights)));			
+ 		classifier = ((model.weights * recognized) >= sum(0.5*(model.weights)));	
+		%switch the classifier to the right labels!!!
+		mask = (classifier == 0);
+		classifier(mask)  = 1;
+		classifier(~mask) = 0;
 	end
+	%use the initial labels: 0 -- fit, 1 -- unfit!!!
+	index_pos = find(target == 1); %the indexes for the positive class
+    index_neg = find(target == 0); %the indexes for the negative class
+	
 	true_pos  = sum(classifier(index_pos)' == target(index_pos))/length(index_pos);
 	false_pos = 1 - sum(classifier(index_neg)' == target(index_neg))/length(index_neg);
     error     = 1 - sum(classifier' == target)/length(target); 	
