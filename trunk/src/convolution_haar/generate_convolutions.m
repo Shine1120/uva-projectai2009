@@ -4,6 +4,7 @@
 %		side	 -- rear/front
 %OUTPUT:
 %		values   -- the values obtained by convolving the image with the rectangles 
+%__________________________________________________________________________
 function values = generate_convolutions(patterns,Images,side)	
 	values = zeros(size(patterns,2), size(Images,3));
 	for i=1:size(patterns,2)	
