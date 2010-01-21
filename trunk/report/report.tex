@@ -9,7 +9,7 @@
 \newcommand{\ds}{\displaystyle}
 \newcommand{\argmax}{\operatornamewithlimits{argmax}}
 
-\title{\tbf{Dirty Money}\\\tbf{Feature selection using AdaBoost}}
+\title{\tbf{Dirty Money:}\\\tbf{Feature selection using AdaBoost}}
 \author{J. van Turnhout (0312649) jturnhou@science.uva.nl, \\ N. Raiman (0336696) nraiman@science.uva.nl, \\ S. L. Pintea (6109969) s.l.pintea@student.uva.nl}
 
 \usepackage{amsmath}
@@ -23,27 +23,28 @@
 	\maketitle
 
 	\begin{abstract}
+	In the month January of 2010 a project on the classification of the fitness of money was proposed. During this month we have tested and implemented various techniques to handle the problem of money classification. The results from our experiment show promising development comparing to the current state of research.
 	\end{abstract}
 
 
 	\section{Introduction}
 
-		In section \ref{sec:background}, related work on Haar-features, PCA, SVM, AdaBoost, edge detection and intensity are. The implementation of the AdaBoost algorithm applied on the different techniques are discussed in \ref{sec:implementation}. We discuss our experiments and their results in section \ref{sec:results}. Finally, we conclude in section \ref{sec:conclusion}.
+		In section \ref{sec:background}, related work on Haar-features, PCA, SVM, AdaBoost, edge detection and intensity are discussed. The implementation of the AdaBoost algorithm applied on the different techniques are explained in \ref{sec:implementation}. We discuss our experiments and their results in section \ref{sec:results}. Finally, we conclude in section \ref{sec:conclusion} and propose some topics for future research.
 	
 	\section{Background}\label{sec:background}
-		
+		Adaptive Boosting (also known as AdaBoost) is a machine learning technique which can be used in conjunction with various other learning algorithms. The idea is to have a (convex) set of weak classifiers (classifiers that perform at least better than random) and then minimize the total error over the training-set by finding the best classifier at each stage of the algorithm.
 
 	\section{Implementation}\label{sec:implementation}
 
 		\begin{algorithm}[0]
-			\caption{AdaBoost learning best features}
+			\caption{AdaBoost learning features}
 			\begin{algorithmic}[1]
 			\medskip
 			\STATE \tbf{function} AdaBoostLearn($T$, $M$, $S$) 
 			\STATE {$T$ = nr. of hypothesis}
 			\STATE {$M$ = Models}
 			\STATE {$S$ = training-set, \{$(x_1,y_1),...(x_n,y_n)$\} \\ with $x_i \epsilon X$ and $y_i \epsilon \{-1, 1\}$ }
-			\STATE {$D_{1(i)}=\frac{1}{n}$, with $i=1,...,n$}
+			\STATE {$D_{1(i)} \leftarrow \frac{1}{n}$, with $i=1,...,n$}
 			\FOR {$t=1$ to $T$}
 				\STATE {$error_t \leftarrow 0$}
 				\FOR {$m \epsilon M$}
@@ -60,7 +61,6 @@
 				\ENDFOR
 			\ENDFOR
 			\STATE {\tbf{return} $\alpha, h$}
-			
 			\end{algorithmic}
 			\label{alg:AdaBoostLearn}
 		\end{algorithm}
@@ -75,7 +75,7 @@
 			\STATE {$I$ = image}
 			\STATE {$p$ = prediction} 
 			\FOR {$t=1$ to $length(\alpha)$}
-				\STATE $p \leftarrow p + \alpha_th_t(x)$
+				\STATE $p \leftarrow p + \alpha_th_t(I)$
 			\ENDFOR
 			\STATE {\tbf{return} $sign(p)$}
 			\end{algorithmic}
@@ -91,6 +91,9 @@
 			P. Viola \& M. Jones:\\
 			\tit{Rapid Object Detection using a Boosted Cascade of Simple Features}
 			(CVPR 2001)
+		\bibitem{Ada}
+			AdaBoost: \\
+			\tit{http://en.wikipedia.org/wiki/AdaBoost}	
 	\end{thebibliography}
 
 \end{document}
