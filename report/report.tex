@@ -1,0 +1,96 @@
+\documentclass[11pt,twocolumn]{article}
+
+\setlength\topmargin{-0.5in}
+\setlength\headsep{0in}
+\setlength\textheight{9.5in}
+
+\newcommand{\tbf}{\textbf}
+\newcommand{\tit}{\textit}
+\newcommand{\ds}{\displaystyle}
+\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+
+\title{\tbf{Dirty Money}\\\tbf{Feature selection using AdaBoost}}
+\author{J. van Turnhout (0312649) jturnhou@science.uva.nl, \\ N. Raiman (0336696) nraiman@science.uva.nl, \\ S. L. Pintea (6109969) s.l.pintea@student.uva.nl}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{algorithm}
+\usepackage[noend]{algorithmic}
+
+
+\begin{document}
+	\maketitle
+
+	\begin{abstract}
+	\end{abstract}
+
+
+	\section{Introduction}
+
+		In section \ref{sec:background}, related work on Haar-features, PCA, SVM, AdaBoost, edge detection and intensity are. The implementation of the AdaBoost algorithm applied on the different techniques are discussed in \ref{sec:implementation}. We discuss our experiments and their results in section \ref{sec:results}. Finally, we conclude in section \ref{sec:conclusion}.
+	
+	\section{Background}\label{sec:background}
+		
+
+	\section{Implementation}\label{sec:implementation}
+
+		\begin{algorithm}[0]
+			\caption{AdaBoost learning best features}
+			\begin{algorithmic}[1]
+			\medskip
+			\STATE \tbf{function} AdaBoostLearn($T$, $M$, $S$) 
+			\STATE {$T$ = nr. of hypothesis}
+			\STATE {$M$ = Models}
+			\STATE {$S$ = training-set, \{$(x_1,y_1),...(x_n,y_n)$\} \\ with $x_i \epsilon X$ and $y_i \epsilon \{-1, 1\}$ }
+			\STATE {$D_{1(i)}=\frac{1}{n}$, with $i=1,...,n$}
+			\FOR {$t=1$ to $T$}
+				\STATE {$error_t \leftarrow 0$}
+				\FOR {$m \epsilon M$}
+					\STATE {$h_j(x_i) \leftarrow predict(x_i)$ \%\tit{svm or gaussian distribution}}
+					\STATE {$error_j \leftarrow \sum^n_{i=1}D_t(i)[y_i \neq h_j(x_i)]$}
+					\IF {$error_j < error_t$}
+						\STATE {$error_t \leftarrow error_j$}
+						\STATE {$h_t \leftarrow h_j$}
+					\ENDIF
+				\ENDFOR
+				\STATE {$\alpha_t \leftarrow 0.5 \cdot \log{\frac{1-error_t}{error_t}}$}
+				\FOR {$i=1$ to $n$}
+					\STATE {$D_{t+1}(i) \leftarrow \frac{D_t(i)\exp{-\alpha_t \cdot y_i \cdot h_t(x_i)}}{Z_t}$}
+				\ENDFOR
+			\ENDFOR
+			\STATE {\tbf{return} $\alpha, h$}
+			
+			\end{algorithmic}
+			\label{alg:AdaBoostLearn}
+		\end{algorithm}
+
+		\begin{algorithm}
+			\caption{AdaBoost Prediction}
+			\begin{algorithmic}[1]
+			\medskip
+			\STATE \tbf{function} AdaBoostPredict($\alpha$, $h$, $I$)
+			\STATE { $\alpha$ = weights }
+			\STATE { $h$ = weak classifiers}
+			\STATE {$I$ = image}
+			\STATE {$p$ = prediction} 
+			\FOR {$t=1$ to $length(\alpha)$}
+				\STATE $p \leftarrow p + \alpha_th_t(x)$
+			\ENDFOR
+			\STATE {\tbf{return} $sign(p)$}
+			\end{algorithmic}
+			\label{alg:AdaBoostPredict}
+		\end{algorithm}
+
+	\section{Results}\label{sec:results}
+
+	\section{Conclusion}\label{sec:conclusion}
+
+	\begin{thebibliography}{2}
+		\bibitem{Haar}
+			P. Viola \& M. Jones:\\
+			\tit{Rapid Object Detection using a Boosted Cascade of Simple Features}
+			(CVPR 2001)
+	\end{thebibliography}
+
+\end{document}
