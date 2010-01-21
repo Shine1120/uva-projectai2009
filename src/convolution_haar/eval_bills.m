@@ -11,8 +11,10 @@
 %       false_pos  -- the number of false positives
 %       error      -- the error of the classifier
 %                     (number of images incorrectly classified)
-%       classifier -- the vector of with the final probabilities of the test set   
+%       classifier -- the vector of with the final probabilities of the test set
+%__________________________________________________________________________
 function [true_pos, false_pos, error, classifier] = eval_bills(model, target, convImg, classifier)
+	%BUILD THE STRONG CLASSIFIER OUT OF THE BEST T ONES FROM ADABOOST______
 	if classifier == 0
 		for i=1:size(model.best_ids,2)
 			id = model.best_ids(i);			
@@ -22,10 +24,18 @@ function [true_pos, false_pos, error, classifier] = eval_bills(model, target, co
 		end	
  		classifier = ((model.weights * recognized) >= sum(0.5*(model.weights)));			
 	end
-	index_pos = find(target == 1); %the indexes for the positive class
-    index_neg = find(target == 0); %the indexes for the negative class
-	
+	%COMPUTE THE TP, FP AND ERROR__________________________________________
+	index_pos = find(target == 1); %INDEXES FOR POSITIVE CLASS
+    index_neg = find(target == 0); %INDEXES FOR NEGATIVE CLASS	
 	true_pos  = sum(classifier(index_pos)' == target(index_pos))/length(index_pos);
 	false_pos = 1 - sum(classifier(index_neg)' == target(index_neg))/length(index_neg);
     error     = 1 - sum(classifier' == target)/length(target); 	
 end
+
+
+
+
+
+
+
+

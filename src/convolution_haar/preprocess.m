@@ -6,6 +6,7 @@
 %OUTPUT:
 %       ImgSet     -- images for the data set as a matrix resized with the
 %                     procent res
+%__________________________________________________________________________
 function ImgSet = preprocess(res,img_names)
 	for i=1:length(img_names)
 %			fprintf('\t %d --> %s \n',i,img_names{i})		

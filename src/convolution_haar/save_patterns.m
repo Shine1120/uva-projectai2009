@@ -7,6 +7,7 @@
 %OUTPUT:
 %		patters  -- the structure containing the patterns: 
 %					rectangles(=matrix), pattern_id(=id)	
+%__________________________________________________________________________
 function patterns = save_patterns(imsize_y,imsize_x,scale)
   	pre_patterns(1) = struct('pattern_id',1, 'rectangles', [1 -1;1 -1]);
   	pre_patterns(2) = struct('pattern_id',2, 'rectangles', [-1 1;-1 1]);
@@ -45,7 +46,7 @@ function patterns = save_patterns(imsize_y,imsize_x,scale)
  	
 
 	size_patt = size(pre_patterns,2);	
-	%RESIZE THE BASIC PATTERNS
+	%RESIZE THE BASIC PATTERNS AND STORE___________________________________
 	index = 0;
 	for i=1:size_patt
 		width      = size(pre_patterns(i).rectangles,2);
@@ -61,7 +62,7 @@ function patterns = save_patterns(imsize_y,imsize_x,scale)
 			index           = index+1; 
 			rectangles      = sign(imresize_old(pre_patterns(i).rectangles,[height*size_y(j) width*size_x(j)]));
 			patterns(index) = struct('pattern_id',index, 'rectangles', rectangles, 'parent_id',i,...
-				'scale_x',size_x(j),'scale_y',size_y(j));
+							  'scale_x',size_x(j),'scale_y',size_y(j));
 		end
 	end
 	save 'patterns.mat' patterns
