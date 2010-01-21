@@ -29,9 +29,10 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 	frontMethod = methodIdx(segInFront);
 	rearMethod = methodIdx(segInRear);
 	
-	figure(1)
+	figure(2)
 	subplot(1,2,1)
 	imshow(imageFront)
+	title('front    blue: edge, red: intensity')
 	hold on
 	for i=1: length(frontSegs)
 		segment = frontSegs(i);
@@ -54,6 +55,7 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 	
 	subplot(1,2,2)
 	imshow(imageRear)
+	title('rear')
 	hold on
 	for i=1: length(rearSegs)
 		segment = rearSegs(i) - segsPerSide;
