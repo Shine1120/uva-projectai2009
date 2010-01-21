@@ -33,8 +33,8 @@ function [ output_args ] = IErunAda( )
 
 	sizeHoldoutSet    = 100;
 	leave_n_out		  = 50;	% size of test-set
-	repetitions		  = 5;
-	trials			  = 20;
+	repetitions		  = 1;
+	trials			  = 10;
 	hypotheses 		  = 10;
 	
 	doEdge			  = 1;
@@ -52,8 +52,8 @@ function [ output_args ] = IErunAda( )
 	useFront		  = 1;
 	useRear			  = 1;
 
-	xSegms			  = 3;
-	ySegms			  = 7;
+	xSegms			  = 5;
+	ySegms			  = 12;
 	
 	modelCount		  = xSegms*ySegms*(useFront+useRear);
 	
@@ -108,6 +108,8 @@ function [ output_args ] = IErunAda( )
 	sumTPRate = 0;
 	sumTNRate = 0;
 	
+	overAllBestHOResults = 0;
+	
 	for r=1:repetitions
 		randIndexAll     = randperm(nrIndxesFit+nrIndxesUnfit)';
 		randIndexHOAll   = randIndexAll(1:sizeHoldoutSet);
@@ -125,16 +127,15 @@ function [ output_args ] = IErunAda( )
 		
 		holdoutSetClasses	= allDataClasses(randIndexHOAll);
 
-
 		sumModelsOverTrials = zeros(4,modelCount*(doEdge+doIntensity));
 		
 		for trial=1:trials
 			fprintf('repetition %d/%d\t trial %d/%d\n',r,repetitions,trial,trials)
-			randIndexTT = randperm(length(randIndexTTAll));
-			testset		= randIndexTTAll(randIndexTT(1:leave_n_out));
-			trainset	= randIndexTTAll(randIndexTT(leave_n_out+1:end));
-			testLabels  = allDataClasses(testset);
-			trainLabels = allDataClasses(trainset);
+			randIndexTT  = randperm(length(randIndexTTAll));
+			testset		 = randIndexTTAll(randIndexTT(1:leave_n_out));
+			trainset	 = randIndexTTAll(randIndexTT(leave_n_out+1:end));
+			testLabels   = allDataClasses(testset);
+			trainLabels  = allDataClasses(trainset);
 			
 			trainsetE    = [];
 			testsetE     = [];
@@ -181,14 +182,14 @@ function [ output_args ] = IErunAda( )
 			%initialize weights
 			Dt = ones(size(trainLabels,1),1)*(1/size(trainLabels,1));
 
-			labels_masked = trainLabels;
-			mask = trainLabels == 0;
+			labels_masked		= trainLabels;
+			mask				= trainLabels == 0;
 			labels_masked(mask) = -1;	
 			
-			bestModels = zeros(hypotheses,2);
+			bestModels			= zeros(hypotheses,2);
 			
 			[labels] = IEgetLabelsByGauss(trainSetCombi,modelsCombi);
-			alpha = zeros(1,hypotheses);
+			alpha	 = zeros(1,hypotheses);
 			for t=1:hypotheses
 				for model = 1:size(labels,2)
 					mask = labels(:,model) ~= trainLabels;
@@ -206,7 +207,8 @@ function [ output_args ] = IErunAda( )
 					%chosen models yet
 					if mNr<= length(sortedModelResultsIdx)
 						if ~ismember(sortedModelResultsIdx(mNr), bestModels(:,1))
-							alpha(t) = 0.5*log((1-sortedModelResults(mNr))/sortedModelResults(mNr));
+							alpha(t) =...
+								0.5*log((1-sortedModelResults(mNr))/sortedModelResults(mNr));
 							bestModels(t,1) = sortedModelResultsIdx(mNr);
 							bestModels(t,2) = alpha(t);	
 							searchForBestModel = 0;
@@ -214,23 +216,21 @@ function [ output_args ] = IErunAda( )
 							mNr = mNr+1;
 						end
 					else
-						alpha(t) = 0.5*log((1-sortedModelResults(1))/sortedModelResults(1));
-						bestModels(t,1) = sortedModelResultsIdx(1);
-						bestModels(t,2) = alpha(t);	
+						alpha(t)		   = 0.5*log((1-sortedModelResults(1))/...
+											 sortedModelResults(1));
+						bestModels(t,1)    = sortedModelResultsIdx(1);
+						bestModels(t,2)    = alpha(t);	
 						searchForBestModel = 0;
 					end
 				end
-% 				fprintf('model %d \tis best with %3.6g \terror. alpha is %3.6g\n',...
-% 					sortedModelResultsIdx(mNr),sortedModelResults(mNr),alpha)
-				
 				
 				% update instance weights
 				labelsOfBestModel = labels(:,sortedModelResultsIdx(mNr));
 
 				Dt = (Dt.*exp(-alpha(t).*labels_masked.*labelsOfBestModel));
 
-				% normalize Dt so it will be a probability distribution (it sums up
-				% to 1)
+				% normalize Dt so it will be a probability distribution 
+				%  (it sums up to 1)
 				Dt = Dt./sum(Dt);
 			end
 
@@ -251,20 +251,19 @@ function [ output_args ] = IErunAda( )
 			mask					= resultLabelsTest<=0;
 			resultLabelsTest(mask)  = 0;
 
-			fitTest   = testLabels==1;
-			unfitTest = testLabels==0;
+			fitTest					= testLabels==1;
+			unfitTest				= testLabels==0;
 
-			fitResultsTest   = resultLabelsTest(fitTest);
-			unfitResultsTest = resultLabelsTest(unfitTest);
+			fitResultsTest			= resultLabelsTest(fitTest);
+			unfitResultsTest		= resultLabelsTest(unfitTest);
 
-			testTP = fitResultsTest==1;
-			testTPRate = sum(testTP)/size(testTP,1);
-			testTN = unfitResultsTest==0;
-			testTNRate = sum(testTN)/size(testTN,1);
+			testTP					= fitResultsTest==1;
+			testTPRate				= sum(testTP)/size(testTP,1);
+			testTN					= unfitResultsTest==0;
+			testTNRate				= sum(testTN)/size(testTN,1);
 
- 			testGoodClassified = (sum(testTP)+sum(testTN))/(size(testTP,1)+size(testTN,1));
-% 			fprintf('TESTresults::  fitGood: %4.4g \t unfitGood: %4.4g \t-->  error: %4.4g\n',...
-% 				testTPRate,testTNRate,1-testGoodClassified)
+ 			testGoodClassified		= (sum(testTP)+sum(testTN))/...
+									  (size(testTP,1)+size(testTN,1));
 
 			%%%%%%%%%%%%%%%FINISHED TESTING TEST SET%%%%%%%%%%%%%%%%%%%%			
 			
@@ -282,12 +281,18 @@ function [ output_args ] = IErunAda( )
 					modelsVotes(4,bestModels(i,1)) = testGoodClassified; %goodClassified
 					modelsVotes(5,bestModels(i,1)) = bestModels(i,1);	 %idx
 				else
-					modelsVotes(1,bestModels(i,1)) = modelsVotes(1,bestModels(i,1)) + (length(bestModels(:,1))+1-i);
-					modelsVotes(2,bestModels(i,1)) = modelsVotes(2,bestModels(i,1)) + 1;
-					modelsVotes(3,bestModels(i,1)) = modelsVotes(3,bestModels(i,1)) + bestModels(i,2);
+					modelsVotes(1,bestModels(i,1)) =...
+						modelsVotes(1,bestModels(i,1)) +...
+						(length(bestModels(:,1))+1-i);
+					modelsVotes(2,bestModels(i,1)) =...
+						modelsVotes(2,bestModels(i,1)) + 1;
+					modelsVotes(3,bestModels(i,1)) =...
+						modelsVotes(3,bestModels(i,1)) + bestModels(i,2);
 					%not all indexes are in here when the algo gets here...
-					modelsVotes(4,bestModels(i,1)) = modelsVotes(4,bestModels(i,1)) + testGoodClassified; %error
-					modelsVotes(5,bestModels(i,1)) = bestModels(i,1); %idx
+					modelsVotes(4,bestModels(i,1)) =...
+						modelsVotes(4,bestModels(i,1)) + testGoodClassified; %error
+					modelsVotes(5,bestModels(i,1)) =...
+						bestModels(i,1); %idx
 				end
 			end
 		end %trials
@@ -296,11 +301,11 @@ function [ output_args ] = IErunAda( )
 		
 		
 		%sort:
-		%modelsVotes(1,:) stores a sum of the weighted occurence in the
-		%chosen model list (chosen by adaboost). If an item is on the first place in a list it gets weight of
-		%the size of the list. If it is last it gets one.
-		%modelsVotes(2,:) is a sum of the occurences of a model in the
-		%chosen models (by adaboost)
+		% modelsVotes(1,:) stores a sum of the weighted occurence in the
+		% chosen model list (chosen by adaboost). If an item is on the first
+		% place in a list it gets weight of the size of the list. 
+		% If it is last it gets one. modelsVotes(2,:) is a sum of the 
+		% occurences of a model in the chosen models (by adaboost)
 		[ignore modelsHighestVotesIds] = sort(modelsVotes(2,:),'descend');
 		chosenModelsAlphas = modelsVotes(3,modelsHighestVotesIds(1:hypotheses))./...
 			modelsVotes(2,modelsHighestVotesIds(1:hypotheses));
@@ -317,45 +322,49 @@ function [ output_args ] = IErunAda( )
 % 			fprintf('model %d with alpha %3.6g\n',...
 % 				chosenModelsIdx(bestModel),chosenModelsAlphas(bestModel))
 			BMlabels =...
-				IEgetLabelsByGauss(holdoutSetCombi(:,chosenModelsIdx(bestModel)),...
-				WinnerModels(:,bestModel));
+				IEgetLabelsByGauss(holdoutSetCombi(:,...
+				chosenModelsIdx(bestModel)),WinnerModels(:,bestModel));
 			mask = BMlabels==0;
 			BMlabels(mask) = -1;
-			sumLabels = sumLabels + (BMlabels.*chosenModelsAlphas(bestModel).*averageGoodClassified(bestModel));
+			sumLabels = sumLabels + (BMlabels.*...
+				chosenModelsAlphas(bestModel).*averageGoodClassified(bestModel));
 		end
 
 		resultLabels = sign(sumLabels);
 		mask = resultLabels<=0;
 		resultLabels(mask)  = 0;
 
-		fitHO   = holdoutSetClasses==1;
-		unfitHO = holdoutSetClasses==0;
+		fitHO		 = holdoutSetClasses==1;
+		unfitHO		 = holdoutSetClasses==0;
 
 		fitResults   = resultLabels(fitHO);
 		unfitResults = resultLabels(unfitHO);
 
-		TP = fitResults==1;
-		TPRate = sum(TP)/size(TP,1);
-		TN = unfitResults==0;
-		TNRate = sum(TN)/size(TN,1);
+		TP			 = fitResults==1;
+		TPRate		 = sum(TP)/size(TP,1);
+		TN			 = unfitResults==0;
+		TNRate		 = sum(TN)/size(TN,1);
 
-		sumTPRate = sumTPRate + TPRate;
-		sumTNRate = sumTNRate + TNRate;
+		sumTPRate	 = sumTPRate + TPRate;
+		sumTNRate	 = sumTNRate + TNRate;
 			
 		HOGoodClassified = (sum(TP)+sum(TN))/(size(TP,1)+size(TN,1));
 		fprintf('HOResults::  fitGood: %4.4g \t unfitGood: %4.4g \t-->  error: %4.4g\n',...
 			TPRate,TNRate,1-HOGoodClassified)
+		
+		if HOGoodClassified > overAllBestHOResults 
+			overallBestModels = WinnerModels;
+			overallBestIndexes = chosenModelsIdx;
+		end
 		%%%%%%%%%%%%%%%FINISHED TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%
 	end %repetitions
 
 	%%%%%%%%%%%%%%%%RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%%%%%%%	
 
-%	WinnerModels = averageModelsOverTrials(:,chosenModelsIdx);
 	sumLabels = zeros(sizeHoldoutSet,1);
-%		fprintf('Models used for holdout set: \n')
 	
-	for modelNr=1:size(WinnerModels,2)
-		modelToUse				   = WinnerModels(:,1:modelNr);
+	for modelNr=1:size(overallBestModels,2)
+		modelToUse				   = overallBestModels(:,1:modelNr);
 		chosenModelsAlphasToUse	   = chosenModelsAlphas(1:modelNr);
 		averageGoodClassifiedToUse = averageGoodClassified(1:modelNr);
 		chosenModelsIdxToUse	   = chosenModelsIdx(1:modelNr);
@@ -371,20 +380,20 @@ function [ output_args ] = IErunAda( )
 				averageGoodClassifiedToUse(bestModel));
 		end
 
-		resultLabels = sign(sumLabels);
-		mask = resultLabels<=0;
+		resultLabels		= sign(sumLabels);
+		mask				= resultLabels<=0;
 		resultLabels(mask)  = 0;
 
-		fitHO   = holdoutSetClasses==1;
-		unfitHO = holdoutSetClasses==0;
+		fitHO				= holdoutSetClasses==1;
+		unfitHO				= holdoutSetClasses==0;
 
-		fitResults   = resultLabels(fitHO);
-		unfitResults = resultLabels(unfitHO);
+		fitResults			= resultLabels(fitHO);
+		unfitResults		= resultLabels(unfitHO);
 
-		TP = fitResults==1;
-		TPRate = sum(TP)/size(TP,1);
-		TN = unfitResults==0;
-		TNRate = sum(TN)/size(TN,1);
+		TP		= fitResults==1;
+		TPRate	= sum(TP)/size(TP,1);
+		TN		= unfitResults==0;
+		TNRate	= sum(TN)/size(TN,1);
 
 		GoodClassified(modelNr,1) = modelNr;
 		GoodClassified(modelNr,2) = (sum(TP)+sum(TN))/(size(TP,1)+size(TN,1));
@@ -393,10 +402,10 @@ function [ output_args ] = IErunAda( )
 	end
 	%%%%%%%%%%%%%%%FINISHED RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%
 
-	figure
+	figure(1)
 	plot(GoodClassified(:,1),GoodClassified(:,2),'b',...
-		GoodClassified(:,1),GoodClassified(:,3),'r',...
-		GoodClassified(:,1),GoodClassified(:,4),'g')
+		 GoodClassified(:,1),GoodClassified(:,3),'r',...
+		 GoodClassified(:,1),GoodClassified(:,4),'g')
 	legend('overall','good fit','good unfit',3,'location','SouthEast');
 	xlabel('weak classifiers used')
 	ylabel('good classification rate')
@@ -407,6 +416,11 @@ function [ output_args ] = IErunAda( )
 	fprintf('fit wrong:   \t%4.4g%%\n',(1-(sumTPRate/(repetitions)))*100)
 	fprintf('unfit right: \t%4.4g%%\n',(sumTNRate/(repetitions))*100)
 	fprintf('unfit wrong: \t%4.4g%%\n',(1-(sumTNRate/(repetitions)))*100)
+	
+	numberOfMethods = doEdge + doIntensity + doIntensityOfEdge;
+	overallBestIndexes
+	IEshowAreasOnBill( xSegms, ySegms,...
+	useFront,useRear,numberOfMethods,overallBestIndexes)
 end
 
 function p = randperm(n)
