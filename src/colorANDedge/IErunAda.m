@@ -33,9 +33,9 @@ function [ output_args ] = IErunAda( )
 
 	sizeHoldoutSet    = 100;
 	leave_n_out		  = 50;	% size of test-set
-	repetitions		  = 1;
-	trials			  = 10;
-	hypotheses 		  = 10;
+	repetitions		  = 5;
+	trials			  = 100;
+	hypotheses 		  = 20;
 	
 	doEdge			  = 1;
 	doIntensity		  = 1;

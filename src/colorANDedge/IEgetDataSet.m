@@ -11,7 +11,7 @@ function [ allResults ] = IEgetDataSet( do, path,cannyThresh,...
 	end
 
 	fprintf('\tconstructing the %s data set for %s\n',dataset, do)
-	maxImage=250;
+	maxImage=300;
 	for i = 1:maxImage
 		%for all images: extract the data
 
