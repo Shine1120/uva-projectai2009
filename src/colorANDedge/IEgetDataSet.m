@@ -56,26 +56,17 @@ function [ allResults ] = IEgetDataSet( do, path,cannyThresh,...
 				  invariant,imgSegRX,imgSegRY);
 			end
 		  end
-		  if strcmp(do,'IntensityOfEdge')
-			if (useFront)
-			  frontImageResults = doIntensityOfEdge(nextImageFront,...
-				  cannyThresh,invariant,imgSegFX,imgSegFY);
-			end
-			if (useRear)
-			  rearImageResults  = doIntensityOfEdge(nextImageRear,...
-				  cannyThresh,invariant,imgSegRX,imgSegRY);
-			end
-		  end
-		  if strcmp(do,'edge and Intensity')
-			if (useFront)
-			  frontImageResults = doEdgeIntensity(nextImageFront,...
-				  cannyThresh,invariant,imgSegFX,imgSegFY);
-			end
-			if (useRear)
-			  rearImageResults  = doEdgeIntensity(nextImageRear,...
-				  cannyThresh,invariant,imgSegRX,imgSegRY);
-			end
-		  end
+
+% 		  if strcmp(do,'edge and Intensity')
+% 			if (useFront)
+% 			  frontImageResults = doEdgeIntensity(nextImageFront,...
+% 				  cannyThresh,invariant,imgSegFX,imgSegFY);
+% 			end
+% 			if (useRear)
+% 			  rearImageResults  = doEdgeIntensity(nextImageRear,...
+% 				  cannyThresh,invariant,imgSegRX,imgSegRY);
+% 			end
+% 		  end
 
 % 		  sizeFrontImageCount = size(frontImageResults)
 % 		  frontImageResults
@@ -130,42 +121,6 @@ function results = doEdge(image,cannyThresh,invariant,imgSegX, imgSegY)
 			count = count+1;
 		end
 	end
-	
-%	edgeCount = sum(results);
-% 	results
-% 	resultsCheck = sum(sum(edgeImage))
-end
-
-function results = doIntensityOfEdge(image,cannyThresh,invariant,imgSegX, imgSegY)
-	if invariant==1
-		image = image - mean(mean(image));
-	end
-	edgeImage = edge(image,'canny',cannyThresh);
-	mask = edgeImage==1;
-	edgeImageIntensity = image(mask);
-	%do per image segment and store in vector
-	results = [];
-	count=1;
-	for y=1:imgSegY:size(image,1)-imgSegY
-		for x=1:imgSegX:size(image,2)-imgSegX
-			if y+imgSegY+10>size(image,1)
-				untillY = size(image,1);
-			else
-				untillY = y+imgSegY-1;
-			end
-			if x+imgSegX+10>size(image,2)
-				untillX = size(image,2);
-			else
-				untillX = x+imgSegX-1;
-			end
-			results(count) = sum(sum(edgeImageIntensity(y:untillY,x:untillX)));
-			count = count+1;
-		end
-	end
-	
-%	edgeCount = sum(results);
-%	results
-%	resultsCheck = sum(sum(edgeImageIntensity));
 end
 
 function results = doIntensity(image,invariant,imgSegX, imgSegY)
@@ -191,18 +146,14 @@ function results = doIntensity(image,invariant,imgSegX, imgSegY)
 			count = count+1;
 		end
 	end
-	
-%	avgIntensity = mean(results);
-% 	results
-% 	resultsCheck = mean(mean(image))
 end
 
-function count = doEdgeIntensity(image,cannyThresh,invariant,imgSegX, imgSegY)
-	if invariant==1
-		image = image - mean(mean(image));
-	end
-	factor = 10;
-	%average Intensity is raised by a factor to make it usefull for large count
-	%of edges. This might not be the ideal way to do this.
-	count = doEdge(image,cannyThresh) + (doIntensity(image)*factor);
-end
+% function count = doEdgeIntensity(image,cannyThresh,invariant,imgSegX, imgSegY)
+% 	if invariant==1
+% 		image = image - mean(mean(image));
+% 	end
+% 	factor = 10;
+% 	%average Intensity is raised by a factor to make it usefull for large count
+% 	%of edges. This might not be the ideal way to do this.
+% 	count = doEdge(image,cannyThresh) + (doIntensity(image)*factor);
+% end
