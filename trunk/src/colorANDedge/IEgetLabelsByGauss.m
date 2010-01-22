@@ -4,7 +4,7 @@ function [ labels ] = IEgetLabelsByGauss(data,models)
 		covFit    = models(2,:);
 		meanUnfit = models(3,:);
 		covUnfit  = models(4,:);
-		
+
 % 	testFitMask    = testClasses==1;
 % 	testUnfitMask  = testClasses==0;
 
@@ -20,8 +20,11 @@ function [ labels ] = IEgetLabelsByGauss(data,models)
 	if ~isempty(data)
 		for x=1:size(models,2)
 			for y=1:size(data,1)
-				probBeFit   = gaussProb(meanFit(x),covFit(x),data(y,x));
-				probBeUnfit = gaussProb(meanUnfit(x),covUnfit(x),data(y,x));
+%				probBeFit   = gaussProb(meanFit(x),covFit(x),data(y,x))
+				probBeFit = mvnpdf(data(y,x),meanFit(x),covFit(x));
+%				probBeUnfit = gaussProb(meanUnfit(x),covUnfit(x),data(y,x))
+				probBeUnfit = mvnpdf(data(y,x),meanUnfit(x),covUnfit(x));
+
 				if probBeFit>probBeUnfit
 					labels(y,x) = 1;
 				else
@@ -42,8 +45,9 @@ function [ labels ] = IEgetLabelsByGauss(data,models)
 % 	end
 end
 
-function p = gaussProb(mu,c,x)
-	a = 2 * pi * sqrt(det(c));
-	b = (x - mu) * inv(c) * (x - mu)';
-	p = (1/a) * exp(-b/2);
-end
+% function p = gaussProb(mu,c,x)
+% 	a = 2 * pi * sqrt(det(c));
+% 	b = (x - mu) * inv(c) * (x - mu)';
+% 	p = (1/a) * exp(-b/2);
+% end
+

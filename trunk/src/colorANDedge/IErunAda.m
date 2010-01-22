@@ -2,16 +2,14 @@ function [ output_args ] = IErunAda( )
 
 	close all;
 
-	windows           = 0;
+	do5Euro           = 1;
+	do10Euro          = 0;
 
-	do5Euro           = 0;
-	do10Euro          = 1;
-
-	doWholeNote       = 0;
-	doWholeNotePB     = 1;
+	doWholeNote       = 1;
+	doWholeNotePB     = 0;
 	doWhitePatchNote  = 0;
 
-	path = '../money/';
+	path = '../moneyDivided/';
 	if (doWholeNote)
 		path      = [path 'whole/'];
 	elseif (doWholeNotePB)
@@ -26,26 +24,20 @@ function [ output_args ] = IErunAda( )
 	end
 	pathFit		  = [path 'fit/'];
 	pathUnfit	  = [path 'unfit/'];
-	if (windows)
-		pathFit   = regexprep(pathFit, '/', '\');
-		pathUnfit = regexprep(pathUnfit, '/', '\');
-	end
 
 	sizeHoldoutSet    = 75;
 	leave_n_out		  = 35;	% size of test-set
 % 	sizeHoldoutSet    = 100;
 % 	leave_n_out		  = 50;	% size of test-set
-	repetitions		  = 30;
+	repetitions		  = 5;
 	trials			  = 20;
-	hypotheses 		  = 20;
+	hypotheses 		  = 30;
 	
 	doEdge			  = 1;
 	doIntensity		  = 1;
-	doIntensityOfEdge = 0;
 
 	doMethods(1)	  = doEdge;
 	doMethods(2)	  = doIntensity;
-	doMethods(3)	  = doIntensityOfEdge;
 
 	invariant         = 0;
 
@@ -61,13 +53,11 @@ function [ output_args ] = IErunAda( )
 	
 	allDataE          = [];
 	allDataI          = [];
-	allDataIofE       = [];
 	nrIndxesFit       = 0;
 	nrIndxesUnfit     = 0;
 
     holdoutSetE       = [];
     holdoutSetI       = [];
-    holdoutSetIofE    = [];
 	
 	modelsVotes       = [];
 	
@@ -80,8 +70,8 @@ function [ output_args ] = IErunAda( )
 						   useFront, useRear, invariant,xSegms, ySegms);
 
 		allDataE         = [allDataFitE;allDataUnfitE];
-		nrIndxesFit      = length(allDataFitE);
-		nrIndxesUnfit    = length(allDataUnfitE);
+		nrIndxesFit      = size(allDataFitE,1);
+		nrIndxesUnfit    = size(allDataUnfitE,1);
 	end
 	if doIntensity==1
 		allDataFitI		 = IEgetDataSet( 'Intensity', pathFit,cannyThresh,...
@@ -90,23 +80,13 @@ function [ output_args ] = IErunAda( )
 						   useFront, useRear, invariant,xSegms, ySegms);
 
 		allDataI         = [allDataFitI;allDataUnfitI];
-		nrIndxesFit      = length(allDataFitI);
-		nrIndxesUnfit    = length(allDataUnfitI);
-	end
-	if doIntensityOfEdge==1
-		allDataFitIofE   = IEgetDataSet( 'IntensityOfEdge', pathFit,cannyThresh,...
-						   useFront, useRear, invariant,xSegms, ySegms);
-		allDataUnfitIofE = IEgetDataSet( 'IntensityOfEdge', pathUnfit,cannyThresh,...
-						   useFront, useRear, invariant,xSegms, ySegms);
-
-		allDataIofE      = [allDataFitIofE;allDataUnfitIofE];
-		nrIndxesFit      = length(allDataFitIofE);
-		nrIndxesUnfit    = length(allDataUnfitIofE);
+		nrIndxesFit      = size(allDataFitI,1);
+		nrIndxesUnfit    = size(allDataUnfitI,1);
 	end
 	toc
 
 	allDataClasses   = [ones(nrIndxesFit,1); zeros(nrIndxesUnfit,1)];
-
+	
 	sumTPRate = 0;
 	sumTNRate = 0;
 	
@@ -116,15 +96,12 @@ function [ output_args ] = IErunAda( )
 		randIndexAll     = randperm(nrIndxesFit+nrIndxesUnfit)';
 		randIndexHOAll   = randIndexAll(1:sizeHoldoutSet);
 		randIndexTTAll   = randIndexAll(sizeHoldoutSet+1:size(randIndexAll,1));
-
+		
 		if (doEdge)
 			holdoutSetE     = allDataE(randIndexHOAll,:);
 		end
 		if (doIntensity)
 			holdoutSetI     = allDataI(randIndexHOAll,:);
-		end
-		if (doIntensityOfEdge)
-			holdoutSetIofE  = allDataIofE(randIndexHOAll,:);
 		end
 		
 		holdoutSetClasses	= allDataClasses(randIndexHOAll);
@@ -143,8 +120,6 @@ function [ output_args ] = IErunAda( )
 			testsetE     = [];
 			trainsetI    = [];
 			testsetI     = [];
-			trainsetIofE = [];
-			testsetIofE  = [];
 			
 			if (doEdge)
 				testsetE  = allDataE(testset,:);
@@ -154,13 +129,9 @@ function [ output_args ] = IErunAda( )
 				testsetI  = allDataI(testset,:);
 				trainsetI = allDataI(trainset,:);
 			end
-			if (doIntensityOfEdge)
-				testsetIofE  = allDataIofE(testset,:);
-				trainsetIofE = allDataIofE(trainset,:);
-			end
 
-			[EModels,IModels,IofEModels] = IEgetModels(doMethods,...
-				trainLabels,trainsetE,trainsetI,trainsetIofE,modelCount);
+			[EModels,IModels] = IEgetModels(doMethods,...
+				trainLabels,trainsetE,trainsetI,modelCount);
 
 			if doEdge & doIntensity
 				trainSetCombi     = [trainsetE trainsetI];
@@ -179,95 +150,15 @@ function [ output_args ] = IErunAda( )
 				holdoutSetCombi   = holdoutSetI;
 			end
 			sumModelsOverTrials = sumModelsOverTrials+modelsCombi;
-			%do ADABOOST
-			
-			%initialize weights
-			Dt = ones(size(trainLabels,1),1)*(1/size(trainLabels,1));
 
-			labels_masked		= trainLabels;
-			mask				= trainLabels == 0;
-			labels_masked(mask) = -1;	
-			
-			bestModels			= zeros(hypotheses,2);
-			
-			[labels] = IEgetLabelsByGauss(trainSetCombi,modelsCombi);
-			alpha	 = zeros(1,hypotheses);
-			for t=1:hypotheses
-				for model = 1:size(labels,2)
-					mask = labels(:,model) ~= trainLabels;
-					results(:,model) = Dt.*mask;
-				end
-				modelResults = sum(results);
-				
-				[sortedModelResults, sortedModelResultsIdx] =...
-					sort(modelResults);
-				
-				searchForBestModel = 1;
-				mNr = 1;
-				while (searchForBestModel)
-					%search for the best model that is not included in the
-					%chosen models yet
-					if mNr<= length(sortedModelResultsIdx)
-						if ~ismember(sortedModelResultsIdx(mNr), bestModels(:,1))
-							alpha(t) =...
-								0.5*log((1-sortedModelResults(mNr))/sortedModelResults(mNr));
-							bestModels(t,1) = sortedModelResultsIdx(mNr);
-							bestModels(t,2) = alpha(t);	
-							searchForBestModel = 0;
-						else
-							mNr = mNr+1;
-						end
-					else
-						alpha(t)		   = 0.5*log((1-sortedModelResults(1))/...
-											 sortedModelResults(1));
-						bestModels(t,1)    = sortedModelResultsIdx(1);
-						bestModels(t,2)    = alpha(t);	
-						searchForBestModel = 0;
-					end
-				end
-				
-				% update instance weights
-				labelsOfBestModel = labels(:,sortedModelResultsIdx(mNr));
-
-				Dt = (Dt.*exp(-alpha(t).*labels_masked.*labelsOfBestModel));
-
-				% normalize Dt so it will be a probability distribution 
-				%  (it sums up to 1)
-				Dt = Dt./sum(Dt);
-			end
-
-			%%%%%%%%%%%%%%%%TESTING TEST SET%%%%%%%%%%%%%%%%%%%%%%%%%	
-
-			testModels = modelsCombi(:,bestModels(:,1));
-			sumTestLabels = zeros(length(testset),1);
-			for testModel=1:size(testModels,2)
-				BMlabelsTest =...
-					IEgetLabelsByGauss(testSetCombi(:,bestModels(testModel,1)),...
-					testModels(:,testModel));
-				mask = BMlabelsTest==0;
-				BMlabelsTest(mask) = -1;
-				sumTestLabels = sumTestLabels + (BMlabelsTest.*alpha(testModel));
-			end
-
-			resultLabelsTest		= sign(sumTestLabels);
-			mask					= resultLabelsTest<=0;
-			resultLabelsTest(mask)  = 0;
-
-			fitTest					= testLabels==1;
-			unfitTest				= testLabels==0;
-
-			fitResultsTest			= resultLabelsTest(fitTest);
-			unfitResultsTest		= resultLabelsTest(unfitTest);
-
-			testTP					= fitResultsTest==1;
-			testTPRate				= sum(testTP)/size(testTP,1);
-			testTN					= unfitResultsTest==0;
-			testTNRate				= sum(testTN)/size(testTN,1);
-
- 			testGoodClassified		= (sum(testTP)+sum(testTN))/...
-									  (size(testTP,1)+size(testTN,1));
-
-			%%%%%%%%%%%%%%%FINISHED TESTING TEST SET%%%%%%%%%%%%%%%%%%%%			
+			%%%%%%%%%%%%%%%%%%%%%%%DO ADABOOST%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			[bestModels, alpha] = IEAdaboost(trainLabels, hypotheses,...
+									trainSetCombi,modelsCombi);
+			%%%%%%%%%%%%%%%%%%%%%%TESTING TEST SET%%%%%%%%%%%%%%%%%%%%%%%%%
+			[ignore, testTPRate, testTNRate, testGoodClassified] =...
+					IErunModels(modelsCombi,bestModels,testSetCombi,...
+					testLabels,alpha,ones(size(alpha,2)));
+			%%%%%%%%%%%%%%%%%%%FINISHED TESTING TEST SET%%%%%%%%%%%%%%%%%%%
 			
 			for i=1:length(bestModels(:,1))
 				if bestModels(i,1)> size(modelsVotes,2) 
@@ -314,53 +205,27 @@ function [ output_args ] = IErunAda( )
 			modelsVotes(2,modelsHighestVotesIds(1:hypotheses));
 		chosenModelsIdx    = modelsVotes(5,modelsHighestVotesIds(1:hypotheses));
 
-		%%%%%%%%%%%%%%%%TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%%%%%%	
+		%%%%%%%%%%%%%%%%%%%%%%%TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%%%%%%
 		
-		WinnerModels = averageModelsOverTrials(:,chosenModelsIdx);
-		sumLabels = zeros(sizeHoldoutSet,1);
-%		fprintf('Models used for holdout set: \n')
-		for bestModel=1:size(WinnerModels,2)
-% 			fprintf('model %d with alpha %3.6g\n',...
-% 				chosenModelsIdx(bestModel),chosenModelsAlphas(bestModel))
-			BMlabels =...
-				IEgetLabelsByGauss(holdoutSetCombi(:,...
-				chosenModelsIdx(bestModel)),WinnerModels(:,bestModel));
-			mask = BMlabels==0;
-			BMlabels(mask) = -1;
-			sumLabels = sumLabels + (BMlabels.*...
-				chosenModelsAlphas(bestModel).*averageGoodClassified(bestModel));
-		end
+		[WinnerModels, HOTPRate, HOTNRate, HOGoodClassified] =...
+				IErunModels(averageModelsOverTrials,chosenModelsIdx',...
+				holdoutSetCombi,holdoutSetClasses,chosenModelsAlphas,...
+				averageGoodClassified);
 
-		resultLabels = sign(sumLabels);
-		mask = resultLabels<=0;
-		resultLabels(mask)  = 0;
-
-		fitHO		 = holdoutSetClasses==1;
-		unfitHO		 = holdoutSetClasses==0;
-
-		fitResults   = resultLabels(fitHO);
-		unfitResults = resultLabels(unfitHO);
-
-		TP			 = fitResults==1;
-		TPRate		 = sum(TP)/size(TP,1);
-		TN			 = unfitResults==0;
-		TNRate		 = sum(TN)/size(TN,1);
-
-		sumTPRate	 = sumTPRate + TPRate;
-		sumTNRate	 = sumTNRate + TNRate;
+		sumTPRate	 = sumTPRate + HOTPRate;
+		sumTNRate	 = sumTNRate + HOTNRate;
 			
-		HOGoodClassified = (sum(TP)+sum(TN))/(size(TP,1)+size(TN,1));
 		fprintf('HOResults::  fitGood: %4.4g \t unfitGood: %4.4g \t-->  error: %4.4g\n',...
-			TPRate,TNRate,1-HOGoodClassified)
+			HOTPRate,HOTNRate,1-HOGoodClassified)
 		
 		if HOGoodClassified > overAllBestHOResults 
-			overallBestModels = WinnerModels;
+			overallBestModels  = WinnerModels;
 			overallBestIndexes = chosenModelsIdx;
 		end
-		%%%%%%%%%%%%%%%FINISHED TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%
+		%%%%%%%%%%%%%%%%%%%FINISHED TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%
 	end %repetitions
 
-	%%%%%%%%%%%%%%%%RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%%%%%%%	
+	%%%%%%%%%%%%%%%%%%%%%%RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%%%%%%%
 
 	sumLabels = zeros(sizeHoldoutSet,1);
 	
@@ -401,7 +266,7 @@ function [ output_args ] = IErunAda( )
 		GoodClassified(modelNr,3) = TPRate;
 		GoodClassified(modelNr,4) = TNRate;
 	end
-	%%%%%%%%%%%%%%%FINISHED RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%FINISHED RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%
 
 	figure(1)
 	plot(GoodClassified(:,1),GoodClassified(:,2),'b',...
@@ -418,10 +283,12 @@ function [ output_args ] = IErunAda( )
 	fprintf('unfit right: \t%4.4g%%\n',(sumTNRate/(repetitions))*100)
 	fprintf('unfit wrong: \t%4.4g%%\n',(1-(sumTNRate/(repetitions)))*100)
 	
-	numberOfMethods = doEdge + doIntensity + doIntensityOfEdge;
+	numberOfMethods = doEdge + doIntensity;
 	overallBestIndexes
 	IEshowAreasOnBill( xSegms, ySegms,...
 	useFront,useRear,numberOfMethods,overallBestIndexes)
+
+%	save(fileName matrix)
 end
 
 function p = randperm(n)

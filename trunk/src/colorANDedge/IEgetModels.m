@@ -1,13 +1,11 @@
-function [eModels,iModels,iofeModels] =...
-	IEgetModels(doMethods,trainLabels,trainSetE,trainSetI,trainSetIofE,modelCount)
+function [eModels,iModels] =...
+	IEgetModels(doMethods,trainLabels,trainSetE,trainSetI,modelCount)
 
 	doEdge = doMethods(1);
 	doIntensity = doMethods(2);
-	doIntensityOfEdge = doMethods(3);
 
 	eModels    = zeros(4,modelCount);
 	iModels    = zeros(4,modelCount);
-	iofeModels = zeros(4,modelCount);
 	
 	if (doEdge)
 		[meanEFit, covEFit, meanEUnfit, covEUnfit] =...
@@ -26,16 +24,6 @@ function [eModels,iModels,iofeModels] =...
 		iModels(2,:) = covIFit;
 		iModels(3,:) = meanIUnfit;
 		iModels(4,:) = covIUnfit;
-	end
-
-	if (doIntensityOfEdge)
-		[meanIofEFit, covIofEFit, meanIofEUnfit, covIofEUnfit] =...
-			getMeanCov(trainLabels, trainSetIofE);
-
-		iofeModels(1,:) = meanIofEFit;
-		iofeModels(2,:) = covIofEFit;
-		iofeModels(3,:) = meanIofEUnfit;
-		iofeModels(4,:) = covIofEUnfit;
 	end
 end
 
