@@ -31,10 +31,12 @@ function [ output_args ] = IErunAda( )
 		pathUnfit = regexprep(pathUnfit, '/', '\');
 	end
 
-	sizeHoldoutSet    = 100;
-	leave_n_out		  = 50;	% size of test-set
-	repetitions		  = 5;
-	trials			  = 100;
+	sizeHoldoutSet    = 75;
+	leave_n_out		  = 35;	% size of test-set
+% 	sizeHoldoutSet    = 100;
+% 	leave_n_out		  = 50;	% size of test-set
+	repetitions		  = 30;
+	trials			  = 20;
 	hypotheses 		  = 20;
 	
 	doEdge			  = 1;
@@ -299,14 +301,13 @@ function [ output_args ] = IErunAda( )
 
 		averageModelsOverTrials = sumModelsOverTrials./trials;
 		
-		
 		%sort:
 		% modelsVotes(1,:) stores a sum of the weighted occurence in the
 		% chosen model list (chosen by adaboost). If an item is on the first
 		% place in a list it gets weight of the size of the list. 
 		% If it is last it gets one. modelsVotes(2,:) is a sum of the 
 		% occurences of a model in the chosen models (by adaboost)
-		[ignore modelsHighestVotesIds] = sort(modelsVotes(2,:),'descend');
+		[ignore modelsHighestVotesIds] = sort(modelsVotes(4,:),'descend');
 		chosenModelsAlphas = modelsVotes(3,modelsHighestVotesIds(1:hypotheses))./...
 			modelsVotes(2,modelsHighestVotesIds(1:hypotheses));
 		averageGoodClassified = modelsVotes(4,modelsHighestVotesIds(1:hypotheses))./...
