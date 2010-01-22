@@ -4,8 +4,8 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 	segsPerSide		= Xsegs * Ysegs;
 	segsPerMethod	= segsPerSide * (doFront+doRear);
 	
-	imageNameFront	= '../money/wholeplusborder/neur10/fit/f1.bmp';
-	imageNameRear	= '../money/wholeplusborder/neur10/fit/r1.bmp';
+	imageNameFront	= '../moneyDivided/wholeplusborder/neur10/fit/f1.bmp';
+	imageNameRear	= '../moneyDivided/wholeplusborder/neur10/fit/r1.bmp';
 
 	imageFront		= imread(imageNameFront);
 	imageRear		= imread(imageNameRear);
@@ -49,7 +49,8 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 		rectangle('Position',[x,y,segWidthFront,segHeightFront],'EdgeColor',colors(frontMethod(i)))
 		p       = patch([x,x+segWidthFront,x+segWidthFront,x],...
 						[y,y,y+segHeightFront,y+segHeightFront] , colors(frontMethod(i)));
-		alpha(p , 0.3);
+%		alpha(p , 0.3);
+%		set(p,'AlphaDataMapping', 0.2)	
 	end
 	hold off
 	
@@ -71,7 +72,8 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 		rectangle('Position',[x,y,segWidthRear,segHeightRear],'EdgeColor',colors(rearMethod(i)))
 		p       = patch([x,x+segWidthRear,x+segWidthRear,x],...
 						[y,y,y+segHeightRear,y+segHeightRear] , colors(rearMethod(i)));
-		alpha(p , 0.3);
+%		alpha(p , 0.3);
+%		set(p,'AlphaDataMapping', 0.2)	
 	end
 	hold off
 end
