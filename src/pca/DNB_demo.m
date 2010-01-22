@@ -1,11 +1,18 @@
 function DNB_demo(docreate)%(all_money_front, all_money_rear, all_labels)
 
+
+
+%% Best Parameter Settings so far:
 T				= 2;	% number of hypothesis for AdaBoost
-leave_n_out		= 50;	% size of test-set
-hold_n_out		= 100;  % size of validation-set
-trials			= 20;	% 20 fold experiment
-repetitions		= 20;	% 20 for repeating the k-fold experiment
+leave_n_out		= 35;	% size of test-set
+hold_n_out		= 75;   % size of validation-set
+trials			= 50;	% 20 fold experiment
+repetitions		= 50;	% 20 for repeating the k-fold experiment
 unfitaccept		= 0.04; % ensures better than 5% error on unfit class
+
+
+error_naive_Best = 10000;
+
 
 % how many eigenvectors to use
 NumberOfEigenVectors = 30;
@@ -23,7 +30,7 @@ best_model_list1 = [];
 best_alpha_list1 = [];
 best_model_list2 = [];
 best_alpha_list2 = [];
-
+%% Create (slow) or load (fast) image regions
 if docreate
 	fprintf('Creating Image Regions... ');
 	tic;
@@ -46,10 +53,10 @@ else
 	toc;
 end
 
+SIZE = size(all_money_front_regions)
 
+%% Start the repetitions
 for q=1:repetitions
-	
-	fprintf('Run %d of %d\n', q, repetitions);
 	
 	allidx = randperm(length(all_labels));
 	holdoutset = allidx(1:hold_n_out);
@@ -79,6 +86,7 @@ for q=1:repetitions
 	n = [0 0];
 	
 	for i=1:trials
+		fprintf('Repetition %d/%d, Trial %d/%d\n', q, repetitions, i, trials)
 		thisbayes = [0 0];
 		thisn = [0 0];
 		if (trials == length(allidx) && leave_n_out == 1)
@@ -192,11 +200,6 @@ for q=1:repetitions
 				best_alpha2 = alpha2;
 				best_modelIdx1 = modelIdx1;
 				best_modelIdx2 = modelIdx2;
-				
-				% 				best_model_list1 = [best_model_list1; modelIdx1];
-				% 				best_alpha_list1 = [best_alpha_list1; alpha1];
-				% 				best_model_list2 = [best_model_list2; modelIdx2];
-				% 				best_alpha_list2 = [best_alpha_list2; alpha2];
 			end;
 		else
 			if (thisbayes(2) < correctbest(2))
@@ -209,11 +212,6 @@ for q=1:repetitions
 				best_alpha2 = alpha2;
 				best_modelIdx1 = modelIdx1;
 				best_modelIdx2 = modelIdx2;
-				
-				% 				best_model_list1 = [best_model_list1; modelIdx1];
-				% 				best_alpha_list1 = [best_alpha_list1; alpha1];
-				% 				best_model_list2 = [best_model_list2; modelIdx2];
-				% 				best_alpha_list2 = [best_alpha_list2; alpha2];
 			end
 		end
 		
@@ -299,7 +297,22 @@ for q=1:repetitions
 	error_naive_Bayes = 1-correctbayes./n
 	error_front = 1-correct_front./n
 	error_rear = 1-correct_rear./n
+	
+	if error_naive_Bayes < error_naive_Best
+		fprintf('Found new best model! Saving... ')
+		save best_alpha_front.mat alpha1
+		save best_idx_front.mat modelIdx1
+		save best_model_front.mat model_front
+		save best_eigen_front.mat eigen_front_regions
+		
+		save best_alpha_rear.mat alpha2
+		save best_idx_rear.mat modelIdx2
+		save best_model_rear.mat model_rear
+		save best_eigen_rear.mat eigen_rear_regions
+		fprintf('DONE\n')
+	end
 end; % repetitions
+
 
 fprintf( 'Final:\n' );
 Model_Front = best_model_list1

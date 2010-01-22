@@ -63,7 +63,7 @@ function [alpha, modelIdx, models] = AdaBoostSVM(models, traindata, eigen_region
 
 	end
 
-	fprintf('\tFound best models and alpha:\n')
-	modelIdx
-	alpha
+% 	fprintf('\tFound best models and alpha:\n')
+% 	modelIdx
+% 	alpha
 end
