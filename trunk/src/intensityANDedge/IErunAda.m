@@ -2,8 +2,8 @@ function [ output_args ] = IErunAda( )
 
 	close all;
 
-	do5Euro           = 1;
-	do10Euro          = 0;
+	do5Euro           = 0;
+	do10Euro          = 1;
 
 	doWholeNote       = 1;
 	doWholeNotePB     = 0;
@@ -27,11 +27,9 @@ function [ output_args ] = IErunAda( )
 
 	sizeHoldoutSet    = 75;
 	leave_n_out		  = 35;	% size of test-set
-% 	sizeHoldoutSet    = 100;
-% 	leave_n_out		  = 50;	% size of test-set
 	repetitions		  = 5;
 	trials			  = 20;
-	hypotheses 		  = 30;
+	hypotheses 		  = 15;
 	
 	doEdge			  = 1;
 	doIntensity		  = 1;
@@ -46,8 +44,8 @@ function [ output_args ] = IErunAda( )
 	useFront		  = 1;
 	useRear			  = 1;
 
-	xSegms			  = 5;
-	ySegms			  = 12;
+	xSegms			  = 4;
+	ySegms			  = 10;
 	
 	modelCount		  = xSegms*ySegms*(useFront+useRear);
 	
@@ -61,8 +59,8 @@ function [ output_args ] = IErunAda( )
 	
 	modelsVotes       = [];
 	
-	tic
 	fprintf('\nconstructing data set...\n')
+	tic
 	if doEdge==1
 		allDataFitE      = IEgetDataSet( 'edge', pathFit,cannyThresh,...
 						   useFront, useRear, invariant,xSegms, ySegms);
@@ -93,6 +91,7 @@ function [ output_args ] = IErunAda( )
 	overAllBestHOResults = 0;
 	
 	for r=1:repetitions
+		tic
 		randIndexAll     = randperm(nrIndxesFit+nrIndxesUnfit)';
 		randIndexHOAll   = randIndexAll(1:sizeHoldoutSet);
 		randIndexTTAll   = randIndexAll(sizeHoldoutSet+1:size(randIndexAll,1));
@@ -155,39 +154,14 @@ function [ output_args ] = IErunAda( )
 			[bestModels, alpha] = IEAdaboost(trainLabels, hypotheses,...
 									trainSetCombi,modelsCombi);
 			%%%%%%%%%%%%%%%%%%%%%%TESTING TEST SET%%%%%%%%%%%%%%%%%%%%%%%%%
-			[ignore, testTPRate, testTNRate, testGoodClassified] =...
+			[ignore, ignore, ignore, testGoodClassified] =...
 					IErunModels(modelsCombi,bestModels,testSetCombi,...
-					testLabels,alpha,ones(size(alpha,2)));
+					testLabels,alpha,ones(size(alpha,2)),0);
 			%%%%%%%%%%%%%%%%%%%FINISHED TESTING TEST SET%%%%%%%%%%%%%%%%%%%
 			
-			for i=1:length(bestModels(:,1))
-				if bestModels(i,1)> size(modelsVotes,2) 
-					modelsVotes(1,bestModels(i,1)) = (length(bestModels(:,1))+1-i);
-					modelsVotes(2,bestModels(i,1)) = 1;
-					modelsVotes(3,bestModels(i,1)) = bestModels(i,2);	 %alpha
-					modelsVotes(4,bestModels(i,1)) = testGoodClassified; %goodClassified
-					modelsVotes(5,bestModels(i,1)) = bestModels(i,1);	 %idx
-				elseif numel(modelsVotes(:,bestModels(i,1)))<4
-					modelsVotes(1,bestModels(i,1)) = (length(bestModels(:,1))+1-i);
-					modelsVotes(2,bestModels(i,1)) = 1;
-					modelsVotes(3,bestModels(i,1)) = bestModels(i,2);	 %alpha
-					modelsVotes(4,bestModels(i,1)) = testGoodClassified; %goodClassified
-					modelsVotes(5,bestModels(i,1)) = bestModels(i,1);	 %idx
-				else
-					modelsVotes(1,bestModels(i,1)) =...
-						modelsVotes(1,bestModels(i,1)) +...
-						(length(bestModels(:,1))+1-i);
-					modelsVotes(2,bestModels(i,1)) =...
-						modelsVotes(2,bestModels(i,1)) + 1;
-					modelsVotes(3,bestModels(i,1)) =...
-						modelsVotes(3,bestModels(i,1)) + bestModels(i,2);
-					%not all indexes are in here when the algo gets here...
-					modelsVotes(4,bestModels(i,1)) =...
-						modelsVotes(4,bestModels(i,1)) + testGoodClassified; %error
-					modelsVotes(5,bestModels(i,1)) =...
-						bestModels(i,1); %idx
-				end
-			end
+			[ modelsVotes ] = IEupdateModelVotes(modelsVotes,...
+								bestModels,testGoodClassified);
+
 		end %trials
 
 		averageModelsOverTrials = sumModelsOverTrials./trials;
@@ -210,7 +184,7 @@ function [ output_args ] = IErunAda( )
 		[WinnerModels, HOTPRate, HOTNRate, HOGoodClassified] =...
 				IErunModels(averageModelsOverTrials,chosenModelsIdx',...
 				holdoutSetCombi,holdoutSetClasses,chosenModelsAlphas,...
-				averageGoodClassified);
+				averageGoodClassified,0);
 
 		sumTPRate	 = sumTPRate + HOTPRate;
 		sumTNRate	 = sumTNRate + HOTNRate;
@@ -223,48 +197,27 @@ function [ output_args ] = IErunAda( )
 			overallBestIndexes = chosenModelsIdx;
 		end
 		%%%%%%%%%%%%%%%%%%%FINISHED TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%
+		toc
 	end %repetitions
 
 	%%%%%%%%%%%%%%%%%%%%%%RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%%%%%%%
 
-	sumLabels = zeros(sizeHoldoutSet,1);
-	
+	GoodClassified = zeros(size(overallBestModels,2),4);
 	for modelNr=1:size(overallBestModels,2)
 		modelToUse				   = overallBestModels(:,1:modelNr);
 		chosenModelsAlphasToUse	   = chosenModelsAlphas(1:modelNr);
 		averageGoodClassifiedToUse = averageGoodClassified(1:modelNr);
 		chosenModelsIdxToUse	   = chosenModelsIdx(1:modelNr);
 
-		for bestModel=1:size(modelToUse,2)
-			BMlabels =...
-				IEgetLabelsByGauss(holdoutSetCombi(:,chosenModelsIdxToUse(bestModel)),...
-				modelToUse(:,bestModel));
-			mask = BMlabels==0;
-			BMlabels(mask) = -1;
-			sumLabels = sumLabels +...
-				(BMlabels.*chosenModelsAlphasToUse(bestModel).*...
-				averageGoodClassifiedToUse(bestModel));
-		end
-
-		resultLabels		= sign(sumLabels);
-		mask				= resultLabels<=0;
-		resultLabels(mask)  = 0;
-
-		fitHO				= holdoutSetClasses==1;
-		unfitHO				= holdoutSetClasses==0;
-
-		fitResults			= resultLabels(fitHO);
-		unfitResults		= resultLabels(unfitHO);
-
-		TP		= fitResults==1;
-		TPRate	= sum(TP)/size(TP,1);
-		TN		= unfitResults==0;
-		TNRate	= sum(TN)/size(TN,1);
+		[ignore, PlotTPRate, PlotTNRate, PlotGoodClassified] =...
+				IErunModels(modelToUse,chosenModelsIdxToUse',...
+				holdoutSetCombi,holdoutSetClasses,chosenModelsAlphasToUse,...
+				averageGoodClassifiedToUse,1);		
 
 		GoodClassified(modelNr,1) = modelNr;
-		GoodClassified(modelNr,2) = (sum(TP)+sum(TN))/(size(TP,1)+size(TN,1));
-		GoodClassified(modelNr,3) = TPRate;
-		GoodClassified(modelNr,4) = TNRate;
+		GoodClassified(modelNr,2) = PlotGoodClassified;
+		GoodClassified(modelNr,3) = PlotTPRate;
+		GoodClassified(modelNr,4) = PlotTNRate;
 	end
 	%%%%%%%%%%%%%%%%%%%FINISHED RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%
 
@@ -286,7 +239,7 @@ function [ output_args ] = IErunAda( )
 	numberOfMethods = doEdge + doIntensity;
 	overallBestIndexes
 	IEshowAreasOnBill( xSegms, ySegms,...
-	useFront,useRear,numberOfMethods,overallBestIndexes)
+	useFront,useRear,overallBestIndexes,do5Euro,do10Euro)
 
 %	save(fileName matrix)
 end
