@@ -1,8 +1,12 @@
 function [modelsOut, TPRate, TNRate,goodClassified] =...
 		  IErunModels(modelsIN,bestModels,dataSet,...
-		  labels,alpha,rescale)
+		  labels,alpha,rescale,plot)
 
-	modelsOut = modelsIN(:,bestModels(:,1));
+	if (plot)
+		modelsOut = modelsIN;
+	else
+		modelsOut = modelsIN(:,bestModels(:,1));
+	end
 
 	sumLabels = zeros(size(dataSet,1),1);
 	for modelNr=1:size(modelsOut,2)
