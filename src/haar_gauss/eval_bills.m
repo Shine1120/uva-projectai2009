@@ -21,7 +21,9 @@ function [true_pos, true_neg, error, classifier] = eval_bills(model, target, con
 			for j=1:size(convImg,1)
 				prob_fit(j)     = mvnpdf(convImg(j,id), model.mean_fit(id), model.cov_fit(id));
 				prob_unfit(j)   = mvnpdf(convImg(j,id), model.mean_unfit(id), model.cov_unfit(id));
-				recognized(i,j) = (prob_fit(j)<=prob_unfit(j));
+				final_fit(j) = (0.4 * prob_fit(j))/(0.4 * prob_fit(j) + 0.6 * prob_unfit(j));
+				final_unfit(j) = (0.6 * prob_unfit(j))/(0.4 * prob_fit(j) + 0.6 * prob_unfit(j));
+				recognized(i,j) = (final_fit(j)<=final_unfit(j));
 			end	
 		end	
 		

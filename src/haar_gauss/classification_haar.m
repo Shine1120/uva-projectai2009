@@ -12,7 +12,7 @@ function classification_haar(T, rounds, pattern_scales)
     unfit           = ['moneyDivided/wholeplusborder/' money_dir '/unfit/'];	
 	hold_n_out      = 80;
 	slice           = 80;
-	repetitions     = 10;
+	repetitions     = 5;
 	ySegms			= 12;
 	xSegms			= 5;
 	dir_fit_rear    = dir([fit 'r*.bmp']);
@@ -37,6 +37,8 @@ function classification_haar(T, rounds, pattern_scales)
  	load 'convolved_images_front'
  	load 'convolved_images_rear'
  	load 'patterns'	
+	min_error        = 1;
+	best_model_index = 0;
 	%START REPETITIONS OF CROSSVALIDATION__________________________________
 	for r=1:repetitions	
 		%DEFINE HOLDOUT SET________________________________________________ 	
@@ -52,8 +54,6 @@ function classification_haar(T, rounds, pattern_scales)
 		tp_rear  = zeros(1,rounds); tn_rear = zeros(1,rounds); error_rear = zeros(1,rounds);
 		tp_front = zeros(1,rounds); tn_front = zeros(1,rounds); error_front = zeros(1,rounds);
 		tp_both  = zeros(1,rounds); tn_both = zeros(1,rounds); error_both = zeros(1,rounds);	
-		min_error        = 1;
-		best_model_index = 0;
 		%START CROSSVALIDATION_____________________________________________
 		for i=1:rounds
 			fprintf('\t Crossvalidation -- round:%d \t repetition:%d\n',i,r)		
@@ -85,16 +85,16 @@ function classification_haar(T, rounds, pattern_scales)
 			%EVALUATION ___________________________________________________	
 			%CLASSIFY THE NEW DATA USING THE STRONG CLASSIFIER_____________              
 				if (mod(j,2)==0)                 
-					string_name = ['model_' money_dir sprintf('_rear%d.mat', i)];
+					string_name = ['model_' money_dir sprintf('_rear%d.mat', rounds*(r-1)+1)];
 					save(string_name, 'model');   
 					[tp_rear(i),tn_rear(i),error_rear(i),classifier_rear]=eval_bills(model,labels_test,ImgTest,0,0);
 				elseif (mod(j,2)~=0) 
-					string_name = ['model_' money_dir sprintf('_front%d.mat', i)];
+					string_name = ['model_' money_dir sprintf('_front%d.mat',rounds*(r-1)+1)];
 					save(string_name, 'model');
 					[tp_front(i),tn_front(i),error_front(i),classifier_front]=eval_bills(model,labels_test,ImgTest,0,0);
 				end
 			%VOTE THE BEST FEATURES TO BUILD THE BEST MODEL EVER___________
-				if (i==1 && j==1)
+				if (i==1 && j==1 && r==1)
 					voted_rear  = zeros(2,size(mean_fit,2));  
 					voted_front = zeros(2,size(mean_fit,2));  
 				end
@@ -112,7 +112,7 @@ function classification_haar(T, rounds, pattern_scales)
 					labels_test, ImgTest, both_val(i,:),0);		
 			if error_both(i)<=min_error
 				min_error = error_both(i);
-				best_model_index = i;
+				best_model_index = rounds*(r-1)+1;
 			end	
 		end		
 		%COMPUTE THE MEAN OF THE RESULTS FROM THE CORSSVALIDATION__________
@@ -155,7 +155,7 @@ function classification_haar(T, rounds, pattern_scales)
 		model_rear = struct('weights', voted_weights_rear, 'best_ids', indexes_rear(1:T),...
 					'mean_fit',model.mean_fit,'cov_fit',model.cov_fit,'mean_unfit',...
 					 model.mean_unfit,'cov_unfit',model.cov_unfit);				
-		save(['model_' money_dir '_handout_rear'], 'model_rear');
+		save(['model_' money_dir '_handout_rear.mat'], 'model_rear');
 		[tp_holdout_rear(r), tn_holdout_rear(r), error_holdout_rear(r), ...
 			classifier_holdout_rear] = eval_bills(model_rear,labels_holdout,ImgHoldout_rear,0,'r');
 		model_name = ['model_' money_dir sprintf('_front%d.mat', best_model_index)];
@@ -163,7 +163,7 @@ function classification_haar(T, rounds, pattern_scales)
 		model_front = struct('weights',voted_weights_front, 'best_ids',indexes_front(1:T),...
 					  'mean_fit',model.mean_fit,'cov_fit',model.cov_fit,'mean_unfit',...
 					  model.mean_unfit,'cov_unfit',model.cov_unfit);
-		save(['model_' money_dir '_handout_front'], 'model_front');
+		save(['model_' money_dir '_handout_front.mat'], 'model_front');
 		[tp_holdout_front(r), tn_holdout_front(r), error_holdout_front(r), ...
 			classifier_holdout_front] = eval_bills(model_front,labels_holdout,ImgHoldout_front,0,'g');
 		%REAR&FRONT CLASSIFIER - JUST LABELS NEEDED________________________
