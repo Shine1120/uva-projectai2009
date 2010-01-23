@@ -42,15 +42,17 @@ function [alpha, indexs, mean_fit, mean_unfit, cov_fit, cov_unfit] = ...
 				for j=1:size(convImages,1)
 					prob_fit(j)   = mvnpdf(convImages(j,i), mean_fit(i), cov_fit(i));
 					prob_unfit(j) = mvnpdf(convImages(j,i), mean_unfit(i), cov_unfit(i));
-					recognized(j) = (prob_fit(j)<=prob_unfit(j));
+					final_fit(j) = (0.4 * prob_fit(j))/(0.4 * prob_fit(j) + 0.6 * prob_unfit(j));
+					final_unfit(j) = (0.6 * prob_unfit(j))/(0.4 * prob_fit(j) + 0.6 * prob_unfit(j));
+					recognized(j) = (final_fit(j)<=final_unfit(j));
 				end	
 		%COMPUTE THE ERROR FOR EACH WEAK CLASSIFIER________________________ 
 				error(i)   = sum(weights .* abs(recognized' - labels)) + delta;				
 				ei(i,:)    = abs(recognized' - labels);
 				pattern_id = ceil(i/(ySegms*xSegms));
-				fprintf('\t\t Error for model %d is %f\t pattern type:%d\t scale_x:%d\t scale_y:%d\n',i,error(i),...
-					rect_patterns(pattern_id).parent_id,rect_patterns(pattern_id).scale_x,...
-					rect_patterns(pattern_id).scale_y);
+% 				fprintf('\t\t Error for model %d is %f\t pattern type:%d\t scale_x:%d\t scale_y:%d\n',i,error(i),...
+% 					rect_patterns(pattern_id).parent_id,rect_patterns(pattern_id).scale_x,...
+% 					rect_patterns(pattern_id).scale_y);
 			else
 				error(i) = 1;
 			end
