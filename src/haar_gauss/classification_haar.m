@@ -85,11 +85,11 @@ function classification_haar(T, rounds, pattern_scales)
 			%EVALUATION ___________________________________________________	
 			%CLASSIFY THE NEW DATA USING THE STRONG CLASSIFIER_____________              
 				if (mod(j,2)==0)                 
-					string_name = ['model_' money_dir sprintf('_rear%d.mat', rounds*(r-1)+1)];
+					string_name = ['model_' money_dir sprintf('_rear%d.mat', rounds*(r-1)+i)];
 					save(string_name, 'model');   
 					[tp_rear(i),tn_rear(i),error_rear(i),classifier_rear]=eval_bills(model,labels_test,ImgTest,0,0);
 				elseif (mod(j,2)~=0) 
-					string_name = ['model_' money_dir sprintf('_front%d.mat',rounds*(r-1)+1)];
+					string_name = ['model_' money_dir sprintf('_front%d.mat',rounds*(r-1)+i)];
 					save(string_name, 'model');
 					[tp_front(i),tn_front(i),error_front(i),classifier_front]=eval_bills(model,labels_test,ImgTest,0,0);
 				end
@@ -112,7 +112,7 @@ function classification_haar(T, rounds, pattern_scales)
 					labels_test, ImgTest, both_val(i,:),0);		
 			if error_both(i)<=min_error
 				min_error = error_both(i);
-				best_model_index = rounds*(r-1)+1;
+				best_model_index = rounds*(r-1)+i;
 			end	
 		end		
 		%COMPUTE THE MEAN OF THE RESULTS FROM THE CORSSVALIDATION__________
@@ -173,8 +173,8 @@ function classification_haar(T, rounds, pattern_scales)
 										ImgHoldout_front,both_holdout,'b');
 		hold off;legend('rear','front');
 	end
-	plot_regions(ySegms,xSegms,voted_indexes_rear, 'rear');
-	plot_regions(ySegms,xSegms,voted_indexes_front, 'front');
+	plot_regions(ySegms, xSegms, voted_indexes_rear, 'rear');
+	plot_regions(ySegms, xSegms, voted_indexes_front, 'front');
 	
 	%THE MEAN OF THE RESULTS FOR ALL ROUND AND ALL REPETITIONS_____________
 	fprintf('\t Correct_Unfit:%f \t Correct_Fit:%f \t Incorrect_Fit:%f \t Incorrect_Unfit:%f \t Error_Rear:%f \n',...
