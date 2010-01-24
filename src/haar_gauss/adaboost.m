@@ -13,6 +13,9 @@
 %__________________________________________________________________________
 function [alpha, indexs, mean_fit, mean_unfit, cov_fit, cov_unfit] = ...
 							adaboost(ySegms,xSegms,convImages,T,rect_patterns,labels)
+	prior_fit   = 0.5;
+	prior_unfit = 0.5;
+						
 	positives = sum(sum(labels == 1)); 
 	negatives = sum(sum(labels == 0));
 	weights   = 2/positives .* (labels==1) + 2/negatives .* (labels==0); %weights = 2/length(labels); 
@@ -42,8 +45,8 @@ function [alpha, indexs, mean_fit, mean_unfit, cov_fit, cov_unfit] = ...
 				for j=1:size(convImages,1)
 					prob_fit(j)    = mvnpdf(convImages(j,i), mean_fit(i), cov_fit(i));
 					prob_unfit(j)  = mvnpdf(convImages(j,i), mean_unfit(i), cov_unfit(i));
-					final_fit(j)   = (0.60 * prob_fit(j))/(0.60 * prob_fit(j) + 0.40 * prob_unfit(j)+2);
-					final_unfit(j) = (0.40 * prob_unfit(j))/(0.60 * prob_fit(j) + 0.40 * prob_unfit(j)+2);
+					final_fit(j)   = (prior_fit * prob_fit(j)+1)/(prior_fit * prob_fit(j) + prior_unfit * prob_unfit(j)+2);
+					final_unfit(j) = (prior_unfit * prob_unfit(j)+1)/(prior_fit * prob_fit(j) + prior_unfit * prob_unfit(j)+2);
 					recognized(j)  = (final_fit(j)<=final_unfit(j));
 				end	
 		%COMPUTE THE ERROR FOR EACH WEAK CLASSIFIER________________________ 
