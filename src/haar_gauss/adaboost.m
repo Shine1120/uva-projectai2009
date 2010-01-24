@@ -22,7 +22,7 @@ function [alpha, indexs, mean_fit, mean_unfit, cov_fit, cov_unfit] = ...
 	mean_fit   = mean(convImages((labels==0),:));
 	mean_unfit = mean(convImages((labels==1),:));
 
-	trainFit   = convImages((labels==0),:)';
+	trainFit   = convImages((labels==0),:)'; 
 	trainUnfit = convImages((labels==1),:)';
 	cov_fit    = zeros(1,size(trainFit,1));
 	for covIdx = 1:size(trainFit,1)
@@ -40,11 +40,11 @@ function [alpha, indexs, mean_fit, mean_unfit, cov_fit, cov_unfit] = ...
 		for i=1:size(convImages,2)
 			if (sum(indexs==i)==0)
 				for j=1:size(convImages,1)
-					prob_fit(j)   = mvnpdf(convImages(j,i), mean_fit(i), cov_fit(i));
-					prob_unfit(j) = mvnpdf(convImages(j,i), mean_unfit(i), cov_unfit(i));
-					final_fit(j) = (0.4 * prob_fit(j))/(0.4 * prob_fit(j) + 0.6 * prob_unfit(j));
-					final_unfit(j) = (0.6 * prob_unfit(j))/(0.4 * prob_fit(j) + 0.6 * prob_unfit(j));
-					recognized(j) = (final_fit(j)<=final_unfit(j));
+					prob_fit(j)    = mvnpdf(convImages(j,i), mean_fit(i), cov_fit(i));
+					prob_unfit(j)  = mvnpdf(convImages(j,i), mean_unfit(i), cov_unfit(i));
+					final_fit(j)   = (0.60 * prob_fit(j))/(0.60 * prob_fit(j) + 0.40 * prob_unfit(j)+2);
+					final_unfit(j) = (0.40 * prob_unfit(j))/(0.60 * prob_fit(j) + 0.40 * prob_unfit(j)+2);
+					recognized(j)  = (final_fit(j)<=final_unfit(j));
 				end	
 		%COMPUTE THE ERROR FOR EACH WEAK CLASSIFIER________________________ 
 				error(i)   = sum(weights .* abs(recognized' - labels)) + delta;				

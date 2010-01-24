@@ -10,9 +10,9 @@ function classification_haar(T, rounds, pattern_scales)
     money_dir       = 'neur10'; % 'neur05';  
     fit             = ['moneyDivided/wholeplusborder/' money_dir '/fit/'];
     unfit           = ['moneyDivided/wholeplusborder/' money_dir '/unfit/'];	
-	hold_n_out      = 80;
-	slice           = 80;
-	repetitions     = 5;
+	hold_n_out      = 75;
+	slice           = 35;
+	repetitions     = 2;
 	ySegms			= 12;
 	xSegms			= 5;
 	dir_fit_rear    = dir([fit 'r*.bmp']);
@@ -37,8 +37,10 @@ function classification_haar(T, rounds, pattern_scales)
  	load 'convolved_images_front'
  	load 'convolved_images_rear'
  	load 'patterns'	
-	min_error        = 1;
-	best_model_index = 0;
+	min_error_rear   = 1;
+	min_error_front  = 1;
+	best_index_rear  = 0;
+	best_index_front = 0;
 	%START REPETITIONS OF CROSSVALIDATION__________________________________
 	for r=1:repetitions	
 		%DEFINE HOLDOUT SET________________________________________________ 	
@@ -110,9 +112,13 @@ function classification_haar(T, rounds, pattern_scales)
 			both_val(i,:) = 1-(1-classifier_front).*(1-classifier_rear); 				
 			[tp_both(i),tn_both(i),error_both(i),both_val(i,:)]=eval_bills(model,...
 					labels_test, ImgTest, both_val(i,:),0);		
-			if error_both(i)<=min_error
-				min_error = error_both(i);
-				best_model_index = rounds*(r-1)+i;
+			if error_rear(i)<=min_error_rear
+				min_error_rear  = error_rear(i);
+				best_index_rear = rounds*(r-1)+i;
+			end	
+			if error_front(i)<=min_error_front
+				min_error_front  = error_front(i);
+				best_index_front = rounds*(r-1)+i;
 			end	
 		end		
 		%COMPUTE THE MEAN OF THE RESULTS FROM THE CORSSVALIDATION__________
@@ -138,39 +144,40 @@ function classification_haar(T, rounds, pattern_scales)
 		ImgHoldout_front = convolutions_front(holdout_id,:);
 		ImgHoldout_rear  = convolutions_rear(holdout_id,:); 
 
-		mask_rear                 = (voted_rear(2,:)==0);
-		voted_rear(2,mask_rear)   = 1;
-		mask_front                = (voted_front(2,:)==0);
-		voted_front(2,mask_front) = 1;
+		mask_rear                    = (voted_rear(2,:)==0);
+		voted_rear(2,mask_rear)      = 1;
+		mask_front                   = (voted_front(2,:)==0);
+		voted_front(2,mask_front)    = 1;
 		[sorted_rear indexes_rear]   = sort((voted_rear(1,:)./voted_rear(2,:)),'descend'); 
 		[sorted_front indexes_front] = sort((voted_front(1,:)./voted_front(2,:)),'descend');
 		voted_weights_rear  = sorted_rear(1:T)
 		voted_indexes_rear  = indexes_rear(1:T)
 		voted_weights_front = sorted_front(1:T)
 		voted_indexes_front = indexes_front(1:T)
-		%LOAD THE BEST MODEL FROM THE CROSSVALIDAITON______________________
+		%LOAD THE BEST MODEL FROM THE CROSSVALIDAITON(REAR)________________
 		figure;hold on;
-		model_name = ['model_' money_dir sprintf('_rear%d.mat', best_model_index)];
+		model_name = ['model_' money_dir sprintf('_rear%d.mat', best_index_rear)];
 		load(model_name);
-		model_rear = struct('weights', voted_weights_rear, 'best_ids', indexes_rear(1:T),...
+		model      = struct('weights', voted_weights_rear, 'best_ids', indexes_rear(1:T),...
 					'mean_fit',model.mean_fit,'cov_fit',model.cov_fit,'mean_unfit',...
 					 model.mean_unfit,'cov_unfit',model.cov_unfit);				
-		save(['model_' money_dir '_handout_rear.mat'], 'model_rear');
+		save(['model_' money_dir '_handout_rear.mat'], 'model');
 		[tp_holdout_rear(r), tn_holdout_rear(r), error_holdout_rear(r), ...
-			classifier_holdout_rear] = eval_bills(model_rear,labels_holdout,ImgHoldout_rear,0,'r');
-		model_name = ['model_' money_dir sprintf('_front%d.mat', best_model_index)];
+			classifier_holdout_rear] = eval_bills(model,labels_holdout,ImgHoldout_rear,0,'r');
+		%LOAD THE BEST MODEL FROM THE CROSSVALIDAITON(FRONT)_______________		
+		model_name = ['model_' money_dir sprintf('_front%d.mat', best_index_front)];
 		load(model_name);	
-		model_front = struct('weights',voted_weights_front, 'best_ids',indexes_front(1:T),...
-					  'mean_fit',model.mean_fit,'cov_fit',model.cov_fit,'mean_unfit',...
-					  model.mean_unfit,'cov_unfit',model.cov_unfit);
-		save(['model_' money_dir '_handout_front.mat'], 'model_front');
+		model      = struct('weights',voted_weights_front, 'best_ids',indexes_front(1:T),...
+					 'mean_fit',model.mean_fit,'cov_fit',model.cov_fit,'mean_unfit',...
+					 model.mean_unfit,'cov_unfit',model.cov_unfit);
+		save(['model_' money_dir '_handout_front.mat'], 'model');
 		[tp_holdout_front(r), tn_holdout_front(r), error_holdout_front(r), ...
-			classifier_holdout_front] = eval_bills(model_front,labels_holdout,ImgHoldout_front,0,'g');
+			classifier_holdout_front] = eval_bills(model,labels_holdout,ImgHoldout_front,0,'g');
 		%REAR&FRONT CLASSIFIER - JUST LABELS NEEDED________________________
 		both_holdout = 1-(1-classifier_holdout_front).*(1-classifier_holdout_rear); 				
 		[tp_holdout_both(r), tn_holdout_both(r), error_holdout_both(r), ...
-			classifier_holdout_both] = eval_bills(model_front,labels_holdout,...
-										ImgHoldout_front,both_holdout,'b');
+			classifier_holdout_both] = eval_bills(model,labels_holdout,...
+											ImgHoldout_front,both_holdout,0);
 		hold off;legend('rear','front');
 	end
 	plot_regions(ySegms, xSegms, voted_indexes_rear, 'rear');
