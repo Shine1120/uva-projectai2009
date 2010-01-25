@@ -1,0 +1,43 @@
+function eval_combined()
+
+	doread		= 0;
+	docreate	= 0;
+
+	moneydir = '../validationset/wholeplusborderHO/neur10';
+
+
+
+	if (doread)
+		fprintf('reading training data...\n');
+		preprocessnew(moneydir);
+	end
+
+	load('all_money_rear');
+	load('all_money_front');		
+	load('all_labels')
+%	size(all_labels)
+%	size(all_money_front)
+	
+	
+	
+	predictions = eval_pca(all_money_front, all_money_rear, all_labels, docreate);
+	
+	
+	mask_fit = all_labels == 0;
+	mask_unfit = all_labels == 1;
+
+	[all_labels predictions]
+	
+	good_unfit = sum(all_labels(mask_unfit) == predictions(mask_unfit))/length(all_labels)
+	
+	good_fit = sum(all_labels(mask_fit) == predictions(mask_fit))/length(all_labels)	
+
+	error_unfit = sum(all_labels(mask_unfit) ~= predictions(mask_unfit))/length(all_labels)
+	
+	error_fit = sum(all_labels(mask_fit) ~= predictions(mask_fit))/length(all_labels)	
+	
+
+	for i=1
+	
+	
+end
