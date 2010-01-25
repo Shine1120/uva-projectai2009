@@ -3,7 +3,7 @@ function eval_combined()
 	doread		= 1;
 	docreate	= 1;
 
-	moneydir = '../validationset/wholeplusborderHO/neur10';
+	moneydir = 'moneyDivided/wholeplusborderHO/neur10';
 
 
 
@@ -18,9 +18,13 @@ function eval_combined()
 %	size(all_labels)
 %	size(all_money_front)
 	
+
+	predictions = final_eval(all_money_rear, all_money_front);
 	
+	size(predictions)
+	size(all_labels)
 	
-	predictions = eval_pca(all_money_front, all_money_rear, all_labels, docreate);
+%	predictions = eval_pca(all_money_front, all_money_rear, all_labels, docreate);
 	
 	[all_labels predictions]
 	
