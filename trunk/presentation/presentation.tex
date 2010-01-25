@@ -1,28 +1,43 @@
 \documentclass{beamer}
-\usepackage{beamerthemesplit}
-\usepackage{amsmath}
-\usetheme{classic}%\usetheme{Boadilla} %\usetheme{shadow} 
-\title{Dirty money}
-\author{Silvia, Jasper \& Nimrod}
-\date{21 Januari 2010}
+\mode<presentation>{\usetheme{classic}
+\setbeamercovered{transparent}}
+\usepackage[T1]{fontenc}
+\usepackage{ifpdf}
+\usepackage{graphicx}
+\usepackage{color}
 
+\newcommand{\tbf}{\textbf}
+\newcommand{\ds}{\displaystyle}
+\newcommand{\ra}{\rightarrow}
+
+\ifpdf
+\hypersetup{pdfpagemode=FullScreen}
+\fi
+
+\title{\tbf{Dirty money: \\ Feature Selection Using AdaBoost}}
+\author{Silvia, Jasper \& Nimrod}
+%\subject{bmeps}
 \begin{document}
+
 \frame{\titlepage}
 \section[Outline]{}
 \frame{\tableofcontents}
-\definecolor{orange}{rgb}{0.9,0.4,0}
 
-\section{Our Task}
+
+% \beamertemplateshadingbackground{yellow!50}{magenta!50}
+
+
+\section{Introduction}
 	\frame{
 		\frametitle{What and why?}
-		\hspace*{8px}Recognize the dirty bills from the clean once\\
-		\vspace{10px}\pause
-		\hspace*{8px}Euro bills are manufactured all over europe,\\ 
-		\hspace*{8px}with different paper and ink, which makes sorting hard\\
-		\vspace{10px}
-		\hspace*{8px}for example, usa has 2 bill factories and one paper factory\\
-		 
+		\hspace*{8pt}Recognize the dirty bills from the clean once\\
+		\vspace{10pt}\pause
+		\hspace*{8pt}Euro bills are manufactured all over europe,\\ 
+		\hspace*{8pt}with different paper and ink, which makes sorting hard\\
+		\vspace{10pt}
+		\hspace*{8pt}for example, usa has 2 bill factories and one paper factory\\
 	}
+
 	\frame{ 
 		\frametitle{some facts} 
 		\begin{itemize}
@@ -33,14 +48,15 @@
 		of the dirty bills
 		\item value of good bills that are destoyed in holland is 1.5 million euro
 		\end{itemize}
-	}  		
-\section{previous work}
-	\subsection{how does the DNB do it?}
+	}  	
+	
+\section{Previous work}
+	\subsection{How does the DNB do it?}
 		\frame{
   			\frametitle{DNB approach}
-  			\hspace*{8px} Reflection of light on small area near water mark area\\
-  			\vspace{10px}\pause
-  			\hspace*{8px} Results:
+  			\hspace*{8pt} Reflection of light on small area near water mark area\\
+  			\vspace{10pt}\pause
+  			\hspace*{8pt} Results:
 			\begin{itemize}
 			\item  5\% dirty bills error 
 			\item 30\% clean bills error
@@ -49,9 +65,9 @@
 	\subsection{By Molenaar, Nusselder \& Stefanov}
 		\frame{
   			\frametitle{MNS approach}
-  			\hspace*{8px} Learn eigen money using PCA\\
-  			\vspace{10px}\pause
-  			\hspace*{8px} Results (what are the right numbers?):
+  			\hspace*{8pt} Learn eigen money using PCA\\
+  			\vspace{10pt}\pause
+  			\hspace*{8pt} Results (what are the right numbers?):
 			\begin{itemize}
 			\item   5 euro: 10\%  7\%  
 			\item  10 euro:  8\%  5\%  
@@ -60,110 +76,103 @@
 	\subsection{By Jan-Mark Geusebroek}
 		\frame{
   			\frametitle{JM approach}
-  			\hspace*{8px} Pre-processing: 
+  			\hspace*{8pt} Pre-processing: 
 			\begin{itemize}
 				\item bills alligned  
 				\item non-linear reflection
 				\item water-mark region extracted
             \end{itemize} 
-  			\hspace*{8px} Learn eigen-money on water mark region\\
-  			\vspace{10px}\pause
-  			\hspace*{8px} Results:
+  			\hspace*{8pt} Learn eigen-money on water mark region\\
+  			\vspace{10pt}\pause
+  			\hspace*{8pt} Results:
 			\begin{itemize}
 			\item   5 euro:  3\%  0\% 
 			\item  10 euro: 16\%  6\%  
 			\end{itemize}
   		}
+
+  		
 \section{Our approach}
 	\subsection{Task redefined}
 		\frame{
   			\frametitle{The task}
-			\hspace*{8px} Improve classification of 5 and 10 euro bills\\
-			\vspace{10px}\pause
-			\hspace*{8px} new data set:\\
-			\hspace*{8px} Euro 5 and 10\\
-			\hspace*{18px} $\approx400$ banknotes per class\\
-			\hspace*{18px} $\approx250$ fit, $\approx150$ unfit
+			\hspace*{8pt} Improve classification of 5 and 10 euro bills\\
+			\vspace{10pt}\pause
+			\hspace*{8pt} new data set:\\
+			\hspace*{8pt} Euro 5 and 10\\
+			\hspace*{18pt} $\approx400$ banknotes per class\\
+			\hspace*{18pt} $\approx250$ fit, $\approx150$ unfit
 		}
 		\frame{
   			\frametitle{Classifiers}
-			\hspace*{8px} Three different stong classifiers built fron weak classifiers\\
-			\vspace{10px}\pause
+			\hspace*{8pt} Three different stong classifiers built fron weak classifiers\\
+			\vspace{10pt}\pause
 			\begin{itemize}
 				\item Haar 
 				\item PCA  
 				\item intensity \& edge  
 			\end{itemize}
-			\hspace*{8px} combined into one final classifier
+			\hspace*{8pt} combined into one final classifier
 		}
-	
-	\subsection{Haar}
-		\frame{
-			\frametitle{Haar}
-			\hspace*{8px}Haar
-		}
-	\subsection{PCA}
-		\frame{
-			\frametitle{PCA}
-			\hspace*{8px}PCA
-		}
+
 	\subsection{Intensity \& edge} 
 		\frame{
 			\frametitle{Intensity \& edge}
-			\hspace*{8px}Intensity approach is inspired by current approach DNB\\
-			\vspace{10px}
-			\hspace*{8px}Can be (easily) computed by the average intansity of a bill\\
-			\vspace{10px} \pause
-			\hspace*{8px}Edge approach is inspired by idea that used bill have more folds
+			\hspace*{8pt}Intensity approach is inspired by current approach DNB\\
+			\vspace{10pt}
+			\hspace*{8pt}Can be (easily) computed by the average intansity of a bill\\
+			\vspace{10pt} \pause
+			\hspace*{8pt}Edge approach is inspired by idea that used bill have more folds
 			nad wrinkles\\ 
-			\vspace{10px}
-			\hspace*{8px}Can be computed by the sum of edge-points from a canny edge
+			\vspace{10pt}
+			\hspace*{8pt}Can be computed by the sum of edge-points from a canny edge
 			filter 
 		}
-		\frame{
-			\frametitle{Intensity \& edge 2}
-			\hspace*{8px}construct probability distribution of intensity and edge for
-			clean and dirty bills seperatly\\
-			\vspace{10px}
-			\hspace*{8px} use these distribution to calculate clean and dirty prob\\
-			\vspace{10px}
-	
-		}
+	\frame{
+		\frametitle{Intensity \& edge}
+			\begin{figure}[H]
+				\begin{center}
+					\includegraphics[width=5cm]{img/neur05int.eps}
+					\includegraphics[width=5cm]{img/neur05edge.eps} \\
+					\includegraphics[width=5cm]{img/neur10int.eps}
+					\includegraphics[width=5cm]{img/neur10edge.eps} \\
+				\end{center}
+			\end{figure}
+	}
+
 	\subsection{Adaboost} 
 		\frame{
 			\frametitle{Adaboost}
-			\hspace*{8px}Adaboost is used to combine weak classifiers into a stong
-			classifier\\
+			\hspace*{8pt}Adaboost is used to combine weak classifiers into a strong classifier\\
 		}
 
-\section{Our results}
+\section{Experiments \& results}
 	\frame{
 		\frametitle{Results Haar}
-		\hspace*{8px}Haar
+		\hspace*{8pt}Haar
 	}
 	\frame{
 		\frametitle{Results PCA}
-		\hspace*{8px}PCA
+		\hspace*{8pt}PCA
 	}
 	\frame{
-		\frametitle{Results Intensity \& edge}
-		\hspace*{8px}Intensity \& edge
+		\frametitle{Results intensity \& edge}
+		\hspace*{8pt}Intensity \& edge
 	}
 	\frame{
-		\frametitle{Results All combined}
-		\hspace*{8px}Combined classifier
+		\frametitle{Results combined}
+		\hspace*{8pt}Combined classifier
 	}
 
 \section{Conclusion}
 	\frame{
 		\frametitle{conclusion}
-		\hspace*{8px}conclusion
+		\hspace*{8pt}conclusion
 	}
 
 \section{future work} 
 	\frame{
 		\frametitle{future work}
-		\hspace*{8px}future work
+		\hspace*{8pt}future work
 	}
-
 \end{document}
