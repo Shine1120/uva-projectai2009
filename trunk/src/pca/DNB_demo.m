@@ -3,11 +3,11 @@ function DNB_demo(docreate)%(all_money_front, all_money_rear, all_labels)
 
 
 %% Best Parameter Settings so far:
-T				= 2;	% number of hypothesis for AdaBoost
+T				= 9;	% number of hypothesis for AdaBoost
 leave_n_out		= 35;	% size of test-set
 hold_n_out		= 75;   % size of validation-set
-trials			= 50;	% 20 fold experiment
-repetitions		= 50;	% 20 for repeating the k-fold experiment
+trials			= 10;	% 20 fold experiment
+repetitions		= 10;	% 20 for repeating the k-fold experiment
 unfitaccept		= 0.04; % ensures better than 5% error on unfit class
 
 
@@ -294,12 +294,17 @@ for q=1:repetitions
 		n(2) = 1;
 	end;
 	%error_naive_Bayes_all = 1-correctall./n
+	
+	error_naive_Best
 	error_naive_Bayes = 1-correctbayes./n
 	error_front = 1-correct_front./n
 	error_rear = 1-correct_rear./n
 	
 	if error_naive_Bayes < error_naive_Best
 		fprintf('Found new best model! Saving... ')
+		ErrorBayes = error_naive_Bayes 
+		ErrorBest = error_naive_Best
+		error_naive_Best = error_naive_Bayes;
 		save best_alpha_front.mat alpha1
 		save best_idx_front.mat modelIdx1
 		save best_model_front.mat model_front
