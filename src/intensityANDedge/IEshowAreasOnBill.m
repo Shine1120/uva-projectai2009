@@ -1,5 +1,5 @@
 function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
-	doFront,doRear,bestModels,do5Euro,do10Euro)
+	doFront,doRear,bestModels,do5Euro,do10Euro, titleTxt)
 
 	segsPerSide		= Xsegs * Ysegs;
 	segsPerMethod	= segsPerSide * (doFront+doRear);
@@ -38,10 +38,10 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 	MethName = ['E','I'];
 
 	
-	figure(2)
+	figure
 	subplot(1,2,1)
 	imshow(imageFront)
-	title('front    red: edge, blue: intensity')
+	title([titleTxt ' front'])
 	hold on
 	for i=1: length(frontSegs)
 		segment = frontSegs(i);
@@ -57,7 +57,7 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 		rectangle('Position',[x,y,segWidthFront,segHeightFront],'EdgeColor',colors(frontMethod(i)))
 		p       = patch([x,x+segWidthFront,x+segWidthFront,x],...
 						[y,y,y+segHeightFront,y+segHeightFront] , colors(frontMethod(i)));
-		alpha(p , 0.3);
+%		alpha(p , 0.3);
 %		set(p,'AlphaDataMapping', 0.2)	
 	end
 	for i=1: length(frontSegs)
@@ -83,7 +83,7 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 	
 	subplot(1,2,2)
 	imshow(imageRear)
-	title('rear')
+	title('rear    red: edge, blue: intensity')
 	hold on
 	for i=1: length(rearSegs)
 		segment = rearSegs(i) - segsPerSide;
@@ -99,7 +99,7 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 		rectangle('Position',[x,y,segWidthRear,segHeightRear],'EdgeColor',colors(rearMethod(i)))
 		p       = patch([x,x+segWidthRear,x+segWidthRear,x],...
 						[y,y,y+segHeightRear,y+segHeightRear] , colors(rearMethod(i)));
-		alpha(p , 0.3);
+%		alpha(p , 0.3);
 %		set(p,'AlphaDataMapping', 0.2)	
 	end
 	for i=1: length(rearSegs)
