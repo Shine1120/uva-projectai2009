@@ -2,11 +2,11 @@ function [ output_args ] = IErunAda( )
 
 	close all;
 
-	do5Euro           = 0;
-	do10Euro          = 1;
+	do5Euro           = 1;
+	do10Euro          = 0;
 
-	doWholeNote       = 1;
-	doWholeNotePB     = 0;
+	doWholeNote       = 0;
+	doWholeNotePB     = 1;
 	doWhitePatchNote  = 0;
 
 	path = '../moneyDivided/';
@@ -27,9 +27,9 @@ function [ output_args ] = IErunAda( )
 
 	sizeHoldoutSet    = 75;
 	leave_n_out		  = 35;	% size of test-set
-	repetitions		  = 5;
-	trials			  = 20;
-	hypotheses 		  = 15;
+	repetitions		  = 10;
+	trials			  = 50;
+	hypotheses 		  = 25;
 	
 	doEdge			  = 1;
 	doIntensity		  = 1;
@@ -44,8 +44,8 @@ function [ output_args ] = IErunAda( )
 	useFront		  = 1;
 	useRear			  = 1;
 
-	xSegms			  = 4;
-	ySegms			  = 10;
+	xSegms			  = 5;
+	ySegms			  = 12;
 	
 	modelCount		  = xSegms*ySegms*(useFront+useRear);
 	
@@ -57,7 +57,9 @@ function [ output_args ] = IErunAda( )
     holdoutSetE       = [];
     holdoutSetI       = [];
 	
-	modelsVotes       = [];
+	modelsVotes       = zeros(5,modelCount*(doEdge+doIntensity));
+	finalModels		  = zeros(7,modelCount*(doEdge+doIntensity));
+	uberModels		  = zeros(7,modelCount*(doEdge+doIntensity));
 	
 	fprintf('\nconstructing data set...\n')
 	tic
@@ -89,6 +91,8 @@ function [ output_args ] = IErunAda( )
 	sumTNRate = 0;
 	
 	overAllBestHOResults = 0;
+	overAllBestHOFitGoodClass = 0;
+	overAllBestHOUnfitGoodClass = 0;
 	
 	for r=1:repetitions
 		tic
@@ -156,10 +160,10 @@ function [ output_args ] = IErunAda( )
 			%%%%%%%%%%%%%%%%%%%%%%TESTING TEST SET%%%%%%%%%%%%%%%%%%%%%%%%%
 			[ignore, ignore, ignore, testGoodClassified] =...
 					IErunModels(modelsCombi,bestModels,testSetCombi,...
-					testLabels,alpha,ones(size(alpha,2)),0);
+					testLabels,alpha,0);
 			%%%%%%%%%%%%%%%%%%%FINISHED TESTING TEST SET%%%%%%%%%%%%%%%%%%%
 			
-			[ modelsVotes ] = IEupdateModelVotes(modelsVotes,...
+			modelsVotes = IEupdateModelVotes(modelsVotes,...
 								bestModels,testGoodClassified);
 
 		end %trials
@@ -174,17 +178,16 @@ function [ output_args ] = IErunAda( )
 		% occurences of a model in the chosen models (by adaboost)
 		[ignore modelsHighestVotesIds] = sort(modelsVotes(4,:),'descend');
 		chosenModelsAlphas = modelsVotes(3,modelsHighestVotesIds(1:hypotheses))./...
-			modelsVotes(2,modelsHighestVotesIds(1:hypotheses));
-		averageGoodClassified = modelsVotes(4,modelsHighestVotesIds(1:hypotheses))./...
-			modelsVotes(2,modelsHighestVotesIds(1:hypotheses));
+							 modelsVotes(2,modelsHighestVotesIds(1:hypotheses));
+% 		averageGoodClassified = modelsVotes(4,modelsHighestVotesIds(1:hypotheses))./...
+% 								modelsVotes(2,modelsHighestVotesIds(1:hypotheses));
 		chosenModelsIdx    = modelsVotes(5,modelsHighestVotesIds(1:hypotheses));
 
 		%%%%%%%%%%%%%%%%%%%%%%%TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%%%%%%
 		
 		[WinnerModels, HOTPRate, HOTNRate, HOGoodClassified] =...
 				IErunModels(averageModelsOverTrials,chosenModelsIdx',...
-				holdoutSetCombi,holdoutSetClasses,chosenModelsAlphas,...
-				averageGoodClassified,0);
+				holdoutSetCombi,holdoutSetClasses,chosenModelsAlphas,0);
 
 		sumTPRate	 = sumTPRate + HOTPRate;
 		sumTNRate	 = sumTNRate + HOTNRate;
@@ -193,42 +196,138 @@ function [ output_args ] = IErunAda( )
 			HOTPRate,HOTNRate,1-HOGoodClassified)
 		
 		if HOGoodClassified > overAllBestHOResults 
-			overallBestModels  = WinnerModels;
-			overallBestIndexes = chosenModelsIdx;
+			fprintf('new overall Model\n')
+			overAllBestHOResults = HOGoodClassified;
+			%reinitialize bestmodel list
+			finalModels = zeros(7,modelCount*(doEdge+doIntensity));
+			finalModels = IEupdateBestModels(finalModels,modelsCombi,...
+				chosenModelsIdx,chosenModelsAlphas);
+		elseif HOGoodClassified == overAllBestHOResults 
+			fprintf('overall Models updated\n')
+			%update bestModel list
+			finalModels = IEupdateBestModels(finalModels,modelsCombi,...
+				chosenModelsIdx,chosenModelsAlphas);
+		end
+		
+		if HOTNRate > overAllBestHOUnfitGoodClass
+			fprintf('new uber model\n')
+			%if unfit good classified is better then current best results,
+			%clear uberModels and update it with the newest model
+			overAllBestHOUnfitGoodClass = HOTNRate;
+			overAllBestHOFitGoodClass   = HOTPRate;
+			uberModels = zeros(7,modelCount*(doEdge+doIntensity));
+			uberModels = IEupdateBestModels(uberModels,modelsCombi,...
+				chosenModelsIdx,chosenModelsAlphas);
+		elseif HOTNRate == overAllBestHOUnfitGoodClass
+			%if unfit good classified is as good as the current one
+			%check if fit bills are classified better then the current best
+			%results. If so, clear uberModel and reinitialize it with
+			%current model
+			
+			if HOTPRate > overAllBestHOFitGoodClass
+				fprintf('new uber model\n')
+				overAllBestHOFitGoodClass = HOTPRate;
+				uberModels = zeros(7,modelCount*(doEdge+doIntensity));
+				uberModels = IEupdateBestModels(uberModels,modelsCombi,...
+					chosenModelsIdx,chosenModelsAlphas);
+			elseif HOTPRate == overAllBestHOFitGoodClass
+				fprintf('uber models updated\n')
+				%if unfit and fit bills are classified as good ad the
+				%current best model, update uberModel with the corrent
+				%model (to average on it later on)
+				uberModels = IEupdateBestModels(uberModels,modelsCombi,...
+					chosenModelsIdx,chosenModelsAlphas);
+			end
 		end
 		%%%%%%%%%%%%%%%%%%%FINISHED TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%
 		toc
 	end %repetitions
-
+	
 	%%%%%%%%%%%%%%%%%%%%%%RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%%%%%%%
 
-	GoodClassified = zeros(size(overallBestModels,2),4);
-	for modelNr=1:size(overallBestModels,2)
-		modelToUse				   = overallBestModels(:,1:modelNr);
-		chosenModelsAlphasToUse	   = chosenModelsAlphas(1:modelNr);
-		averageGoodClassifiedToUse = averageGoodClassified(1:modelNr);
-		chosenModelsIdxToUse	   = chosenModelsIdx(1:modelNr);
+	%%%%%%%%%%%%%%%%%%%%%%RUNNING finalModels %%%%%%%%%%%%%%%%%%%%%%%%%
+	finalModels(2,:) = finalModels(2,:)./finalModels(1,:);
+	finalModels(3,:) = finalModels(3,:)./finalModels(1,:);
+	finalModels(4,:) = finalModels(4,:)./finalModels(1,:);
+	finalModels(5,:) = finalModels(5,:)./finalModels(1,:);
+	finalModels(6,:) = finalModels(6,:)./finalModels(1,:);
 
-		[ignore, PlotTPRate, PlotTNRate, PlotGoodClassified] =...
+	finalModelsMask			     = isnan(finalModels);
+	finalModels(finalModelsMask) = 0;
+
+	[ignore finalModelsSortedIdxs] = sort(finalModels(2,:),'descend');
+	finalModelsToUse = finalModels(:,finalModelsSortedIdxs(1:hypotheses));
+	
+	GoodClassified1 = zeros(size(finalModelsToUse,2),4);
+	for modelNr=1:size(finalModelsToUse,2)
+		modelToUse				= finalModelsToUse(3:6,1:modelNr);
+		chosenModelsAlphasToUse	= finalModelsToUse(2,1:modelNr);
+		chosenModelsIdxToUse	= finalModelsSortedIdxs(1:modelNr);
+
+		[ignore, PlotTPRate1 PlotTNRate1, PlotGoodClassified1] =...
 				IErunModels(modelToUse,chosenModelsIdxToUse',...
-				holdoutSetCombi,holdoutSetClasses,chosenModelsAlphasToUse,...
-				averageGoodClassifiedToUse,1);		
+				holdoutSetCombi,holdoutSetClasses,chosenModelsAlphasToUse,1);		
 
-		GoodClassified(modelNr,1) = modelNr;
-		GoodClassified(modelNr,2) = PlotGoodClassified;
-		GoodClassified(modelNr,3) = PlotTPRate;
-		GoodClassified(modelNr,4) = PlotTNRate;
+		GoodClassified1(modelNr,1) = modelNr;
+		GoodClassified1(modelNr,2) = PlotGoodClassified1;
+		GoodClassified1(modelNr,3) = PlotTPRate1;
+		GoodClassified1(modelNr,4) = PlotTNRate1;
+	end
+
+	%%%%%%%%%%%%%%%%%%%%%%RUNNING uberModels %%%%%%%%%%%%%%%%%%%%%%%%%
+	uberModels(2,:)  = uberModels(2,:)./uberModels(1,:);
+	uberModels(3,:)  = uberModels(3,:)./uberModels(1,:);
+	uberModels(4,:)  = uberModels(4,:)./uberModels(1,:);
+	uberModels(5,:)  = uberModels(5,:)./uberModels(1,:);
+	uberModels(6,:)  = uberModels(6,:)./uberModels(1,:);
+
+	uberModelsMask			   = isnan(uberModels);
+	uberModels(uberModelsMask) = 0;
+
+	[ignore uberModelsSortedIdxs] = sort(uberModels(2,:),'descend');
+	uberModelsToUse = uberModels(:,uberModelsSortedIdxs(1:hypotheses));
+	
+	GoodClassified2 = zeros(size(uberModelsToUse,2),4);
+	for modelNr=1:size(uberModelsToUse,2)
+		
+		modelToUse				= uberModelsToUse(3:6,1:modelNr);
+		chosenModelsAlphasToUse	= uberModelsToUse(2,1:modelNr);
+		chosenModelsIdxToUse	= uberModelsSortedIdxs(1:modelNr);
+		
+		[ignore, PlotTPRate2, PlotTNRate2, PlotGoodClassified2] =...
+				IErunModels(modelToUse,chosenModelsIdxToUse',...
+				holdoutSetCombi,holdoutSetClasses,chosenModelsAlphasToUse,1);		
+
+		GoodClassified2(modelNr,1) = modelNr;
+		GoodClassified2(modelNr,2) = PlotGoodClassified2;
+		GoodClassified2(modelNr,3) = PlotTPRate2;
+		GoodClassified2(modelNr,4) = PlotTNRate2;
 	end
 	%%%%%%%%%%%%%%%%%%%FINISHED RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%
 
-	figure(1)
-	plot(GoodClassified(:,1),GoodClassified(:,2),'b',...
-		 GoodClassified(:,1),GoodClassified(:,3),'r',...
-		 GoodClassified(:,1),GoodClassified(:,4),'g')
+	figure
+	plot(GoodClassified1(:,1),GoodClassified1(:,2),'b',...
+		 GoodClassified1(:,1),GoodClassified1(:,3),'r',...
+		 GoodClassified1(:,1),GoodClassified1(:,4),'g')
 	legend('overall','good fit','good unfit',3,'location','SouthEast');
 	xlabel('weak classifiers used')
 	ylabel('good classification rate')
 	title('results good classified')
+
+	IEshowAreasOnBill( xSegms, ySegms,useFront,useRear,...
+		finalModelsToUse(7,:),do5Euro,do10Euro, 'best overall models')
+
+	figure
+	plot(GoodClassified2(:,1),GoodClassified2(:,2),'b',...
+		 GoodClassified2(:,1),GoodClassified2(:,3),'r',...
+		 GoodClassified2(:,1),GoodClassified2(:,4),'g')
+	legend('overall','good fit','good unfit',3,'location','SouthEast');
+	xlabel('weak classifiers used')
+	ylabel('good classification rate')
+	title('results uber models')
+
+	IEshowAreasOnBill( xSegms, ySegms,useFront,useRear,...
+		uberModelsToUse(7,:),do5Euro,do10Euro, 'bestUnfit models')
 
 	fprintf('\n\nresults for %d repetitions:\n',repetitions)
 	fprintf('fit right:   \t%4.4g%%\n',(sumTPRate/(repetitions))*100)
@@ -236,12 +335,9 @@ function [ output_args ] = IErunAda( )
 	fprintf('unfit right: \t%4.4g%%\n',(sumTNRate/(repetitions))*100)
 	fprintf('unfit wrong: \t%4.4g%%\n',(1-(sumTNRate/(repetitions)))*100)
 	
-	numberOfMethods = doEdge + doIntensity;
-	overallBestIndexes
-	IEshowAreasOnBill( xSegms, ySegms,...
-	useFront,useRear,overallBestIndexes,do5Euro,do10Euro)
-
-%	save(fileName matrix)
+	
+	save resultModels.mat finalModelsToUse
+	save uberModels.mat uberModelsToUse
 end
 
 function p = randperm(n)

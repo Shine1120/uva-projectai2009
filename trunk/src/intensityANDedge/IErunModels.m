@@ -1,6 +1,6 @@
-function [modelsOut, TPRate, TNRate,goodClassified] =...
+function [modelsOut, fitGoodRate, unfitGoodRate,goodClassified] =...
 		  IErunModels(modelsIN,bestModels,dataSet,...
-		  labels,alpha,rescale,plot)
+		  labels,alpha,plot)
 
 	if (plot)
 		modelsOut = modelsIN;
@@ -16,23 +16,23 @@ function [modelsOut, TPRate, TNRate,goodClassified] =...
 		mask = modelLabels==0;
 		modelLabels(mask) = -1;
 		sumLabels = sumLabels +...
-					(modelLabels.*alpha(modelNr).*rescale(modelNr));
+					(modelLabels.*alpha(modelNr)');%.*rescale(modelNr));
 	end
 
 	resultLabels		= sign(sumLabels);
 	mask				= resultLabels<=0;
 	resultLabels(mask)  = 0;
 
-	fitData					= labels==1;
-	unfitData				= labels==0;
+	fitData				= labels==1;
+	unfitData			= labels==0;
 
 	fitResults			= resultLabels(fitData);
 	unfitResults		= resultLabels(unfitData);
 
-	TP					= fitResults==1;
-	TPRate				= sum(TP)/size(TP,1);
-	TN					= unfitResults==0;
-	TNRate				= sum(TN)/size(TN,1);
-	goodClassified		= (sum(TP)+sum(TN))./(size(TP,1)+size(TN,1));
+	fitGood				= fitResults==1;
+	fitGoodRate			= sum(fitGood)/size(fitGood,1);
+	unfitGood			= unfitResults==0;
+	unfitGoodRate		= sum(unfitGood)/size(unfitGood,1);
+	goodClassified		= (sum(fitGood)+sum(unfitGood))./...
+						  (size(fitGood,1)+size(unfitGood,1));
 end
-
