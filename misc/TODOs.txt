@@ -1,0 +1,22 @@
+TODOs:
+
+- [V] integrate JM strong classifier in the combined classifier  
+- [X] output best model for T=2 for combined classifier
+- [X] more repetition/trials to filter out margin
+- [X] create images for the best regions
+- [X] subtracting mean from bills (to get intensity invariance)
+- [X] build presentation!!!
+- [X] produce results on the same grid (21x3 preferably)
+- [X] redo histogram plots (front and rear)
+- [X] check out overlapping areas (haar and edge/intensity)
+
+
+
+
+A correct title voor Haar:
+- convolution with Haar filters
+
+
+Q: overfitting in JM code? [V]
+Q: validation set reliable? [V]
+Q: does it make sense to increase the dataset by adding gaussian noise? [V]
