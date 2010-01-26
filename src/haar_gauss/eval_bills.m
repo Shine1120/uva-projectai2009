@@ -16,28 +16,28 @@
 function [true_pos, true_neg, error, classifier] = eval_bills(model, target, convImg, classifier, isplot)
 	%BUILD THE STRONG CLASSIFIER OUT OF THE BEST T ONES FROM ADABOOST______
 	if classifier == 0
-		prior_fit   = 0.5;
-		prior_unfit = 0.5;
+		prior_fit   = 0.55;
+		prior_unfit = 0.45;
 		for i=1:size(model.best_ids,2)
 			id = model.best_ids(i);
 			for j=1:size(convImg,1)
 				prob_fit(j)     = mvnpdf(convImg(j,id), model.mean_fit(id), model.cov_fit(id));
 				prob_unfit(j)   = mvnpdf(convImg(j,id), model.mean_unfit(id), model.cov_unfit(id));
-				final_fit(j)    = (prior_fit * prob_fit(j)+1)/(prior_fit * prob_fit(j) + prior_unfit * prob_unfit(j)+2);
-				final_unfit(j)  = (prior_unfit * prob_unfit(j)+1)/(prior_fit * prob_fit(j) + prior_unfit * prob_unfit(j)+2);
-				recognized(i,j) = (final_fit(j)<=final_unfit(j));
 			end	
+			final_fit       = ((prior_fit .* prob_fit)+1)./((prior_fit .* prob_fit) + (prior_unfit .* prob_unfit)+2);
+			final_unfit     = ((prior_unfit .* prob_unfit)+1)./((prior_fit .* prob_fit) + (prior_unfit .* prob_unfit)+2);
+			recognized(i,:) = (final_fit<=final_unfit);
 		end	
 		
 		if (isplot ~= 0)
 			for i=1:size(model.best_ids,2) 
-				classifier      = ((model.weights(:,(1:i)) * recognized((1:i),:)) >= sum(0.5*(model.weights(:,(1:i)))));			
-				correct_plot(i) = sum(classifier' == target)/length(target); 	
+				classifier        = ((model.weights(:,(1:i)) * recognized((1:i),:)) >= sum(0.5*(model.weights(:,(1:i)))));			
+				incorrect_plot(i) = 1 - sum(classifier' == target)/length(target); 	
 			end
-			plot([1:size(model.best_ids,2)],correct_plot,isplot);
-			xlabel('model');ylabel('accuracy');
+			plot([1:size(model.best_ids,2)],incorrect_plot,isplot);
+			xlabel('model');ylabel('error');
 		end
-		classifier = ((model.weights * recognized) >= sum(0.5*(model.weights)));			
+		classifier = ((model.weights * recognized) >= sum(0.5*(model.weights)));
 	end
 	%COMPUTE THE TP, FP AND ERROR__________________________________________
 	index_pos = find(target == 1); %INDEXES FOR POSITIVE CLASS
