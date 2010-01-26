@@ -1,6 +1,9 @@
 \documentclass{beamer}
-\mode<presentation>{\usetheme{classic}
-\setbeamercovered{transparent}}
+\mode<presentation>{
+	\usetheme{classic}
+	\setbeamercovered{transparent}
+	}
+
 \usepackage[T1]{fontenc}
 \usepackage{ifpdf}
 \usepackage{graphicx}
@@ -39,7 +42,7 @@
 	}
 
 	\frame{ 
-		\frametitle{some facts} 
+		\frametitle{Some facts}
 		\begin{itemize}
 		\item Bills return to the bank 2 or 3 times a year (1.1 billion bills a year) 
 		\item 30\% of 5-euro bills is destroyed
@@ -49,11 +52,23 @@
 		\item value of good bills that are destoyed in holland is 1.5 million euro
 		\end{itemize}
 	}  	
-	
+
+	\frame{ 
+		\frametitle{Some facts}
+		\begin{figure}[H]
+			\begin{center}
+				\includegraphics[width=4cm]{img/neur05fit1.eps}
+				\includegraphics[width=4cm]{img/neur05unfit1.eps} \\
+				\includegraphics[width=4cm]{img/neur05fit2.eps}
+				\includegraphics[width=4cm]{img/neur05unfit2.eps} \\
+			\end{center}
+			\caption{left: fit bills, right: unfit bills}
+		\end{figure}
+	}	
 \section{Previous work}
-	\subsection{How does the DNB do it?}
+	\subsection{DNB Approach}
 		\frame{
-  			\frametitle{DNB approach}
+  			\frametitle{DNB Approach}
   			\hspace*{8pt} Reflection of light on small area near water mark area\\
   			\vspace{10pt}\pause
   			\hspace*{8pt} Results:
@@ -62,9 +77,9 @@
 			\item 30\% clean bills error
 			\end{itemize}
   		}
-	\subsection{By Molenaar, Nusselder \& Stefanov}
+	\subsection{Research by Molenaar, Nusselder \& Stefanov}
 		\frame{
-  			\frametitle{MNS approach}
+  			\frametitle{Research by Molenaar, Nusselder \& Stefanov}
   			\hspace*{8pt} Learn eigen money using PCA\\
   			\vspace{10pt}\pause
   			\hspace*{8pt} Results (what are the right numbers?):
@@ -73,9 +88,9 @@
 			\item  10 euro:  8\%  5\%  
             \end{itemize} 
   		}
-	\subsection{By Jan-Mark Geusebroek}
+	\subsection{Research by Jan-Mark Geusebroek}
 		\frame{
-  			\frametitle{JM approach}
+  			\frametitle{Research by Jan-Mark Geusebroek}
   			\hspace*{8pt} Pre-processing: 
 			\begin{itemize}
 				\item bills alligned  
@@ -91,11 +106,10 @@
 			\end{itemize}
   		}
 
-  		
 \section{Our approach}
-	\subsection{Task redefined}
 		\frame{
-  			\frametitle{The task}
+			\frametitle{The task}
+			\hspace*{8pt} Since current research results are really good already, 
 			\hspace*{8pt} Improve classification of 5 and 10 euro bills\\
 			\vspace{10pt}\pause
 			\hspace*{8pt} new data set:\\
@@ -103,47 +117,66 @@
 			\hspace*{18pt} $\approx400$ banknotes per class\\
 			\hspace*{18pt} $\approx250$ fit, $\approx150$ unfit
 		}
+		
+	\subsection{AdaBoost}		
 		\frame{
-  			\frametitle{Classifiers}
+  			\frametitle{AdaBoost}
 			\hspace*{8pt} Three different stong classifiers built fron weak classifiers\\
 			\vspace{10pt}\pause
 			\begin{itemize}
-				\item Haar 
+				\item Haar \& convolution
 				\item PCA  
-				\item intensity \& edge  
+				\item Intensity \& edge  
 			\end{itemize}
 			\hspace*{8pt} combined into one final classifier
 		}
+
+	\subsection{Haar \& convolution}		
+		\frame{
+  			\frametitle{Haar \& convolution}
+
+  		}
+		\frame{
+  			\frametitle{Haar \& convolution}
+				\begin{figure}[H]
+					\begin{center}
+						\includegraphics[width=5cm]{img/front_haar.eps}
+						\includegraphics[width=5cm]{img/rear_haar.eps} \\
+					\end{center}
+				\end{figure}
+
+		}
+
+	\subsection{PCA}		
+		\frame{
+  			\frametitle{Haar \& convolution}
+
+  		}
 
 	\subsection{Intensity \& edge} 
 		\frame{
 			\frametitle{Intensity \& edge}
 			\hspace*{8pt}Intensity approach is inspired by current approach DNB\\
 			\vspace{10pt}
-			\hspace*{8pt}Can be (easily) computed by the average intansity of a bill\\
+			\hspace*{8pt}Can be (easily) computed by taking the average intensity of a bill\\
 			\vspace{10pt} \pause
 			\hspace*{8pt}Edge approach is inspired by idea that used bill have more folds
-			nad wrinkles\\ 
+			and wrinkles\\ 
 			\vspace{10pt}
 			\hspace*{8pt}Can be computed by the sum of edge-points from a canny edge
 			filter 
 		}
-	\frame{
-		\frametitle{Intensity \& edge}
-			\begin{figure}[H]
-				\begin{center}
-					\includegraphics[width=5cm]{img/neur05int.eps}
-					\includegraphics[width=5cm]{img/neur05edge.eps} \\
-					\includegraphics[width=5cm]{img/neur10int.eps}
-					\includegraphics[width=5cm]{img/neur10edge.eps} \\
-				\end{center}
-			\end{figure}
-	}
 
-	\subsection{Adaboost} 
 		\frame{
-			\frametitle{Adaboost}
-			\hspace*{8pt}Adaboost is used to combine weak classifiers into a strong classifier\\
+			\frametitle{Intensity \& edge}
+				\begin{figure}[H]
+					\begin{center}
+						\includegraphics[width=3cm]{img/neur05int.eps}
+						\includegraphics[width=3cm]{img/neur05edge.eps} \\
+						\includegraphics[width=3cm]{img/neur10int.eps}
+						\includegraphics[width=3cm]{img/neur10edge.eps} \\
+					\end{center}
+				\end{figure}
 		}
 
 \section{Experiments \& results}
@@ -166,7 +199,7 @@
 
 \section{Conclusion}
 	\frame{
-		\frametitle{conclusion}
+		\frametitle{Conclusion}
 		\hspace*{8pt}conclusion
 	}
 
@@ -176,3 +209,5 @@
 		\hspace*{8pt}future work
 	}
 \end{document}
+
+%http://www.dnb.nl/binaries/DNBmag208_tcm46-175321.pdf
