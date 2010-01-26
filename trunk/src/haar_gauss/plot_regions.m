@@ -21,6 +21,7 @@ function plot_regions(Ysegs,Xsegs,bestModels,side)
 	figure;imshow(image)
 	title(sprintf('Regions for %s',side))
 	hold on
+	segText = cell(segsPerSide);
 	for i=1:length(frontOrRear)
 		segment = frontOrRear(i);
 		m       = mod(segment,Xsegs);
@@ -33,6 +34,23 @@ function plot_regions(Ysegs,Xsegs,bestModels,side)
 		rectangle('Position',[x,y,segWidth,segHeight],'EdgeColor','r')		
 		p = patch([x,x+segWidth,x+segWidth,x],[y,y,y+segHeight,y+segHeight],'r');
 		alpha(p,0.3);
+		
+		[ignore memLoc] = ismember(bestModels, frontOrRear(i)+((methodIdx(i)-1)*segsPerSide));
+		[ignore index]  = sort(memLoc,'descend');
+
+		segText{segment} = [segText{segment} num2str(index(1))];
+	end
+	
+	for i=1:length(frontOrRear)
+		segment = frontOrRear(i);
+		m       = mod(segment,Xsegs);
+		n       = ((segment-m)/Xsegs)+1;
+		if m==0
+			m=Xsegs;n=n-1;
+		end
+		x = ((m-1)*segWidth)+1;
+		y = ((n-1)*segHeight)+1;
+		text(x+4,y+round(segHeight/2),segText(segment));		
 	end
 	hold off
 end

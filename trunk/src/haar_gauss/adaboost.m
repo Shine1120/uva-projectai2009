@@ -13,8 +13,8 @@
 %__________________________________________________________________________
 function [alpha, indexs, mean_fit, mean_unfit, cov_fit, cov_unfit] = ...
 							adaboost(ySegms,xSegms,convImages,T,rect_patterns,labels)
-	prior_fit   = 0.5;
-	prior_unfit = 0.5;
+	prior_fit   = 0.55;
+	prior_unfit = 0.45;
 						
 	positives = sum(sum(labels == 1)); 
 	negatives = sum(sum(labels == 0));
@@ -35,7 +35,6 @@ function [alpha, indexs, mean_fit, mean_unfit, cov_fit, cov_unfit] = ...
 	for covIdx = 1:size(trainUnfit,1)
 		cov_unfit(covIdx) = cov(trainUnfit(covIdx,:));
 	end
-
 	for t=1:T
 		fprintf('\t AdaBoost t=%d\n',t)
 		%NORMALIZE THE WEIGTHS_____________________________________________
@@ -45,14 +44,15 @@ function [alpha, indexs, mean_fit, mean_unfit, cov_fit, cov_unfit] = ...
 				for j=1:size(convImages,1)
 					prob_fit(j)    = mvnpdf(convImages(j,i), mean_fit(i), cov_fit(i));
 					prob_unfit(j)  = mvnpdf(convImages(j,i), mean_unfit(i), cov_unfit(i));
-					final_fit(j)   = (prior_fit * prob_fit(j)+1)/(prior_fit * prob_fit(j) + prior_unfit * prob_unfit(j)+2);
-					final_unfit(j) = (prior_unfit * prob_unfit(j)+1)/(prior_fit * prob_fit(j) + prior_unfit * prob_unfit(j)+2);
-					recognized(j)  = (final_fit(j)<=final_unfit(j));
 				end	
+				final_fit   = ((prior_fit .* prob_fit)+1)./((prior_fit .* prob_fit) + (prior_unfit .* prob_unfit)+2);
+				final_unfit = ((prior_unfit .* prob_unfit)+1)./((prior_fit .* prob_fit) + (prior_unfit .* prob_unfit)+2);
+				recognized  = (final_fit<=final_unfit);
+
 		%COMPUTE THE ERROR FOR EACH WEAK CLASSIFIER________________________ 
 				error(i)   = sum(weights .* abs(recognized' - labels)) + delta;				
 				ei(i,:)    = abs(recognized' - labels);
-				pattern_id = ceil(i/(ySegms*xSegms));
+%				pattern_id = ceil(i/(ySegms*xSegms));
 % 				fprintf('\t\t Error for model %d is %f\t pattern type:%d\t scale_x:%d\t scale_y:%d\n',i,error(i),...
 % 					rect_patterns(pattern_id).parent_id,rect_patterns(pattern_id).scale_x,...
 % 					rect_patterns(pattern_id).scale_y);
@@ -64,7 +64,7 @@ function [alpha, indexs, mean_fit, mean_unfit, cov_fit, cov_unfit] = ...
  		[minimum indexs(t)]= min(error);		
 		%COMPUTE ALPHA-WEIGHTS AND UPDATE THE WEIGHTS______________________		
 		beta(t)  = error(indexs(t))/(1-error(indexs(t)));
-		alpha(t) = log(1/beta(t))
+		alpha(t) = log(1/beta(t));
 		weights  = weights .* (1 .*(ei(indexs(t),:) == 1)' + beta(t).*(ei(indexs(t),:) == 0)');	
 	end
 end
