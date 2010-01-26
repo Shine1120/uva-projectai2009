@@ -18,31 +18,35 @@ function plots()
 	outUnfitFront = preprocessImg(unfitFrontNames, unfitDir, 1 );
 	outUnfitRear = preprocessImg(unfitRearNames, unfitDir, 1 );
 	
-	EoutFitFront = preprocessImg(fitFrontNames, fitDir, 1 );
-	EoutFitRear = preprocessImg(fitRearNames, fitDir, 1 );
-	EoutUnfitFront = preprocessImg(unfitFrontNames, unfitDir, 1 );
-	EoutUnfitRear = preprocessImg(unfitRearNames, unfitDir, 1 );
+	EoutFitFront = preprocessImg(fitFrontNames, fitDir, 2 );
+	EoutFitRear = preprocessImg(fitRearNames, fitDir, 2 );
+	EoutUnfitFront = preprocessImg(unfitFrontNames, unfitDir, 2 );
+	EoutUnfitRear = preprocessImg(unfitRearNames, unfitDir, 2 );
 
 	figure;
+	hist((outFitFront+outFitRear)/2, 25);
+	h = findobj(gca,'Type','patch');
+	set(h,'FaceColor','r','EdgeColor','w','facealpha',0.75);
 	hold on;
-	title('Fit Intensity');
-	hist(outFitFront+outFitRear/2, 25);
+	title('Intensity 5 euro');
+	xlabel('Average intensity');
+	ylabel('Counts');
+	hist((outUnfitFront+outUnfitRear)/2, 25);
+	h = findobj(gca,'Type','patch');
+	set(h,'facealpha',0.75);
 	hold off;
+	
 	figure;
+	hist((EoutFitFront+EoutFitRear), 25);
+	h = findobj(gca,'Type','patch');
+	set(h,'FaceColor','r','EdgeColor','w','facealpha',0.75);
 	hold on;
-	title('Unfit Intensity');
-	hist(outUnfitFront+outUnfitRear/2, 25);
-	hold off;
-
-	figure;
-	hold on;
-	title('Fit Edge');
-	hist(EoutFitFront+EoutFitRear/2, 25);
-	hold off;
-	figure;
-	hold on;
-	title('Unfit Edge');
-	hist(EoutUnfitFront+EoutUnfitRear/2, 25);
+	title('Edges 5 euro');
+	xlabel('Sum of edge points');
+	ylabel('Counts');
+	hist((EoutUnfitFront+EoutUnfitRear), 25);
+	h = findobj(gca,'Type','patch');
+	set(h,'facealpha',0.75);
 	hold off;
 end
 
@@ -59,7 +63,6 @@ function out = preprocessImg(imageNames, dir_name, s)
 		case 2
 			for i=1:length(imageNames)
 				img = imread([dir_name imageNames(i).name]);
-				img = img - mean(img);
 				out(i) = sum(sum(edge(img,'canny',0.0355)));
 			end
 	end
