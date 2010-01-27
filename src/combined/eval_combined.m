@@ -1,10 +1,17 @@
 function eval_combined()
 
-	doread		= 0;
-	docreate	= 0;
+	doread		= 1;
+% 	docreate	= 0;
+	
+	do5or10 = 5;
 
-	moneydir = 'moneyDivided/wholeplusborderHO/neur10';
-
+	
+	if do5or10 == 5
+		moneydir = '../moneyDivided/wholeplusborderHO/neur05';
+	elseif do5or10 == 10
+		moneydir = '../moneyDivided/wholeplusborderHO/neur10';
+	end
+		
 	if (doread)
 		fprintf('reading training data...\n');
 		preprocessnew(moneydir);
@@ -17,15 +24,15 @@ function eval_combined()
 	
 	%haar evaluation
 	fprintf('running Haar eval\n')
- 	predH = final_eval(all_money_front,all_money_rear);
+ 	predH = final_eval(all_money_front,all_money_rear,do5or10);
 
 	%Intensity & edges evaluation
 	fprintf('running Intensity&edge eval\n')
-	predIE = eval_IE(all_money_front, all_money_rear);
+	predIE = eval_IE(all_money_front, all_money_rear,do5or10);
 	
 	%pca evaluation
 	fprintf('running PCA eval\n')
-	predP = eval_pca(all_money_front, all_money_rear, all_labels, docreate);
+	predP = eval_pca(all_money_front, all_money_rear, all_labels, do5or10);
 
 
 % 	predH				= rand(100,1);

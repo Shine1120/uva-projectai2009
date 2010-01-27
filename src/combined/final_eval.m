@@ -26,10 +26,10 @@ function return_value = final_eval(holdoutSetFront,holdoutSetRear, do5_10)
 		load 'haar_model_neur10_handout_rear.mat';
 		classifier_rear = just_eval(model,convolutions_rear);
 	elseif (do5_10 == 5)
-		load 'haar_model_neur5_handout_front.mat'
+		load 'haar_model_neur05_handout_front.mat'
 		classifier_front = just_eval(model,convolutions_front);
 
-		load 'haar_model_neur5_handout_rear.mat';
+		load 'haar_model_neur05_handout_rear.mat';
 		classifier_rear = just_eval(model,convolutions_rear);
 	end
 		

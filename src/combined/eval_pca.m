@@ -1,6 +1,7 @@
-function predictions = eval_pca(money_front_holdout, money_rear_holdout, labels, docreate)
+function predictions = eval_pca(money_front_holdout, money_rear_holdout, labels, do5or10)
 
-
+	docreate = 1;
+	
 	if docreate
 		fprintf('Creating Image Regions... ');
 		tic;
@@ -26,16 +27,27 @@ function predictions = eval_pca(money_front_holdout, money_rear_holdout, labels,
 
 	predictions = [];
 
-	load T2_best_alpha_front.mat
-	load T2_best_idx_front.mat
-	load T2_best_model_front.mat
-	load T2_best_eigen_front.mat eigen_front_regions
+	if (do5or10 == 10)
+		load T1_best_alpha_front.mat
+		load T1_best_idx_front.mat
+		load T1_best_model_front.mat
+		load T1_best_eigen_front.mat eigen_front_regions
 
-	load T2_best_alpha_rear.mat 
-	load T2_best_idx_rear.mat 
-	load T2_best_model_rear.mat 
-	load T2_best_eigen_rear.mat eigen_rear_regions
+		load T1_best_alpha_rear.mat 
+		load T1_best_idx_rear.mat 
+		load T1_best_model_rear.mat 
+		load T1_best_eigen_rear.mat eigen_rear_regions
+	elseif (do5or10 == 5)
+		load E1_best_alpha_front.mat
+		load E1_best_idx_front.mat
+		load E1_best_model_front.mat
+		load E1_best_eigen_front.mat eigen_front_regions
 
+		load E1_best_alpha_rear.mat 
+		load E1_best_idx_rear.mat 
+		load E1_best_model_rear.mat 
+		load E1_best_eigen_rear.mat eigen_rear_regions
+	end
 
 	predictions = zeros(length(labels),1);
 	
