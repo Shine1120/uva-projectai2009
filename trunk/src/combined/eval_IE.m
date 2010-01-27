@@ -1,4 +1,4 @@
-function predictions = eval_IE(moneyFront, moneyRear)
+function predictions = eval_IE(moneyFront, moneyRear,do5or10)
 
 	overlap = 1;
 	
@@ -9,28 +9,18 @@ function predictions = eval_IE(moneyFront, moneyRear)
 
 	dataSet = [edgeResults intensityResults];
 
-	%%%% model of best overall error %%%%
-	load('IE_finalModels');
+	if do5or10 == 5
+		load('IE_finalModels_5e');
+	end
+	if do5or10 == 10
+		load('IE_finalModels_10e');
+	end
 	modelToUse				= finalModelsToUse(3:6,:);
 	chosenModelsAlphasToUse	= finalModelsToUse(2,:);
 	chosenModelsIdxToUse	= finalModelsToUse(7,:);
 	
-	finalModelLabels = IErunModels(modelToUse,chosenModelsIdxToUse',...
+	predictions = IErunModels(modelToUse,chosenModelsIdxToUse',...
 		dataSet,chosenModelsAlphasToUse);
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	
-	%%%% model of best unfit error %%%%%
-	load('IE_uberModels');
-	modelToUse				= uberModelsToUse(3:6,:);
-	chosenModelsAlphasToUse	= uberModelsToUse(2,:);
-	chosenModelsIdxToUse	= uberModelsToUse(7,:);
 
-	uberModelLabels = IErunModels(modelToUse,chosenModelsIdxToUse',...
-		dataSet,chosenModelsAlphasToUse);
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	
-	diff = finalModelLabels == uberModelLabels;
-	
-	predictions = finalModelLabels;
 end
 
