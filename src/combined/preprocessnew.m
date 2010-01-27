@@ -15,8 +15,8 @@ unfitset_rear = dir([unfitdir 'r*.bmp']);
 
 all_labels = [];
 
-all_money_front = zeros(350, 190, length(fitset_front)+length(unfitset_front));
-all_money_rear = zeros(350, 190, length(fitset_front)+length(unfitset_front));
+all_money_front = zeros(400, 250, length(fitset_front)+length(unfitset_front));
+all_money_rear = zeros(410, 250, length(fitset_front)+length(unfitset_front));
 
 for i = 1:length(fitset_front)
     banknote = DNBreadim([fitdir fitset_front(i).name]);
