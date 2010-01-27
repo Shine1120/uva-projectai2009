@@ -1,10 +1,18 @@
 function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
-	doFront,doRear,bestModels,do5Euro,do10Euro, titleTxt)
+	doFront,doRear,bestModels,do5Euro,do10Euro, titleTxt,overlap)
 
+
+	YsegsOld = Ysegs;
+	XsegsOld = Xsegs;
+
+	if (overlap)
+		Xsegs = ((Xsegs*2)-1);
+		Ysegs = ((Ysegs*2)-1);
+	end
 	segsPerSide		= Xsegs * Ysegs;
 	segsPerMethod	= segsPerSide * (doFront+doRear);
 	
-	if do10Euro
+	if (do10Euro)
 		imageNameFront	= '../moneyDivided/wholeplusborder/neur10/fit/f2.bmp';
 		imageNameRear	= '../moneyDivided/wholeplusborder/neur10/fit/r2.bmp';
 	end
@@ -20,10 +28,10 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 	[frontY frontX] = size(imageFront);
 	[rearY rearX]   = size(imageRear);
 
-	segWidthFront   = round(frontX/Xsegs);
-	segHeightFront  = round(frontY/Ysegs);
-	segWidthRear    = round(rearX/Xsegs);
-	segHeightRear   = round(rearY/Ysegs);
+	segWidthFront   = round(frontX/XsegsOld);
+	segHeightFront  = round(frontY/YsegsOld);
+	segWidthRear    = round(rearX/XsegsOld);
+	segHeightRear   = round(rearY/YsegsOld);
 	
 	methodIdx		= ceil((bestModels./segsPerMethod));
 	frontOrRear		= bestModels-((methodIdx-1)*segsPerMethod);
@@ -34,7 +42,7 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 	frontMethod		= methodIdx(segInFront);
 	rearMethod		= methodIdx(segInRear);
 
-	colors = ['r','b'];
+	colors	 = ['r','b'];
 	MethName = ['E','I'];
 
 	
@@ -45,31 +53,41 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 	hold on
 	for i=1: length(frontSegs)
 		segment = frontSegs(i);
-		m = mod(segment,Xsegs);
-		n = ((segment-m)/Xsegs)+1;
-		if m==0
-			m=Xsegs;
-			n=n-1;
+		column = mod(segment,Xsegs);
+		row = ((segment-column)/Xsegs)+1;
+		if column==0
+			column=Xsegs;
+			row=row-1;
 		end
-		x = ((m-1)*segWidthFront)+1;
-		y = ((n-1)*segHeightFront)+1;
+		
+		x = ((column-1)*segWidthFront)+1;
+		y = ((row-1)*segHeightFront)+1;		
+		if (overlap)
+			x = round(((column-1)/2)*segWidthFront)+1;
+			y = round(((row-1)/2)*segHeightFront)+1;
+		end
 
 		rectangle('Position',[x,y,segWidthFront,segHeightFront],'EdgeColor',colors(frontMethod(i)))
 		p       = patch([x,x+segWidthFront,x+segWidthFront,x],...
 						[y,y,y+segHeightFront,y+segHeightFront] , colors(frontMethod(i)));
-%		alpha(p , 0.3);
-%		set(p,'AlphaDataMapping', 0.2)	
+		alpha(p , 0.3);
 	end
 	for i=1: length(frontSegs)
 		segment = frontSegs(i);
-		m = mod(segment,Xsegs);
-		n = ((segment-m)/Xsegs)+1;
-		if m==0
-			m=Xsegs;
-			n=n-1;
+		column = mod(segment,Xsegs);
+		row = ((segment-column)/Xsegs)+1;
+		if column==0
+			column=Xsegs;
+			row=row-1;
 		end
-		x = ((m-1)*segWidthFront)+1;
-		y = ((n-1)*segHeightFront)+1;
+		
+		x = ((column-1)*segWidthFront)+1;
+		y = ((row-1)*segHeightFront)+1;		
+		if (overlap)
+			x = round(((column-1)/2)*segWidthFront)+1;
+			y = round(((row-1)/2)*segHeightFront)+1;
+		end
+
 		[ignore memLoc] = ismember(bestModels, frontSegs(i)+((frontMethod(i)-1)*segsPerMethod));
 		[ignore index] = sort(memLoc,'descend');
 		shift = 0;
@@ -87,31 +105,42 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 	hold on
 	for i=1: length(rearSegs)
 		segment = rearSegs(i) - segsPerSide;
-		m = mod(segment,Xsegs);
-		n = ((segment-m)/Xsegs)+1;
-		if m==0
-			m=Xsegs;
-			n=n-1;
+		column = mod(segment,Xsegs);
+		row = ((segment-column)/Xsegs)+1;
+		if column==0
+			column=Xsegs;
+			row=row-1;
 		end
-		x = ((m-1)*segWidthRear)+1;
-		y = ((n-1)*segHeightRear)+1;
+		
+		x = ((column-1)*segWidthRear)+1;
+		y = ((row-1)*segHeightRear)+1;		
+		if (overlap)
+			x = round(((column-1)/2)*segWidthRear)+1;
+			y = round(((row-1)/2)*segHeightRear)+1;
+		end
 		
 		rectangle('Position',[x,y,segWidthRear,segHeightRear],'EdgeColor',colors(rearMethod(i)))
 		p       = patch([x,x+segWidthRear,x+segWidthRear,x],...
 						[y,y,y+segHeightRear,y+segHeightRear] , colors(rearMethod(i)));
-%		alpha(p , 0.3);
-%		set(p,'AlphaDataMapping', 0.2)	
+		alpha(p , 0.3);
 	end
 	for i=1: length(rearSegs)
 		segment = rearSegs(i) - segsPerSide;
-		m = mod(segment,Xsegs);
-		n = ((segment-m)/Xsegs)+1;
-		if m==0
-			m=Xsegs;
-			n=n-1;
+		column = mod(segment,Xsegs);
+		row = ((segment-column)/Xsegs)+1;
+		if column==0
+			column=Xsegs;
+			row=row-1;
 		end
-		x = ((m-1)*segWidthRear)+1;
-		y = ((n-1)*segHeightRear)+1;
+		
+		x = ((column-1)*segWidthRear)+1;
+		y = ((row-1)*segHeightRear)+1;		
+
+		if (overlap)
+			x = round(((column-1)/2)*segWidthRear)+1;
+			y = round(((row-1)/2)*segHeightRear)+1;
+		end
+		
 		[ignore memLoc] = ismember(bestModels, rearSegs(i)+((rearMethod(i)-1)*segsPerMethod));
 		[ignore index] = sort(memLoc,'descend');
 		shift = 0;
@@ -119,7 +148,7 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 			shift = 30;
 		end
 		segText = [MethName(rearMethod(i)) num2str(index(1))];
-		text(x+4+shift,y+round(segHeightFront/2),segText)
+		text(x+4+shift,y+round(segHeightRear/2),segText)
 	end
 	hold off
 end
