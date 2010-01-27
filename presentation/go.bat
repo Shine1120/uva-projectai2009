@@ -1,5 +1,5 @@
-latex presentation.tex
-latex presentation.tex
-dvipdfm presentation.dvi
-del presentation.dvi
+latex mypresentation.tex
+latex mypresentation.tex
+dvipdfm mypresentation.dvi
+del mypresentation.dvi
 del *.aux *.log
