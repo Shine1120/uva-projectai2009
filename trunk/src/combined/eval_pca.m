@@ -15,7 +15,7 @@ function predictions = eval_pca(money_front_holdout, money_rear_holdout, labels,
 		save all_money_rear_regions.mat all_money_rear_regions;
 		toc;
 	else
-		fprintf('Loading Image Regions... ');
+		fprintf('Loading Image Regions... \n');
 		tic;
 		load all_labels.mat
 		load all_money_front_regions.mat
@@ -26,15 +26,15 @@ function predictions = eval_pca(money_front_holdout, money_rear_holdout, labels,
 
 	predictions = [];
 
-	load T10_best_alpha_front.mat
-	load T10_best_idx_front.mat
-	load T10_best_model_front.mat
-	load T10_best_eigen_front.mat eigen_front_regions
+	load T2_best_alpha_front.mat
+	load T2_best_idx_front.mat
+	load T2_best_model_front.mat
+	load T2_best_eigen_front.mat eigen_front_regions
 
-	load T10_best_alpha_rear.mat 
-	load T10_best_idx_rear.mat 
-	load T10_best_model_rear.mat 
-	load T10_best_eigen_rear.mat eigen_rear_regions
+	load T2_best_alpha_rear.mat 
+	load T2_best_idx_rear.mat 
+	load T2_best_model_rear.mat 
+	load T2_best_eigen_rear.mat eigen_rear_regions
 
 
 	predictions = zeros(length(labels),1);

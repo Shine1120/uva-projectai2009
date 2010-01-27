@@ -1,6 +1,6 @@
 function im=DNBreadim(str)
 
-im = imresize_old(im2double(imread(str)),[350 190]);
+im = im2double(imread(str));
 
 
 % gives similar results:

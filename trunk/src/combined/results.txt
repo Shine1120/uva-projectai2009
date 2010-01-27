@@ -1,0 +1,30 @@
+
+###################### Results 1 ####################################
+PCA:
+rep   = 50
+tials = 50
+hypo  = 2
+
+Haar:
+rep   = 5
+tials = 10
+hypo  = 10
+no overlap
+
+Haar:
+rep   = 30
+tials = 50
+hypo  = 25
+with overlap
+
+
+The results:
+Haar        -==->   unfit error: 0.075 	fit error: 0.12
+IE          -==->   unfit error: 0.025 	fit error: 0.1
+PCA         -==->   unfit error: 0.025 	fit error: 0.12
+Haar&IE     -==->   unfit error: 0.1 	fit error: 0.033
+Haar&PCA    -==->   unfit error: 0.1 	fit error: 0.1
+IE&PCA      -==->   unfit error: 0.05 	fit error: 0.017
+Haar&IE&PCA -==->   unfit error: 0 	    fit error: 0.12
+
+###################################################################
