@@ -3,7 +3,7 @@
 %		holdoutSetFront -- images as they are (not modified) - 3D
 %OUTPUT 
 %		predictions     -- predictions for both
-function return_value = final_eval(holdoutSetFront,holdoutSetRear)
+function return_value = final_eval(holdoutSetFront,holdoutSetRear, do5_10)
  	%GET LABELS OF THE IMAGES FRONT AND REAR_______________________________
 	ySegms = 12;
 	xSegms = 5;
@@ -18,13 +18,21 @@ function return_value = final_eval(holdoutSetFront,holdoutSetRear)
 		convolutions_front(i,:) = generate_convolutions(ySegms,xSegms,400,250,patterns,Img); 
 	end
 	
-	%COMPUTE PROBABILITIES_________________________________________________	
-	load 'haar_model_neur10_handout_front.mat'
-	classifier_front = just_eval(model,convolutions_front);
+	%COMPUTE PROBABILITIES_________________________________________________
+	if (do5_10 == 10)
+		load 'haar_model_neur10_handout_front.mat'
+		classifier_front = just_eval(model,convolutions_front);
 
-	load 'haar_model_neur10_handout_rear.mat';
-	classifier_rear = just_eval(model,convolutions_rear);
-	
+		load 'haar_model_neur10_handout_rear.mat';
+		classifier_rear = just_eval(model,convolutions_rear);
+	elseif (do5_10 == 5)
+		load 'haar_model_neur5_handout_front.mat'
+		classifier_front = just_eval(model,convolutions_front);
+
+		load 'haar_model_neur5_handout_rear.mat';
+		classifier_rear = just_eval(model,convolutions_rear);
+	end
+		
 	%both_holdout = 1-(1-classifier_front).*(1-classifier_rear);	
 	both_holdout = classifier_rear + classifier_front;
 	return_value = (both_holdout>=0)';
