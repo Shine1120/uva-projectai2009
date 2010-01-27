@@ -16,13 +16,15 @@ function result = generate_convolutions(ySegms,xSegms,size_y,size_x,patterns,Ima
 	result  = [];
 	for i=1:size(patterns,2)	
 		%CONVOLVE THE IMAGES_______________________________________________
-		convImg         = conv2(Image, patterns(i).rectangles);
+		convImg         = conv2(Image, patterns(i).rectangles, 'valid');
 		filter          = (convImg<0);
 		convImg(filter) = 0;
 		count           = 1;
 		%CUT CONVOLVED IMAGES______________________________________________
-		for y=1:imgSegY:(size_y-imgSegY)
-			for x=1:imgSegX:(size_x-imgSegX)
+		nrY = floor(imgSegY/2);
+		nrX = floor(imgSegX/2);
+		for y=1:nrY:(size_y-imgSegY)
+			for x=1:nrX:(size_x-imgSegX)
 				if y+imgSegY+ySegms>size_y
 					untillY = size_y;
 				else
@@ -32,7 +34,7 @@ function result = generate_convolutions(ySegms,xSegms,size_y,size_x,patterns,Ima
 					untillX = size_x;
 				else
 					untillX = x+imgSegX-1;
-				end
+				end				
 				values(count) = sum(sum(convImg(y:untillY,x:untillX)));
 				count = count+1;
 			end	
