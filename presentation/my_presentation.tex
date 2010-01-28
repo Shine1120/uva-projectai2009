@@ -52,7 +52,7 @@
 		of the dirty bills
 		\item value of good bills that are destroyed in Holland is 1.5 million \emph{Euro} 
 		\end{itemize}
-		\href{http://www.dnb.nl/binaries/DNBmag208\_tcm46-175321.pdf}{\emph{(DNB Magazine Vol 2, 2009)}}
+		\href{http://www.dnb.nl/binaries/DNBmag208\_tcm46-175321.pdf}{\emph{(DNB Magazine Vol 2, 2008)}}
 	}  	
 
 	\subsection{Image data examples}
@@ -338,10 +338,22 @@
 	}
 	\subsection{PCA Results}
 	\frame{
-		\frametitle{Results PCA}
+		\frametitle{Results PCA -- 5 Euro Bills}
+		\begin{figure}[H]
+			\begin{center}
+					\includegraphics[width=4cm]{img/results_pca_5_regions.jpg}
+					\includegraphics[width=6cm]{img/results_pca_10_plot.jpg}
+			\end{center}
+		\end{figure}				
 	}
 	\frame{
-		\frametitle{Results PCA}
+		\frametitle{Results PCA -- 10 Euro Bills}
+		\begin{figure}[H]
+			\begin{center}
+					\includegraphics[width=4cm]{img/results_pca_10_regions.jpg}
+					\includegraphics[width=6cm]{img/results_pca_10_plot.jpg}
+			\end{center}
+		\end{figure}				
 	}
 
 	\subsection{Intensity \& Edge Results}
@@ -366,8 +378,43 @@
 
 	\subsection{Combined Results}
 	\frame{
-		\frametitle{Results combined}
-	}
+		\frametitle{Results combined -- 5 Euro Bills}
+		\begin{table}[H]
+			\caption{Results for 5 Euro Bills}
+			\centering 
+			\begin{tabular}{ | c | c | c|}
+				\hline\hline & \emph{Unfit\break Error} & \emph{Fit\break Error} \\ [0.5ex]\hline 
+				\emph{Haar} & 0 & 0 \\ [0.5ex]\hline
+				\emph{Intensity - Edge} & 0 & 0.033 \\ [0.5ex]\hline
+				\emph{PCA} & 0.025 & 0.083 \\ [0.5ex]\hline
+				\emph{Haar \& Intensity - Edge} & 0 & 0 \\ [0.5ex]\hline
+				\emph{Haar \& PCA} & 0.025 & 0 \\ [0.5ex]\hline
+				\emph{Intensity - Edge \& PCA} & 0.025 & 0.033 \\ [0.5ex]\hline
+				\emph{Haar \& Intensity - Edge \& PCA} & 0 & 0.033 \\ [0.5ex]\hline
+			\end{tabular}
+			\label{table:nonlin} 
+		\end{table}		
+		}
+		
+		\subsection{Combined Results}
+		\frame{
+		\frametitle{Results combined -- 10 Euro Bills}
+		\begin{table}[H]
+			\caption{Results for 10 Euro Bills}
+			\centering 
+			\begin{tabular}{ | c | c | c|}
+				\hline\hline & \emph{Unfit\break Error} & \emph{Fit\break Error} \\ [0.5ex]\hline 
+				\emph{Haar} & 0.15 & 0.05 \\ [0.5ex]\hline
+				\emph{Intensity - Edge} & 0.025 & 0.1 \\ [0.5ex]\hline
+				\emph{PCA} & 0.05 & 0.083 \\ [0.5ex]\hline
+				\emph{Haar \& Intensity - Edge} & 0.15 & 0.033 \\ [0.5ex]\hline
+				\emph{Haar \& PCA} & 0.2 & 0.017 \\ [0.5ex]\hline
+				\emph{Intensity - Edge \& PCA} & 0.075 & 0.017 \\ [0.5ex]\hline
+				\emph{Haar \& Intensity - Edge \& PCA} & 0.025 & 0.033 \\ [0.5ex]\hline
+			\end{tabular}
+			\label{table:nonlin} 
+		\end{table}		
+		}
 
 \section{Conclusion}
 \subsection{Conclusion}
