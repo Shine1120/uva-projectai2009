@@ -90,18 +90,17 @@
 \caption{Convolution of an entire bill}
 \label{convolved}
 \end{figure} 
-Thus, the resulted set of models would represent the input features used in \emph{AdaBoost}. For establishing the set of the best \emph{T} features we have tried using both \emph{SVM} and \emph{Gaussian distribution}, and the results retrieved by the last one seemed slightly better than the ones obtained while using \emph{SVM}. In the case in which \emph{SVM} was used, a model was generated for each available feature. This model would give the best separation between the values corresponding to that feature for fit images and those for unfit images. In the case of the \emph{Gaussian distribution}, the mean and covariance of features corresponding to fit images were computed, respectively the mean and covariance for the features corresponding to unfit images. In order to determine the predicted class of the input images we have tried two methods:
-\begin{itemize}
-\item In the first method we would simply compute the \emph{mean} and \emph{covariance} for the values corresponding to fit, respectively unfit values corresponding to a specific feature. During testing, for each input value, we would compare the two numbers returned by \emph{Gaussian density function} for fit, respectively unfit and we would choose the predicted class to be the maximum of the two  
-\item The second method was using \emph{Naive Bayes} in order to make use of the prior knowledge available. We know that in a real-life situation there are always more fit bills than unfit one and we would like to use this information to improve our classifiers. The predicted class was defined by using the \emph{MAP} (maximum aposterior probability) estimation. The formula for computing the maximum aposterior probability for fit, respectively unfit class is given by:
+Thus, the resulted set of models would represent the input features used in \emph{AdaBoost}. For establishing the set of the best \emph{T} features we have tried using both \emph{SVM} and \emph{Gaussian distribution}, and the results retrieved by the last one seemed slightly better than the ones obtained while using \emph{SVM}. In the case in which \emph{SVM} was used, a model was generated for each available feature. This model would give the best separation between the values corresponding to that feature for fit images and those for unfit images. In the case of the \emph{Gaussian distribution}, the mean and covariance of features corresponding to fit images were computed, respectively the mean and covariance for the features corresponding to unfit images. In order to determine the predicted class of the input images we have tried two methods.\\
+\hspace*{10px}In the first method we would simply compute the \emph{mean} and \emph{covariance} for the values corresponding to fit, respectively unfit values corresponding to a specific feature. During testing, for each input value, we would compare the two numbers returned by \emph{Gaussian density function} for fit, respectively unfit and we would choose the predicted class to be the maximum of the two.\\  
+\hspace*{10px}The second method was using \emph{Naive Bayes} in order to make use of the prior knowledge available. We know that in a real-life situation there are always more fit bills than unfit one and we would like to use this information to improve our classifiers. The predicted class was defined by using the \emph{MAP} (maximum aposterior probability) estimation. The formula for computing the maximum aposterior probability for fit, respectively unfit class is given by:
 \begin{figure}[!hbtp]
 	\fontfamily{ccr}\selectfont\small
 	\begin{tabular}{|lr|} \hline
 		&\\[5pt]
-		\textcolor{blue}{$argmax_{\theta_{fit}}P(\theta_{fit}\mid X) = $} &\\[3pt]
-		\hspace*{70px}\textcolor{blue}{$\frac{P(\theta_{fit})*P(X\mid \theta_{fit})}{P(\theta_{fit})*P(X\mid \theta_{fit}) + P(\theta_{unfit})*P(X\mid \theta_{unfit})}$} &\\[10pt]
-		\textcolor{blue}{$argmax_{\theta_{unfit}}P(\theta_{fit}\mid X) = $} &\\[3pt]
-		\hspace*{70px}\textcolor{blue}{$\frac{P(\theta_{unfit})*P(X\mid \theta_{unfit})}{P(\theta_{fit})*P(X\mid \theta_{fit}) + P(\theta_{unfit})*P(X\mid \theta_{unfit})}$} &\\[10pt]
+		\textcolor{blue}{$argmax_{\theta_{fit}}P(\theta_{fit}\mid X) = $} &\\[5pt]
+		\hspace*{50px}\textcolor{blue}{$\frac{P(\theta_{fit})*P(X\mid \theta_{fit})}{P(\theta_{fit})*P(X\mid \theta_{fit}) + P(\theta_{unfit})*P(X\mid \theta_{unfit})}$} &\\[15pt]
+		\textcolor{blue}{$argmax_{\theta_{unfit}}P(\theta_{unfit}\mid X) = $} &\\[5pt]
+		\hspace*{50px}\textcolor{blue}{$\frac{P(\theta_{unfit})*P(X\mid \theta_{unfit})}{P(\theta_{fit})*P(X\mid \theta_{fit}) + P(\theta_{unfit})*P(X\mid \theta_{unfit})}$} &\\[10pt]
 \hline
 \end{tabular}
 		where: 
@@ -111,7 +110,6 @@ Thus, the resulted set of models would represent the input features used in \emp
 		\item $P(X\mid \theta_{fit}),P(X\mid \theta_{unfit})$ -- the conditional probabilities of the two classes (representing normal distributions) 
 		\end{itemize} 
 \end{figure}
-
 It can be easily shown that the values of the parameters $\theta$ for a normal distribution (mean and covariance) that would maximize the probability of the classes are exactly the corresponding formulas: 
 \emph{
 \begin{figure}[!hbtp]
@@ -126,7 +124,7 @@ It can be easily shown that the values of the parameters $\theta$ for a normal d
 \hline
 \end{tabular}
 \end{figure}
-}\end{itemize}
+}
 The second technique used for determining the predicted class of the data given the parameters seemed to provides slightly better results in practice due to the fact that it also incorporates some prior knowledge of the data.\\  
  		\hspace*{10px}For this approach we have used two classifiers: one for the rear side and another for the front side of the bills and the predictions given by the two classifiers were combined into a third one using Naive Bayes.\\
 		\hspace*{10px}In order to create the final model, we have tried two different methods: 
@@ -200,7 +198,7 @@ As we would have expected, the second method for defining the best model, proved
 \caption{Best regions for 5 Euro bills}
 \label{haar_regions5}
 \end{figure} 
-	\hspace*{10px}In order to determine the optimal number of features that should be chosen in the end for the best model, we have plot the error with respect to the number of features chosen. Figure\ref{haar_plot10} and Figure\ref{haar_plot5} show how the error evolves depending on the number of models for the 10 Euro bills, respectively for the 5 Euro bills.
+	\hspace*{10px}In order to determine the optimal number of features that should be chosen in the end for the best model, we have plotted the error with respect to the number of features chosen. Figure\ref{haar_plot10} and Figure\ref{haar_plot5} show how the error evolves depending on the number of models for the 10 Euro bills, respectively for the 5 Euro bills.
 \begin{figure}[!hbtp]
 \centering
 \epsfig{file=img/haar_plot10.eps, width=1\linewidth}
