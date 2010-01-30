@@ -183,7 +183,7 @@ As we would have expected, the second method for defining the best model, proved
 			\label{alg:AdaBoostPredict}
 		\end{algorithm}
 	\section{Results}\label{sec:results}
-	\hspace*{10px}The available image set was spilt into a holdout set and the rest of the data was again split into a validation set and a part that was used for training the final model by \emph{random sub-sampling cross-validation} technique. The whole process of defining the validation set and applying random sub-sampling cross-validation was repeated several times to ensure a correct estimation of the predictions. For each round of the cross-validation, a model was trained using the \emph{AdaBoost algorithm} described above. The obtained model was, then, tested by building the strong classifier and computing the corresponding values for: \emph{true-positive estimation}, \emph{true-negative estimation}, \emph{false-positive estimation} and \emph{false-negative estimation}.\\ 
+	\hspace*{10px}The available image set was spilt into a holdout set and the rest of the data was again split into a validation set and a part that was used for training the final model by \emph{random sub-sampling cross-validation} technique. The whole process of defining the validation set and applying random sub-sampling cross-validation was repeated several times to ensure a correct estimation of the predictions. For each round of the cross-validation, a model was trained using the \emph{AdaBoost algorithm} described above. The obtained model was, then, tested by building the strong classifier and computing the corresponding values for: \emph{true-positive estimation}, \emph{true-negative estimation}, \emph{false-positive estimation} and \emph{false-negative estimation}.\\
 	\subsection{Convolution Results}\label{sec:haar_results}
 	\hspace*{10px}Due to the fact that the number of features generated for only 21 patterns and a segmentation for each image of 23 overlapping regions by 9 gives 4,347 features, the training part is relatively slow for this method. In order to create reliable model we have used 5 repetitions, 10 hypothesis (features to be chosen by AdaBoost), 10 trials in the random sampling cross-validation method.\\
 	\hspace*{10px}In Figure\ref{haar_regions10} are indicated the most voted regions for the 10 Euro bills in \emph{AdaBoost} throughout all trials and all repetitions. We can notice that for the front of the bills the regions selected are mainly positions on the water mark area, while for the rear side of the bills, there are some regions considered as being the most informative on the white patch, but also the area in the middle is selected as containing discriminative information.\\  
@@ -213,10 +213,10 @@ As we would have expected, the second method for defining the best model, proved
 \caption{Error depending on the number of features - 5 Euro bills}
 \label{haar_plot5}
 \end{figure} 
-	\subsection{Convolution Results}\label{sec:pca_results}
+	\subsection{PCA Results}\label{sec:pca_results}
 	\todo{RESULTS PCA}
 
-	\subsection{Convolution Results}\label{sec:ie_results}
+	\subsection{Intensity \& Edges Results}\label{sec:ie_results}
 	\todo{RESULTS IE}
 
 	\subsection{Combined Results}\label{sec:comb_results}
