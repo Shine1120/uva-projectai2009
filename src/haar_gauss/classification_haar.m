@@ -12,9 +12,10 @@ function classification_haar(T, rounds, pattern_scales)
     unfit           = ['moneyDivided/wholeplusborder/' money_dir '/unfit/'];	
 	hold_n_out      = 75;
 	slice           = 35;
-	repetitions     = 1;
-	ySegms			= 12;
-	xSegms			= 5;
+	repetitions     = 5;
+	ySegms			= 7;
+	xSegms			= 3;
+	%______________________________________________________________________
 	dir_fit_rear    = dir([fit 'r*.bmp']);
 	dir_unfit_rear  = dir([unfit 'r*.bmp']);
 	dir_fit_front   = dir([fit 'f*.bmp']);
@@ -31,12 +32,12 @@ function classification_haar(T, rounds, pattern_scales)
 		end
 	end		
 	%CONVOLVE IMAGES WITH THE PATTERNS_____________________________________
-%     patterns           = save_patterns(250,400,pattern_scales);						
-%     convolutions_rear  = preprocess(ySegms,xSegms,1,names_rear,patterns,'rear'); 
-%     convolutions_front = preprocess(ySegms,xSegms,1,names_front,patterns,'front'); 
- 	load 'convolved_images_front'
- 	load 'convolved_images_rear'
- 	load 'patterns'	
+    patterns           = save_patterns(250,400,pattern_scales);						
+    convolutions_rear  = preprocess(ySegms,xSegms,1,names_rear,patterns,'rear'); 
+    convolutions_front = preprocess(ySegms,xSegms,1,names_front,patterns,'front'); 
+%  	load 'convolved_images_front'
+%  	load 'convolved_images_rear'
+%  	load 'patterns'	
 	min_error_rear   = 1; min_error_front  = 1;
 	best_index_rear  = 0; best_index_front = 0;
 	%START REPETITIONS OF CROSSVALIDATION__________________________________
@@ -79,7 +80,7 @@ function classification_haar(T, rounds, pattern_scales)
 				end;		
 				%THE RESULTS RETURNED BY ADABOOST CASCADE__________________
 				[alpha_weights,best_feature_indexs,mean_fit,mean_unfit,cov_fit,cov_unfit] = ...
-						adaboost(ySegms,xSegms,ImgTrain,T,patterns,labels_train);
+										adaboost(ImgTrain,T,labels_train);
 				model = struct('weights',alpha_weights,'best_ids', best_feature_indexs,...
 								'mean_fit',mean_fit,'cov_fit',cov_fit,'mean_unfit',mean_unfit,'cov_unfit',cov_unfit);
 			%EVALUATION ___________________________________________________	
@@ -120,8 +121,8 @@ function classification_haar(T, rounds, pattern_scales)
 				best_index_front = rounds*(r-1)+i;
 			end	
 			
-			errRear   = error_rear
-			truepRear = tp_rear
+errRear   = error_rear
+truepRear = tp_rear
 			
 		end		
 		%COMPUTE THE MEAN OF THE RESULTS FROM THE CORSSVALIDATION__________
@@ -188,8 +189,8 @@ tpHoldRear = tp_holdout_rear(r)
 				eval_bills(model,labels_holdout,ImgHoldout_front,both_holdout,0);
 		hold off;legend('rear','front');
 	end
-	plot_regions(ySegms, xSegms, voted_indexes_rear, 'rear');
-	plot_regions(ySegms, xSegms, voted_indexes_front, 'front');
+	plot_regions(ySegms,xSegms,voted_indexes_rear,fit,'rear');
+	plot_regions(ySegms,xSegms,voted_indexes_front,fit,'front');
 	
 	%THE MEAN OF THE RESULTS FOR ALL ROUND AND ALL REPETITIONS_____________
 	fprintf('\t Correct_Unfit:%f \t Correct_Fit:%f \t Incorrect_Unfit:%f \t Incorrect_Fit:%f \t Error_Rear:%f \n',...

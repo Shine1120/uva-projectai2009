@@ -12,18 +12,17 @@
 %		model         -- the array containing the all the SVM models 
 %__________________________________________________________________________
 function [alpha, indexs, mean_fit, mean_unfit, cov_fit, cov_unfit] = ...
-							adaboost(ySegms,xSegms,convImages,T,rect_patterns,labels)
-	prior_fit   = 0.55;
-	prior_unfit = 0.45;
-						
+												adaboost(convImages,T,labels)
+	prior_fit   = 0.60;
+	prior_unfit = 0.40;						
 	positives = sum(sum(labels == 1)); 
 	negatives = sum(sum(labels == 0));
-	weights   = 2/positives .* (labels==1) + 2/negatives .* (labels==0); %weights = 2/length(labels); 
+	weights   = 2/positives .* (labels==1) + 2/negatives .* (labels==0); 
 	indexs    = [];
 	delta     = 0.00001;	
 	
-	mean_fit   = mean(convImages((labels==0),:));
-	mean_unfit = mean(convImages((labels==1),:));
+	mean_fit   = mean(convImages((labels==0),:),1);
+	mean_unfit = mean(convImages((labels==1),:),1);
 
 	trainFit   = convImages((labels==0),:)'; 
 	trainUnfit = convImages((labels==1),:)';
@@ -48,14 +47,9 @@ function [alpha, indexs, mean_fit, mean_unfit, cov_fit, cov_unfit] = ...
 				final_fit   = ((prior_fit .* prob_fit)+1)./((prior_fit .* prob_fit) + (prior_unfit .* prob_unfit)+2);
 				final_unfit = ((prior_unfit .* prob_unfit)+1)./((prior_fit .* prob_fit) + (prior_unfit .* prob_unfit)+2);
 				recognized  = (final_fit<=final_unfit);
-
 		%COMPUTE THE ERROR FOR EACH WEAK CLASSIFIER________________________ 
 				error(i)   = sum(weights .* abs(recognized' - labels)) + delta;				
 				ei(i,:)    = abs(recognized' - labels);
-%				pattern_id = ceil(i/(ySegms*xSegms));
-% 				fprintf('\t\t Error for model %d is %f\t pattern type:%d\t scale_x:%d\t scale_y:%d\n',i,error(i),...
-% 					rect_patterns(pattern_id).parent_id,rect_patterns(pattern_id).scale_x,...
-% 					rect_patterns(pattern_id).scale_y);
 			else
 				error(i) = 1;
 			end
