@@ -16,8 +16,8 @@
 function [true_pos, true_neg, error, classifier] = eval_bills(model, target, convImg, classifier, isplot)
 	%BUILD THE STRONG CLASSIFIER OUT OF THE BEST T ONES FROM ADABOOST______
 	if classifier == 0
-		prior_fit   = 0.55;
-		prior_unfit = 0.45;
+		prior_fit   = 0.60;
+		prior_unfit = 0.40;
 		for i=1:size(model.best_ids,2)
 			id = model.best_ids(i);
 			for j=1:size(convImg,1)

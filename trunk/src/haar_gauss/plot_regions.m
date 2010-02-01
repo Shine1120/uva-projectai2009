@@ -4,12 +4,12 @@
 %		bestModels -- indexes of the best best models
 %		side       -- front/rear
 %__________________________________________________________________________
-function plot_regions(Ysegs,Xsegs,bestModels,side)
-	segsPerSide   = Xsegs * Ysegs;
+function plot_regions(Ysegs,Xsegs,bestModels,path,side)
+	segsPerSide   = ((2 * Xsegs)-1) * ((2 *Ysegs)-1);
 	if (strcmp(side,'rear')==1)
-		imageName = 'moneyDivided/wholeplusborder/neur10/fit/f2.bmp';
+		imageName = [path 'f2.bmp'];
 	else
-		imageName = 'moneyDivided/wholeplusborder/neur10/fit/r2.bmp';
+		imageName = [path 'r2.bmp'];
 	end
 	image         = imread(imageName);
 	[sizeY sizeX] = size(image);
@@ -24,13 +24,14 @@ function plot_regions(Ysegs,Xsegs,bestModels,side)
 	segText = cell(segsPerSide);
 	for i=1:length(frontOrRear)
 		segment = frontOrRear(i);
-		m       = mod(segment,Xsegs);
-		n       = ((segment-m)/Xsegs)+1;
-		if m==0
-			m=Xsegs;n=n-1;
+		column  = mod(segment,((2*Xsegs)-1));
+		row     = (segment-column)/((2*Xsegs)-1)+1;
+		if column==0
+			column = (2 * Xsegs) -1;
+			row    = row-1;
 		end
-		x = ((m-1)*segWidth)+1;
-		y = ((n-1)*segHeight)+1;
+		x = round(((column-1)/2)*segWidth)+1;
+		y = round(((row-1)/2)*segHeight)+1;
 		rectangle('Position',[x,y,segWidth,segHeight],'EdgeColor','r')		
 		p = patch([x,x+segWidth,x+segWidth,x],[y,y,y+segHeight,y+segHeight],'r');
 		alpha(p,0.3);
@@ -38,18 +39,19 @@ function plot_regions(Ysegs,Xsegs,bestModels,side)
 		[ignore memLoc] = ismember(bestModels, frontOrRear(i)+((methodIdx(i)-1)*segsPerSide));
 		[ignore index]  = sort(memLoc,'descend');
 
-		segText{segment} = [segText{segment} num2str(index(1))];
+		segText{segment} = [segText{segment} ' ' num2str(index(1))];
 	end
 	
 	for i=1:length(frontOrRear)
 		segment = frontOrRear(i);
-		m       = mod(segment,Xsegs);
-		n       = ((segment-m)/Xsegs)+1;
-		if m==0
-			m=Xsegs;n=n-1;
+		column  = mod(segment,((2*Xsegs)-1));
+		row     = (segment-column)/((2*Xsegs)-1)+1;
+		if column==0
+			column = (2 * Xsegs)-1;
+			row    = row - 1;
 		end
-		x = ((m-1)*segWidth)+1;
-		y = ((n-1)*segHeight)+1;
+		x = round(((column-1)/2)*segWidth)+1;
+		y = round(((row-1)/2)*segHeight)+1;
 		text(x+4,y+round(segHeight/2),segText(segment));		
 	end
 	hold off
