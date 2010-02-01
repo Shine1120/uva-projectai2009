@@ -33,110 +33,46 @@
 \begin{document}
 	\maketitle
 	\begin{abstract}
-		\hspace*{10px}In the month January of 2010 a project on the classification of
-		the fitness of money was proposed. During this month we have tested and
-		implemented various techniques to handle the problem of money classification.
-		The results from our experiment show promising development comparing to the
-		current state of research.\\ 
-		\hspace*{10px}In the below sections we have described the approaches that we
-		have tried and the results obtained for each one of them.
+	\hspace*{10px}In the month January of 2010 a project on the classification of the fitness of money was proposed. During this month we have tested and implemented various techniques to handle the problem of money classification. The results from our experiment show promising development comparing to the current state of research.\\
+	\hspace*{10px}In the below sections we have described the approaches that we have tried and the results obtained for each one of them.
 	\end{abstract}
-
 	\section{Introduction}
-		\hspace*{10px}The goal of this project is to determine a reliable method that
-		would be able to distinguish between dirty bills and clean bills. In order to
-		achieve this goal we had to think of what are the representative features of
-		dirt that can be found on money bills and what is the best method that can be
-		used to model this.\\  
-		\hspace*{10px}Throughout this project we have tried a number of different
-		approaches in order to gain good results and in the same time we have tried
-		to get a better understanding of what methods are fit for describing the
-		features of the dirty money and clean money.\\ 
-		\hspace*{10px}The main techniques used in this project are: \emph{PCA} in
-		combination with \emph{AdaBoost}, \emph{Haar-like features} and
-		\emph{Adaboost}, \emph{Convolution with predefined kernels},
-		\todo{\emph{edge-detection} and \emph{intensity} distributions}.\\ 
-		\hspace*{10px}In section \ref{sec:background}, related work on
-		\emph{Haar-like features}, \emph{convolution with kernels}, \emph{PCA},
-		\emph{SVM}, \emph{AdaBoost}, \emph{edge detection} and \emph{intensity} are
-		discussed. The implementation of the \emph{AdaBoost} algorithm applied on the
-		different techniques is explained in \ref{sec:implementation}. We discuss our
-		experiments and their results in section \ref{sec:results}. Finally, we
-		conclude in section \ref{sec:conclusion} and propose some topics for future
-		research.\\ 
-		\todo{what about telling first about what is done in previous projects. Then
-		tell the idea of implementing a few techiniques to extract weak classifiers
-		on regions of the bills and then combine them using Adaboost. So first we
-		talk about previous work, then explain Adaboost and then talk about PCA,
-		HaarConv and Intens\&Edge}
-	
+	\hspace*{10px}The goal of this project is to determine a reliable method that would be able to distinguish between dirty bills and clean bills. In order to achieve this goal we had to think of what are the representative features of dirt that can be found on money bills and what is the best method that can be used to model this.\\ 
+	\hspace*{10px}Throughout this project we have tried a number of different approaches in order to gain good results and in the same time we have tried to get a better understanding of what methods are fit for describing the features of the dirty money and clean money.\\
+	\hspace*{10px}The main techniques used in this project are: \emph{PCA} in combination with \emph{AdaBoost}, \emph{Haar-like features} and \emph{Adaboost}, \emph{Convolution with predefined kernels}, \emph{edge-detection} and \emph{intensity} distributions.\\
+	\hspace*{10px}In section \ref{sec:background}, related work on \emph{Haar-like features}, \emph{convolution with kernels}, \emph{PCA}, \emph{SVM}, \emph{AdaBoost}, \emph{edge detection} and \emph{intensity} are discussed. The implementation of the \emph{AdaBoost} algorithm applied on the different techniques is explained in \ref{sec:implementation}. We discuss our experiments and their results in section \ref{sec:results}. Finally, we conclude in section \ref{sec:conclusion} and propose some topics for future research.
 	\section{Background}\label{sec:background}
-		\todo{something about the current state and previous projects}
-	
-	\section{Methods}\label{sec:Methods}
-		\todo{are we going to tell something about the current approach of DNB and the
-		previous projects we build on?}\\
-		\hspace*{10px}Finding the main features of dirty money and clean money was a
-		true challenge in this project. In this section are indicated in more detail
-		the ups and downs of the techniques used and the theoretical knowledge that
-		represents the basis of these methods.
-	
-	\subsection{Adaboost}\label{sec:Adaboost}
-		\hspace*{10px}The \emph{AdaBoost} algorithm is used in combination with
-		different techniques throughout this project, such as: \emph{PCA},
-		\emph{Haar-like features} or \emph{edge} and \emph{intensity} distributions
-		over different regions.\\ \hspace*{10px}Adaptive Boosting (also known as
-		AdaBoost) is a machine learning technique which can be used in conjunction
-		with various other learning algorithms. The idea is to have a (convex) set of
-		weak classifiers (classifiers that perform at least better than random) and
-		then minimize the total error over the training-set by finding the best
-		classifier at each stage of the algorithm.\\ 
-		\hspace*{10px}The theoretical basis of this algorithm is that given a set of
-		models (or features), \emph{M}, the algorithm will determine the subset of
-		\emph{T} models that are the best for distinguishing between the two classes
-		(clean and dirty bills). Thus, \emph{AdaBoost} will learn the most
-		representative features of the two classes. The algorithm for determining the
-		best models is shown in section \ref{sec:implementation}:
-		\emph{Algorithm~\ref{AdaBoost}}.\\ 
-		\hspace*{10px}Another very important characteristic of this algorithm is the
-		fact that it also specifies a method in which the models that were chosen as
-		being the best, can be combined in order to give a strong classifier. The
-		corresponding algorithm can be seen in section \ref{sec:implementation}:
-		\emph{Algorithm~\ref{AdaBoost_pred}}.\\
-		 
-	\subsection{PCA}\label{sec:PCA}
-		\todo{\hspace*{10px}PCA !!!}
-				
+	\hspace*{10px}Finding the main features of dirty money and clean money was a true challenge in this project. In this section are indicated in more detail the ups and downs of the techniques used and the theoretical knowledge that represents the basis of these methods.
+	\subsection{PCA and Adaboost}\label{sec:PCA}
+	\hspace*{10px}The \emph{AdaBoost} algorithm is used in combination with different techniques throughout this project, such as: \emph{PCA}, \emph{Haar-like features} or \emph{edge} and \emph{intensity} distributions over different regions.\\
+		\hspace*{10px}Adaptive Boosting (also known as AdaBoost) is a machine learning technique which can be used in conjunction with various other learning algorithms. The idea is to have a (convex) set of weak classifiers (classifiers that perform at least better than random) and then minimize the total error over the training-set by finding the best classifier at each stage of the algorithm.\\
+		\hspace*{10px}The theoretical basis of this algorithm is that given a set of models (or features), \emph{M}, the algorithm will determine the subset of \emph{T} models that are the best for distinguishing between the two classes (fit and unfit bills). Thus, \emph{AdaBoost} will learn the most representative features of the two classes. The algorithm for determining the best models is shown in section \ref{sec:implementation}: \emph{Algorithm~\ref{AdaBoost}}.\\
+		\hspace*{10px}Another very important characteristic of this algorithm is the fact that it also specifies a method in which the models that were chosen as being the best, can be combined in order to give a strong classifier. The corresponding algorithm can be seen in section \ref{sec:implementation}: \emph{Algorithm~\ref{AdaBoost_pred}}.\\
+		\todo{\hspace*{10px}PCA !!!} 
+	\subsection{Intensity and Edge distributions}\label{sec:Intensity_Edge}
+		\todo{\hspace*{10px}Intensity \& Edge!!!\\}
 	\subsection{Haar-like features and Convolution over kernels}\label{sec:Haar}
-	\hspace*{10px}The first idea that we have tried was to implement the
-	\emph{Viola \& Jones} approach for object detection. The final cascade used in
-	this paper was not implemented because the main idea of this cascade was not
-	suitable for the purpose of this project. We have used the strong classifier
-	computed in \emph{AdaBoost} as the final output.\\ 
-	\begin{figure}[!hbtp]
-		\fbox{\epsfig{file=img/patterns.eps, width=0.9\linewidth} }	
-		\caption{Patterns}
-		\label{patterns}
-	\end{figure}
-	\hspace*{10px}The first step of the algorithm is defining the patterns, that
-	are mainly matrixes of different dimensions containing low and high values
-	for intensity (-1 and 1) -- Figure\ref{patterns} indicates a subset of the
-	patterns used. The algorithm used in the \emph{Viola \& Jones} article was
-	designed to loop over all predefined patterns on each position in the image
-	and convolve the specific region of the image with the patterns using the
-	formula depicted in Figure\ref{patterns_formula}.\\
-	\begin{figure}
-		\fontfamily{ccr}\selectfont\small
-		\caption{}
-		\begin{tabular}{|lr|} \hline
-			& \\[5pt]
-			\textcolor{blue}{$\sum_x\sum_y Image(y:y+h,x:x+w) .* Pattern$} &\\[10pt]
-			where: \emph{h} -- the heigh of the pattern &\\
-			\hspace*{28px} \emph{w} -- the width of the pattern &\\[5pt] 
-			\hline 
-		\end{tabular}
-		\label{patterns_formula}
-	\end{figure}
+	\hspace*{10px}The first idea that we have tried was to implement the \emph{Viola \& Jones} approach for object detection. The final cascade used in this paper was not implemented because the main idea of this cascade was not suitable for the purpose of this project. We have used the strong classifier computed in \emph{AdaBoost} as the final output.\\
+\begin{figure}[!hbtp] 
+\fbox{ 
+	\epsfig{file=img/patterns.eps, width=0.9\linewidth}
+}	
+\caption{Patterns}
+\label{patterns}
+\end{figure}
+	\hspace*{10px}The first step of the algorithm is defining the patterns, that are mainly matrixes of different dimensions containing low and high values for intensity (-1 and 1) -- Figure\ref{patterns} indicates a subset of the patterns used. The algorithm used in the \emph{Viola \& Jones} article was designed to loop over all predefined patterns on each position in the image and convolve the specific region of the image with the patterns using the formula depicted in Figure\ref{patterns_formula}.\\
+\begin{figure}
+\fontfamily{ccr}\selectfont\small
+\caption{}
+\begin{tabular}{|lr|} \hline
+	& \\[5pt]
+	\textcolor{blue}{$\sum_x\sum_y Image(y:y+h,x:x+w) .* Pattern$} &\\[10pt]
+	where: \emph{h} -- the heigh of the pattern &\\
+	\hspace*{28px} \emph{w} -- the width of the pattern &\\[5pt] 
+\hline 
+\end{tabular}
+\label{patterns_formula}
+\end{figure}
 \hspace*{10px}We have started by defining a large number of patterns of different sizes ($\approx$100 patterns), and we have filtered out those that gave bad results when used in the \emph{AdaBoost algorithm} for training the weak classifiers. The resulted values for each pattern and location in the image would, then, be used in \emph{AdaBoost} to train an \emph{SVM} classifier.\\
 \hspace*{10px}Taking into account the fact that the set of features generated by the algorithm for each pattern and each image, was extremely large, and the training took too much time. In order to solve this problem, we have decided to use just random locations at which to convolve the patterns with a region of the image (that would have the same size with the pattern). Figure~\ref{Haar_features} indicates what \emph{AdaBoost} would choose as being the most representative 5 features for the front side and rear side of the bills.\\
 \begin{figure}[!hbtp]
@@ -202,10 +138,6 @@ The second technique used for determining the predicted class of the data given 
 \item the second method was to use a system of voting -- each time a feature was chosen by the \emph{AdaBoost} algorithm, it would receive a vote. In the end the top \emph{T} most voted features throughout all the cross-validation rounds and all the repetitions would be chosen from the best model found. The corresponding weights would be generate by taking the mean of the features\rq\@ $\alpha$-weights computed in the \emph{AdaBoost} algorithm;     
 \end{itemize}
 As we would have expected, the second method for defining the best model, proved to give better results in this case so it was chosen to be applied.
-	
-	\subsection{Intensity and Edge distributions}\label{sec:Intensity_Edge}
-		\todo{\hspace*{10px}Intensity \& Edge!!!}\\
-
 \section{Implementation}\label{sec:implementation}
 		\begin{algorithm}[!hbtp]
 			\caption{AdaBoost learning features}
