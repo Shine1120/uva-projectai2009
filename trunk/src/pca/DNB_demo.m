@@ -1,13 +1,14 @@
 function DNB_demo(docreate)%(all_money_front, all_money_rear, all_labels)
-
-
-
+% In this file, an experiment for AdaBoost-PCA is
+%
+%
+%
 %% Best Parameter Settings so far:
-T				= 9;	% number of hypothesis for AdaBoost
+%T				= 4;	% number of hypothesis for AdaBoost
 leave_n_out		= 35;	% size of test-set
 hold_n_out		= 75;   % size of validation-set
-trials			= 10;	% 20 fold experiment
-repetitions		= 10;	% 20 for repeating the k-fold experiment
+trials			= 1;	% 20 fold experiment
+repetitions		= 1;	% 20 for repeating the k-fold experiment
 unfitaccept		= 0.04; % ensures better than 5% error on unfit class
 
 
@@ -30,6 +31,10 @@ best_model_list1 = [];
 best_alpha_list1 = [];
 best_model_list2 = [];
 best_alpha_list2 = [];
+
+tot_nb = [];
+tot_f = [];
+tot_r = [];
 %% Create (slow) or load (fast) image regions
 if docreate
 	fprintf('Creating Image Regions... ');
@@ -55,6 +60,9 @@ end
 
 SIZE = size(all_money_front_regions)
 
+
+for T=1:10
+
 %% Start the repetitions
 for q=1:repetitions
 	
@@ -63,7 +71,8 @@ for q=1:repetitions
 	allidx = allidx(hold_n_out+1:end);
 	holdout_labels = all_labels(holdoutset);
 	
-	
+
+	% if there is only one class present in the holdout, redo randperm
 	while ( (sum(holdout_labels == 0) == 0) || (sum(holdout_labels == 1) == 0))
 		allidx = randperm(length(all_labels));
 		holdoutset = allidx(1:hold_n_out);
@@ -128,7 +137,7 @@ for q=1:repetitions
 		
 		
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%  ADABOOST  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		
+
 		% for each image region, calculate the eigen faces
 		fprintf('Generate Eigenface Regions... \n')
 		eigen_front_regions = genEigenFaceRegions(money_front_train(l,:,:));
@@ -299,7 +308,11 @@ for q=1:repetitions
 	error_naive_Bayes = 1-correctbayes./n
 	error_front = 1-correct_front./n
 	error_rear = 1-correct_rear./n
-	
+
+	tot_nb = [tot_nb; error_naive_Bayes]
+	tot_f = [tot_f; error_front]
+	tot_r = [tot_r; error_rear]
+
 	if error_naive_Bayes < error_naive_Best
 		fprintf('Found new best model! Saving... ')
 		ErrorBayes = error_naive_Bayes 
@@ -317,6 +330,14 @@ for q=1:repetitions
 		fprintf('DONE\n')
 	end
 end; % repetitions
+
+
+best_model_list1 = [];
+best_model_list2 = [];
+best_alpha_list1 = [];
+best_alpha_list2 = [];
+
+end; % T
 
 
 fprintf( 'Final:\n' );

@@ -2,7 +2,7 @@
 doread = 0;
 docreate = 0;
 
-moneydir = '../validationset/wholeplusborder/neur10';
+moneydir = '../moneyDivided/wholeplusborder/neur05';
 
 %% ------------- READ TRAINING DATA -------------------
 
