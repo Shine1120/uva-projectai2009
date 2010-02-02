@@ -34,110 +34,63 @@
 
 \begin{document}
 	\maketitle
+	
 	\begin{abstract}
-		\hspace*{10px}In the month January of 2010 a project on the classification of
+		In the month January of 2010 a project on the classification of
 		the fitness of money was proposed. During this month we have tested and
 		implemented various techniques to handle the problem of money classification.
 		The results from our experiment show promising development comparing to the
-		current state of research.\\ 
-		\hspace*{10px}In the below sections we have described the approaches that we
+		current state of research.
+		
+		In the below sections we have described the approaches that we
 		have tried and the results obtained for each one of them.
 	\end{abstract}
+	
 	\section{Introduction}
-		\hspace*{10px}The goal of this project is to determine a reliable method that
-		would be able to distinguish between dirty bills and clean bills. In order to
-		achieve this goal we had to think of what are the representative features of
-		dirt that can be found on money bills and what is the best method that can be
-		used to model this.\\  
-		\hspace*{10px}Throughout this project we have tried a number of different
-		approaches in order to gain good results and in the same time we have tried
-		to get a better understanding of what methods are fit for describing the
-		features of the dirty money and clean money.\\ 
-		\hspace*{10px}The main techniques used in this project are: \emph{PCA} in
-		combination with \emph{AdaBoost}, \emph{Haar-like features} and
-		\emph{Adaboost}, \emph{Convolution with predefined kernels},
-		\todo{\emph{edge-detection} and \emph{intensity} distributions}.\\ 
-		\hspace*{10px}In section \ref{sec:background}, related work on
-		\emph{Haar-like features}, \emph{convolution with kernels}, \emph{PCA},
-		\emph{SVM}, \emph{AdaBoost}, \emph{edge detection} and \emph{intensity} are
-		discussed. The implementation of the \emph{AdaBoost} algorithm applied on the
-		different techniques is explained in \ref{sec:implementation}. We discuss our
-		experiments and their results in section \ref{sec:results}. Finally, we
-		conclude in section \ref{sec:conclusion} and propose some topics for future
-		research.\\ 
+		The goal of this project is to research several techniques that have a potential to distinguish between clean bills and dirty bills. In order to achieve this goal we had to think of what are the representative features of dirt that can be found on money bills and what techniques can be applied to model this.
+		 		
+		The main techniques used in this project are: \emph{PCA}, \emph{Haar-like features}, \emph{Convolution with predefined kernels}, \todo{\emph{edge-detection} and \emph{intensity} distributions}. All of these techniques have been analysed on the image data using a machine learning technique called Adaptive Boosting, also refered to in literature as AdaBoost.
+		
+		In section \ref{sec:Background}, related work on the project is discussed. In section \ref{sec:Methods}	\emph{Haar-like features}, \emph{convolution with kernels}, \emph{PCA}, \emph{SVM}, \emph{AdaBoost}, \emph{edge detection} and \emph{intensity} are discussed. The implementation of the \emph{AdaBoost} algorithm applied on the different techniques is explained in \ref{sec:implementation}. We discuss our	experiments and their results in section \ref{sec:results}. Finally, we conclude in section \ref{sec:conclusion} and propose some topics for future research.
+		
 		\todo{what about telling first about what is done in previous projects. Then
 		tell the idea of implementing a few techiniques to extract weak classifiers
 		on regions of the bills and then combine them using Adaboost. So first we
 		talk about previous work, then explain Adaboost and then talk about PCA,
 		HaarConv and Intens\&Edge}
 	
-	\section{Background}\label{sec:background}
-		\hspace*{10px}In Europe a lot of different factories produce euro bills using
-		different ink and paper. This makes the task of detecting dirty bills hard
-		because looking at the global features will not work perfectly due to these
-		small differences in printing. On average bills return 2 to 3 times a year to
-		the DNB (1.1 bilion bills a year). 
-		\hspace*{10px}The current, naive, approach used in the DNB is to measure the
-		reflection of the bill on a small area near the water mark. With this
-		approach 30\% of all bills are destroyed in order to destroy 95\% of the
-		dirty bills. In a first attampt to make this selection proces more
-		sophisticated \todo{cite:MoNuSt} learned global structures(eigen
-		money) of clean and dirty bills using PCA analisys. This approach improved on the
-		results of the current method used by the DNB. \todo{cite:Geusebroek}
-		improved this implementation by learning more local features on the water
-		mark region(white patch) of the bill. This approach again improved the
-		current best results.
+	\section{Background}\label{sec:Background}
+		In Europe a lot of different factories produce euro bills using different ink and paper. This makes the task of detecting dirty bills hard because looking at the global features will not work perfectly due to these small differences in printing. In Holland, on average bills return 2 to 3 times a year to the Dutch National Bank (DNB) with a total value of 1.1 bilion bills a year. 
+
+		The current approach used in the DNB is to measure the reflection of the bill on a small area near the water mark. With this approach 30\% of all bills are destroyed in order to destroy 95\% of the dirty bills. In a first attempt to make this selection process more		sophisticated global features (eigen-money) of clean and dirty bills are extracted using PCA analysis \todo{cite:MoNuSt}. This approach improved on the results of the current method used by the DNB. \todo{cite:Geusebroek} improved this implementation by learning more local features of the water mark region (also refered to as white patch) of the bill. This approach again improved the current results from DNB.
+		
 		\hspace*{10px}\todo{We think these results can be improved by learning weak
 		classifeirs on small areas (i.e. learn more local patterns) and combine those
 		to a strong classifier using Adaboost. The methods used and experiments done
 		are explained in the remainder of this deliverable}
 	
 	\section{Methods}\label{sec:Methods}
-		\todo{are we going to tell something about the current approach of DNB and the
-		previous projects we build on?}\\
-		\hspace*{10px}Finding the main features of dirty money and clean money was a
-		true challenge in this project. In this section are indicated in more detail
-		the ups and downs of the techniques used and the theoretical knowledge that
-		represents the basis of these methods.
 		\subsection{Adaboost}\label{sec:Adaboost}
-			\hspace*{10px}The \emph{AdaBoost} algorithm is used in combination with
-			different techniques throughout this project, such as: \emph{PCA},
-			\emph{Haar-like features} or \emph{edge} and \emph{intensity} distributions
-			over different regions.\\ \hspace*{10px}Adaptive Boosting (also known as
-			AdaBoost) is a machine learning technique which can be used in conjunction
-			with various other learning algorithms. The idea is to have a (convex) set of
-			weak classifiers (classifiers that perform at least better than random) and
-			then minimize the total error over the training-set by finding the best
-			classifier at each stage of the algorithm.\\ 
-			\hspace*{10px}The theoretical basis of this algorithm is that given a set of
-			models (or features), \emph{M}, the algorithm will determine the subset of
-			\emph{T} models that are the best for distinguishing between the two classes
-			(clean and dirty bills). Thus, \emph{AdaBoost} will learn the most
-			representative features of the two classes. The algorithm for determining the
-			best models is shown in section \ref{sec:implementation}:
-			\emph{Algorithm~\ref{AdaBoost}}.\\ 
-			\hspace*{10px}Another very important characteristic of this algorithm is the
-			fact that it also specifies a method in which the models that were chosen as
-			being the best, can be combined in order to give a strong classifier. The
-			corresponding algorithm can be seen in section \ref{sec:implementation}:
-			\emph{Algorithm~\ref{AdaBoost_pred}}.\\
-			\hspace*{10px}\todo{In our approach we split the bill in small regions (i.e.
-			dividing the bill in 5 by 12 regions). For each region we train a weak
-			classifier and those are combined into a strong classifier using
-			\emph{AdaBoost}}
+			The \emph{AdaBoost} algorithm can be used in combination with different techniques throughout this project, such as: \emph{PCA}, \emph{Haar-like features} or \emph{edge} and \emph{intensity} distributions over different regions.
+			
+			AdaBoost is a machine learning technique which can be used in conjunction with various other learning algorithms. The idea is to have a (convex) set of weak classifiers (classifiers that perform at least better than random) and then minimize the total error over the training-set by finding the best classifier at each stage of the algorithm.
+
+			The theoretical basis of this algorithm is that given a set of models (or features), \emph{M}, the algorithm will determine the subset of \emph{T} models that	 are the best for distinguishing between the two classes (clean and dirty bills). Thus, \emph{AdaBoost} will learn the most representative features of the two classes. The algorithm for determining the best models is shown in section \ref{sec:implementation}: \emph{Algorithm~\ref{AdaBoost}}.
+			
+			Another very important characteristic of this algorithm is the fact that it also specifies a method in which the models that were chosen as being the best, can be combined in order to give a strong classifier. The corresponding algorithm can be seen in section \ref{sec:implementation}: \emph{Algorithm~\ref{AdaBoost_pred}}.
+			
+			\todo{In our approach we split the bill in small regions (i.e. dividing the bill in 5 by 12 regions). For each region we train a weak classifier and those are combined into a strong classifier using \emph{AdaBoost}}
 			 
 		\subsection{Haar-like features and Convolution over kernels}\label{sec:Haar}
-			\hspace*{10px}The first idea that we have tried was to implement the
-			\emph{Viola \& Jones} approach for object detection. The final cascade used in
-			this paper was not implemented because the main idea of this cascade was not
-			suitable for the purpose of this project. We have used the strong classifier
-			computed in \emph{AdaBoost} as the final output.\\ 
+			The first idea that we have tried was to implement the \emph{Viola \& Jones} approach for object detection. The final cascade used in this paper was not implemented because the main idea of this cascade was not suitable for the purpose of this project. We have used the strong classifier computed in \emph{AdaBoost} as the final output.
+			
 			\begin{figure}[!hbtp]
-				\fbox{\epsfig{file=img/patterns.jpg, width=0.9\linewidth} }	
+				\fbox{\epsfig{file=img/patterns.eps, width=0.9\linewidth} }	
 				\caption{Patterns}
 				\label{patterns}
 			\end{figure}
-			\hspace*{10px}The first step of the algorithm is defining the patterns, that
+			
+			The first step of the algorithm is defining the patterns, that
 			are mainly matrixes of different dimensions containing low and high values
 			for intensity (-1 and 1) -- Figure\ref{patterns} indicates a subset of the
 			patterns used. The algorithm used in the \emph{Viola \& Jones} article was
@@ -172,7 +125,7 @@
 			the bills.\\ 
 			\begin{figure}[!hbtp]
 				\centering
-				\epsfig{file=img/haar.jpg, width=1\linewidth}
+				\epsfig{file=img/haar.eps, width=1\linewidth}
 				\caption{Haar Features for Front and Rear}
 				\label{Haar_features}
 			\end{figure}
@@ -200,7 +153,7 @@
 			-1;-1 1]} with an entire bill.\\ 
 			\begin{figure}[!hbtp]
 				\centering
-				\epsfig{file=img/convolution.jpg, width=1\linewidth}
+				\epsfig{file=img/convolution.eps, width=1\linewidth}
 				\caption{Convolution of an entire bill}
 				\label{convolved}
 			\end{figure} 
@@ -292,9 +245,9 @@
 			As we would have expected, the second method for defining the best model,
 			proved to give better results in this case so it was chosen to be applied.
 		
-		\subsection{PCA}\label{sec:PCA}
-			\todo{\hspace*{10px}PCA !!!}
-		
+		\subsection{PCA and SVM}\label{sec:PCA}
+			\hspace*{10px}In previous research, the use of SVM in combination with PCA already gave great error reduction on both the 5 and 10 euro bills. These results were conducted from performing PCA on the whitepatch area only, and propagate the projections in SVM. PCA on the whitepatch as well as the whole bill made it possible to reduce the data from a dimensionality equal to the number of pixels of the respective area to only a 30 components. This reduction ensures faster training and classification with SVM. The idea in this project is to identify more regions with similar discriminative features as the whitepatch. This is done by dividing the bill up in an arbitrary number of regions, and performing PCA for each of these regions in all the bills. The PCA segments then can be used to train SVM models for each segment. These SVM models in combination with their respective PCA segments in turn can be used as weak classifiers in AdaBoost.
+
 		\subsection{Intensity and Edge distributions}\label{sec:Intensity_Edge}
 			\hspace*{10px}Besides the more complex approaches we desided to implement
 			also two more simple implementations, based on the intensities on the image
@@ -327,7 +280,7 @@
             can be seen in figure \ref{canny5Euro}.
             \begin{figure}[!hbtp]
 				\centering 
-				\epsfig{file=img/canny5euro.jpg, width=1\linewidth}
+				\epsfig{file=img/canny5euro.eps, width=1\linewidth}
 				\caption{results canny edge filter. Left on a clean bill. Right on a dirty
 				bill} 
 				\label{canny5Euro} 
@@ -413,7 +366,7 @@
 		is selected as containing discriminative information.\\ 
 		\begin{figure}[!hbtp]
 			\centering
-			\epsfig{file=img/haar_regions10.jpg, width=1\linewidth}
+			\epsfig{file=img/haar_regions10.eps, width=1\linewidth}
 			\caption{Best regions for 10 Euro bills}
 			\label{haar_regions10}
 		\end{figure}
@@ -425,7 +378,7 @@
 		spread throughout the image.\\ 
 		\begin{figure}[!hbtp]
 			\centering
-			\epsfig{file=img/haar_regions5.jpg, width=1\linewidth}
+			\epsfig{file=img/haar_regions5.eps, width=1\linewidth}
 			\caption{Best regions for 5 Euro bills}
 			\label{haar_regions5}
 		\end{figure} 
@@ -436,13 +389,13 @@
 		models for the 10 Euro bills, respectively for the 5 Euro bills. 
 		\begin{figure}[!hbtp]
 			\centering
-			\epsfig{file=img/haar_plot10.jpg, width=1\linewidth}
+			\epsfig{file=img/haar_plot10.eps, width=1\linewidth}
 			\caption{Error depending on the number of features - 10 Euro bills}
 			\label{haar_plot10}
 		\end{figure} 
 		\begin{figure}[!hbtp]
 			\centering
-			\epsfig{file=img/haar_plot5.jpg, width=1\linewidth}
+			\epsfig{file=img/haar_plot5.eps, width=1\linewidth}
 			\caption{Error depending on the number of features - 5 Euro bills}
 			\label{haar_plot5}
 		\end{figure} 
