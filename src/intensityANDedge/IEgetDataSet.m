@@ -1,5 +1,5 @@
 function [ allResults ] = IEgetDataSet( do, path,cannyThresh,...
-	useFront, useRear, invariant,xSegms, ySegms)
+	useFront, useRear, invariant,xSegms, ySegms,overlap)
 
 	imgNr=1;
 	allResults=[0,0];
@@ -24,10 +24,10 @@ function [ allResults ] = IEgetDataSet( do, path,cannyThresh,...
 
 		  %load images as required in the initialization at the top
 			if (useFront)
-				nextImageFront = imread(nextImageNameFront);
+				nextImageFront = im2double(imread(nextImageNameFront));
 			end
 			if (useRear)
-				nextImageRear  = imread(nextImageNameRear);
+				nextImageRear  = im2double(imread(nextImageNameRear));
 			end
 			imgSegFX = floor((size(nextImageFront,2)-1)/xSegms);
 			imgSegFY = floor((size(nextImageFront,1)-1)/ySegms);
@@ -39,39 +39,24 @@ function [ allResults ] = IEgetDataSet( do, path,cannyThresh,...
 		  if strcmp(do,'edge')
 			if (useFront)
 			  frontImageResults = doEdge(nextImageFront,cannyThresh,...
-				  invariant,imgSegFX,imgSegFY);
+				  invariant,imgSegFX,imgSegFY,overlap);
 			end
 			if (useRear)
 			  rearImageResults  = doEdge(nextImageRear,cannyThresh,...
-				  invariant,imgSegRX,imgSegRY);
+				  invariant,imgSegRX,imgSegRY,overlap);
 			end
 		  end
 		  if strcmp(do,'Intensity')
 			if (useFront)
 			  frontImageResults = doIntensity(nextImageFront,...
-				  invariant,imgSegFX,imgSegFY);
+				  invariant,imgSegFX,imgSegFY,overlap);
 			end
 			if (useRear)
 			  rearImageResults  = doIntensity(nextImageRear,...
-				  invariant,imgSegRX,imgSegRY);
+				  invariant,imgSegRX,imgSegRY,overlap);
 			end
 		  end
 
-% 		  if strcmp(do,'edge and Intensity')
-% 			if (useFront)
-% 			  frontImageResults = doEdgeIntensity(nextImageFront,...
-% 				  cannyThresh,invariant,imgSegFX,imgSegFY);
-% 			end
-% 			if (useRear)
-% 			  rearImageResults  = doEdgeIntensity(nextImageRear,...
-% 				  cannyThresh,invariant,imgSegRX,imgSegRY);
-% 			end
-% 		  end
-
-% 		  sizeFrontImageCount = size(frontImageResults)
-% 		  frontImageResults
-% 		  sizeRearImageCount = size(rearImageResults)
-% 		  rearImageResults
 		  %add count of front and rear image to results
 		  allResults(imgNr,1:xSegms*ySegms*2)=0;
 		  if (useFront)
@@ -91,7 +76,7 @@ function [ allResults ] = IEgetDataSet( do, path,cannyThresh,...
 	end %for imgaes
 end
 
-function results = doEdge(image,cannyThresh,invariant,imgSegX, imgSegY)
+function results = doEdge(image,cannyThresh,invariant,imgSegX, imgSegY,overlap)
 	if invariant==1
 		image = image - mean(mean(image));
 	end
@@ -105,8 +90,15 @@ function results = doEdge(image,cannyThresh,invariant,imgSegX, imgSegY)
 	%do per image segment and store in vector
 	results = [];
 	count=1;
-	for y=1:imgSegY:size(image,1)-imgSegY
-		for x=1:imgSegX:size(image,2)-imgSegX
+	
+	yStepSize = imgSegY;
+	xStepSize = imgSegX;
+	if (overlap)
+		yStepSize = floor(imgSegY/2);
+		xStepSize = floor(imgSegX/2);
+	end
+	for y=1:yStepSize:size(image,1)-imgSegY
+		for x=1:xStepSize:size(image,2)-imgSegX
 			if y+imgSegY+10>size(image,1)
 				untillY = size(image,1);
 			else
@@ -123,15 +115,23 @@ function results = doEdge(image,cannyThresh,invariant,imgSegX, imgSegY)
 	end
 end
 
-function results = doIntensity(image,invariant,imgSegX, imgSegY)
+function results = doIntensity(image,invariant,imgSegX, imgSegY,overlap)
 	if invariant==1
 		image = image - mean(mean(image));
 	end
 	%do per image segment and store in vector
 	results = [];
 	count=1;
-	for y=1:imgSegY:size(image,1)-imgSegY
-		for x=1:imgSegX:size(image,2)-imgSegX
+	
+	yStepSize = imgSegY;
+	xStepSize = imgSegX;
+	if (overlap)
+		yStepSize = floor(imgSegY/2);
+		xStepSize = floor(imgSegX/2);
+	end
+	
+	for y=1:yStepSize:size(image,1)-imgSegY
+		for x=1:xStepSize:size(image,2)-imgSegX
 			if y+imgSegY+10>size(image,1)
 				untillY = size(image,1);
 			else
