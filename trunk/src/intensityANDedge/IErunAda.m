@@ -2,8 +2,8 @@ function [ output_args ] = IErunAda( )
 
 	close all;
 
-	do5Euro           = 1;
-	do10Euro          = 0;
+	do5Euro           = 0;
+	do10Euro          = 1;
 
 	doWholeNote       = 0;
 	doWholeNotePB     = 1;
@@ -27,9 +27,9 @@ function [ output_args ] = IErunAda( )
 
 	sizeHoldoutSet    = 75;
 	leave_n_out		  = 35;	% size of test-set
-	repetitions		  = 10;
-	trials			  = 50;
-	hypotheses 		  = 25;
+	repetitions		  = 1;
+	trials			  = 10;
+	hypotheses 		  = 5;
 	
 	doEdge			  = 1;
 	doIntensity		  = 1;
@@ -47,7 +47,12 @@ function [ output_args ] = IErunAda( )
 	xSegms			  = 5;
 	ySegms			  = 12;
 	
+	overlap			  = 0;
+	
 	modelCount		  = xSegms*ySegms*(useFront+useRear);
+	if (overlap)
+		modelCount		  = ((xSegms*2)-1)*((ySegms*2)-1)*(useFront+useRear);
+	end
 	
 	allDataE          = [];
 	allDataI          = [];
@@ -61,13 +66,15 @@ function [ output_args ] = IErunAda( )
 	finalModels		  = zeros(7,modelCount*(doEdge+doIntensity));
 	uberModels		  = zeros(7,modelCount*(doEdge+doIntensity));
 	
+	fprintf('\n\nDank je lieve mama!!! :) \n\n')
+
 	fprintf('\nconstructing data set...\n')
 	tic
 	if doEdge==1
 		allDataFitE      = IEgetDataSet( 'edge', pathFit,cannyThresh,...
-						   useFront, useRear, invariant,xSegms, ySegms);
+						   useFront, useRear, invariant,xSegms, ySegms,overlap);
 		allDataUnfitE    = IEgetDataSet( 'edge', pathUnfit,cannyThresh,...
-						   useFront, useRear, invariant,xSegms, ySegms);
+						   useFront, useRear, invariant,xSegms, ySegms,overlap);
 
 		allDataE         = [allDataFitE;allDataUnfitE];
 		nrIndxesFit      = size(allDataFitE,1);
@@ -75,9 +82,9 @@ function [ output_args ] = IErunAda( )
 	end
 	if doIntensity==1
 		allDataFitI		 = IEgetDataSet( 'Intensity', pathFit,cannyThresh,...
-						   useFront, useRear, invariant,xSegms, ySegms);
+						   useFront, useRear, invariant,xSegms, ySegms,overlap);
 		allDataUnfitI    = IEgetDataSet( 'Intensity', pathUnfit,cannyThresh,...
-						   useFront, useRear, invariant,xSegms, ySegms);
+						   useFront, useRear, invariant,xSegms, ySegms,overlap);
 
 		allDataI         = [allDataFitI;allDataUnfitI];
 		nrIndxesFit      = size(allDataFitI,1);
@@ -208,38 +215,65 @@ function [ output_args ] = IErunAda( )
 			finalModels = IEupdateBestModels(finalModels,modelsCombi,...
 				chosenModelsIdx,chosenModelsAlphas);
 		end
+	
 		
-		if HOTNRate > overAllBestHOUnfitGoodClass
-			fprintf('new uber model\n')
-			%if unfit good classified is better then current best results,
-			%clear uberModels and update it with the newest model
-			overAllBestHOUnfitGoodClass = HOTNRate;
-			overAllBestHOFitGoodClass   = HOTPRate;
-			uberModels = zeros(7,modelCount*(doEdge+doIntensity));
+		if r==1
+			%just to fill up in case no run is under 5% unfit error
 			uberModels = IEupdateBestModels(uberModels,modelsCombi,...
-				chosenModelsIdx,chosenModelsAlphas);
-		elseif HOTNRate == overAllBestHOUnfitGoodClass
-			%if unfit good classified is as good as the current one
-			%check if fit bills are classified better then the current best
-			%results. If so, clear uberModel and reinitialize it with
-			%current model
-			
-			if HOTPRate > overAllBestHOFitGoodClass
+				chosenModelsIdx,chosenModelsAlphas);		
+		end
+		if HOTNRate > 0.95
+			%if unfit error is smaller then 5%
+			if HOTPRate>overAllBestHOFitGoodClass
+				%if fit error is smaller then smallest until now
 				fprintf('new uber model\n')
-				overAllBestHOFitGoodClass = HOTPRate;
-				uberModels = zeros(7,modelCount*(doEdge+doIntensity));
-				uberModels = IEupdateBestModels(uberModels,modelsCombi,...
+				%if unfit good classified is better then current best results,
+				%clear uberModels and update it with the newest model
+				uberModels  = zeros(7,modelCount*(doEdge+doIntensity));
+				uberModels  = IEupdateBestModels(uberModels,modelsCombi,...
 					chosenModelsIdx,chosenModelsAlphas);
-			elseif HOTPRate == overAllBestHOFitGoodClass
-				fprintf('uber models updated\n')
-				%if unfit and fit bills are classified as good ad the
-				%current best model, update uberModel with the corrent
-				%model (to average on it later on)
-				uberModels = IEupdateBestModels(uberModels,modelsCombi,...
+			elseif HOTPRate==overAllBestHOFitGoodClass
+				%if fit error is smaller then smallest until now
+				fprintf('uber model updated\n')
+				%if unfit good classified is better then current best results,
+				%clear uberModels and update it with the newest model
+				uberModels  = IEupdateBestModels(uberModels,modelsCombi,...
 					chosenModelsIdx,chosenModelsAlphas);
 			end
 		end
-		%%%%%%%%%%%%%%%%%%%FINISHED TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%
+		
+% 		if HOTNRate > overAllBestHOUnfitGoodClass
+% 			fprintf('new uber model\n')
+% 			%if unfit good classified is better then current best results,
+% 			%clear uberModels and update it with the newest model
+% 			overAllBestHOUnfitGoodClass = HOTNRate;
+% 			overAllBestHOFitGoodClass   = HOTPRate;
+% 			uberModels = zeros(7,modelCount*(doEdge+doIntensity));
+% 			uberModels = IEupdateBestModels(uberModels,modelsCombi,...
+% 				chosenModelsIdx,chosenModelsAlphas);
+% 		elseif HOTNRate == overAllBestHOUnfitGoodClass
+% 			%if unfit good classified is as good as the current one
+% 			%check if fit bills are classified better then the current best
+% 			%results. If so, clear uberModel and reinitialize it with
+% 			%current model
+% 			
+% 			if HOTPRate > overAllBestHOFitGoodClass
+% 				fprintf('new uber model\n')
+% 				overAllBestHOFitGoodClass = HOTPRate;
+% 				uberModels = zeros(7,modelCount*(doEdge+doIntensity));
+% 				uberModels = IEupdateBestModels(uberModels,modelsCombi,...
+% 					chosenModelsIdx,chosenModelsAlphas);
+% 			elseif HOTPRate == overAllBestHOFitGoodClass
+% 				fprintf('uber models updated\n')
+% 				%if unfit and fit bills are classified as good ad the
+% 				%current best model, update uberModel with the corrent
+% 				%model (to average on it later on)
+% 				uberModels = IEupdateBestModels(uberModels,modelsCombi,...
+% 					chosenModelsIdx,chosenModelsAlphas);
+% 			end
+% 		end
+
+	%%%%%%%%%%%%%%%%%%%FINISHED TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%
 		toc
 	end %repetitions
 	
@@ -315,7 +349,7 @@ function [ output_args ] = IErunAda( )
 	title('results good classified')
 
 	IEshowAreasOnBill( xSegms, ySegms,useFront,useRear,...
-		finalModelsToUse(7,:),do5Euro,do10Euro, 'best overall models')
+		finalModelsToUse(7,:),do5Euro,do10Euro, 'best overall models',overlap)
 
 	figure
 	plot(GoodClassified2(:,1),GoodClassified2(:,2),'b',...
@@ -327,7 +361,7 @@ function [ output_args ] = IErunAda( )
 	title('results uber models')
 
 	IEshowAreasOnBill( xSegms, ySegms,useFront,useRear,...
-		uberModelsToUse(7,:),do5Euro,do10Euro, 'bestUnfit models')
+		uberModelsToUse(7,:),do5Euro,do10Euro, 'bestUnfit models',overlap)
 
 	fprintf('\n\nresults for %d repetitions:\n',repetitions)
 	fprintf('fit right:   \t%4.4g%%\n',(sumTPRate/(repetitions))*100)

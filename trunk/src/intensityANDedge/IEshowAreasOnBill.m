@@ -2,9 +2,6 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 	doFront,doRear,bestModels,do5Euro,do10Euro, titleTxt,overlap)
 
 
-	YsegsOld = Ysegs;
-	XsegsOld = Xsegs;
-
 	if (overlap)
 		Xsegs = ((Xsegs*2)-1);
 		Ysegs = ((Ysegs*2)-1);
@@ -28,10 +25,10 @@ function [ output_args ] = IEshowAreasOnBill( Xsegs, Ysegs,...
 	[frontY frontX] = size(imageFront);
 	[rearY rearX]   = size(imageRear);
 
-	segWidthFront   = round(frontX/XsegsOld);
-	segHeightFront  = round(frontY/YsegsOld);
-	segWidthRear    = round(rearX/XsegsOld);
-	segHeightRear   = round(rearY/YsegsOld);
+	segWidthFront   = round(frontX/Xsegs);
+	segHeightFront  = round(frontY/Ysegs);
+	segWidthRear    = round(rearX/Xsegs);
+	segHeightRear   = round(rearY/Ysegs);
 	
 	methodIdx		= ceil((bestModels./segsPerMethod));
 	frontOrRear		= bestModels-((methodIdx-1)*segsPerMethod);
