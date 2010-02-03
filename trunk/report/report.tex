@@ -80,8 +80,8 @@
 			Another very important characteristic of this algorithm is the fact that it also specifies a method in which the models that were chosen as being the best, can be combined in order to give a strong classifier. The corresponding algorithm can be seen in section \ref{sec:implementation}: \emph{Algorithm~\ref{AdaBoost_pred}}.
 			
 			\todo{In our approach we split the bill in small regions (i.e. dividing the bill in 5 by 12 regions). For each region we train a weak classifier and those are combined into a strong classifier using \emph{AdaBoost}}
-			 
-		\subsection{Haar-like features and Convolution over kernels}\label{sec:Haar}
+
+		\subsection{Haar-like features and convolution with Haar-like kernels}\label{sec:Haar}
 			The first idea that we have tried was to implement the \emph{Viola \& Jones} approach for object detection. The final cascade used in this paper was not implemented because the main idea of this cascade was not suitable for the purpose of this project. We have used the strong classifier computed in \emph{AdaBoost} as the final output.
 			
 			\begin{figure}[!hbtp]
