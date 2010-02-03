@@ -49,47 +49,84 @@
 	\section{Introduction}
 		The goal of this project is to research several techniques that have a potential to distinguish between clean bills and dirty bills. In order to achieve this goal we had to think of what are the representative features of dirt that can be found on money bills and what techniques can be applied to model this.
 		 		
-		The main techniques used in this project are: \emph{PCA}, \emph{Haar-like features}, \emph{Convolution with predefined kernels}, \todo{\emph{edge-detection} and \emph{intensity} distributions}. All of these techniques have been analysed on the image data using a machine learning technique called Adaptive Boosting, also refered to in literature as AdaBoost.
+		The main techniques used in this project are: \emph{PCA}, \emph{Haar-like features}, \emph{Convolution with predefined kernels}, \todo{\emph{edge-detection} and \emph{intensity} distributions}. All of these techniques have been analysed on the image data using a machine learning technique called Adaptive Boosting, also refered to in literature as AdaBoost \cite{Ada}.
 		
-		In section \ref{sec:Background}, related work on the project is discussed. In section \ref{sec:Methods}	\emph{Haar-like features}, \emph{convolution with kernels}, \emph{PCA}, \emph{SVM}, \emph{AdaBoost}, \emph{edge detection} and \emph{intensity} are discussed. The implementation of the \emph{AdaBoost} algorithm applied on the different techniques is explained in \ref{sec:implementation}. We discuss our	experiments and their results in section \ref{sec:results}. Finally, we conclude in section \ref{sec:conclusion} and propose some topics for future research.
-		
-		\todo{what about telling first about what is done in previous projects. Then
-		tell the idea of implementing a few techiniques to extract weak classifiers
-		on regions of the bills and then combine them using Adaboost. So first we
-		talk about previous work, then explain Adaboost and then talk about PCA,
-		HaarConv and Intens\&Edge}
-	
+		In section \ref{sec:Background}, related work on the project is discussed. In section \ref{sec:Methods}, the implementation of the \emph{AdaBoost} algorithm applied on the different techniques \emph{Haar-like features}, \emph{convolution with kernels}, \emph{PCA}, \emph{SVM}, \emph{AdaBoost}, \emph{edge detection} and \emph{intensity} are discussed. We discuss our experiments and their results in section \ref{sec:results}. Finally, we conclude in section \ref{sec:conclusion} and propose some topics for future research.
+			
 	\section{Background}\label{sec:Background}
 		In Europe a lot of different factories produce euro bills using different ink and paper. This makes the task of detecting dirty bills hard because looking at the global features will not work perfectly due to these small differences in printing. In Holland, on average bills return 2 to 3 times a year to the Dutch National Bank (DNB) with a total value of 1.1 bilion bills a year. 
 
-		The current approach used in the DNB is to measure the reflection of the bill on a small area near the water mark. With this approach 30\% of all bills are destroyed in order to destroy 95\% of the dirty bills. In a first attempt to make this selection process more		sophisticated global features (eigen-money) of clean and dirty bills are extracted using PCA analysis \todo{cite:MoNuSt}. This approach improved on the results of the current method used by the DNB. \todo{cite:Geusebroek} improved this implementation by learning more local features of the water mark region (also refered to as white patch) of the bill. This approach again improved the current results from DNB.
+		The current approach used in the DNB is to measure the reflection of the bill on a small area near the water mark. With this approach 30\% of all bills are destroyed in order to destroy 95\% of the dirty bills. In a first attempt to make this selection process more		sophisticated global features (eigen-money) of clean and dirty bills are extracted using PCA analysis \cite{MoNuSt}. This approach improved on the results of the current method used by the DNB. The implementation was again improved by learning more local features of the water mark region (also refered to as white patch) of the bill \cite{Geusebroek}. This approach again improved the current results from DNB.
 		
-		\hspace*{10px}\todo{We think these results can be improved by learning weak
-		classifeirs on small areas (i.e. learn more local patterns) and combine those
-		to a strong classifier using Adaboost. The methods used and experiments done
-		are explained in the remainder of this deliverable}
+		\todo{We think these results can be improved by learning weak classifeirs on small areas (i.e. learn more local patterns) and combine those to a strong classifier using Adaboost. The methods used and experiments done are explained in the remainder of this deliverable}
 	
 	\section{Methods}\label{sec:Methods}
 		\subsection{Adaboost}\label{sec:Adaboost}
-			The \emph{AdaBoost} algorithm can be used in combination with different techniques throughout this project, such as: \emph{PCA}, \emph{Haar-like features} or \emph{edge} and \emph{intensity} distributions over different regions.
-			
+			The \emph{AdaBoost} algorithm will be used in combination with different techniques throughout this project, such as: \emph{PCA}, \emph{Haar-like features} or \emph{edge} and \emph{intensity} distributions over different regions.
+
 			AdaBoost is a machine learning technique which can be used in conjunction with various other learning algorithms. The idea is to have a (convex) set of weak classifiers (classifiers that perform at least better than random) and then minimize the total error over the training-set by finding the best classifier at each stage of the algorithm.
 
-			The theoretical basis of this algorithm is that given a set of models (or features), \emph{M}, the algorithm will determine the subset of \emph{T} models that	 are the best for distinguishing between the two classes (clean and dirty bills). Thus, \emph{AdaBoost} will learn the most representative features of the two classes. The algorithm for determining the best models is shown in section \ref{sec:implementation}: \emph{Algorithm~\ref{AdaBoost}}.
+			The theoretical basis of this algorithm is that given a set of models (or features), \emph{M}, the algorithm will determine the subset of \emph{T} models that	 are the best for distinguishing between the two classes (clean and dirty bills). Thus, \emph{AdaBoost} will learn the most representative features of the two classes. The algorithm for determining the best models is shown in \emph{Algorithm~\ref{AdaBoost}}.	Another very important characteristic of this algorithm is the fact that it also specifies a method in which the models that were chosen as being the best, can be combined in order to give a strong classifier. The corresponding algorithm can be seen in \emph{Algorithm~\ref{AdaBoost_pred}}. 
 			
-			Another very important characteristic of this algorithm is the fact that it also specifies a method in which the models that were chosen as being the best, can be combined in order to give a strong classifier. The corresponding algorithm can be seen in section \ref{sec:implementation}: \emph{Algorithm~\ref{AdaBoost_pred}}.
+			Note that the algorithm looks slightly different but is equivalent to the one described in \cite{Haar}.
 			
-			\todo{In our approach we split the bill in small regions (i.e. dividing the bill in 5 by 12 regions). For each region we train a weak classifier and those are combined into a strong classifier using \emph{AdaBoost}}
+			\begin{algorithm}[!hbtp]
+				\caption{AdaBoost learning features}
+				\label{AdaBoost}
+				\begin{algorithmic}[1]
+				\medskip
+				\STATE \tbf{function} AdaBoostLearn($T$, $M$, $S$) 
+				\STATE {$T$ = nr. of hypothesis}
+				\STATE {$M$ = Models}
+				\STATE {$S$ = training-set, \{$(x_1,y_1),...(x_n,y_n)$\} \\ with $x_i \epsilon X$ and $y_i \epsilon \{-1, 1\}$ }
+				\STATE {$D_{1(i)} \leftarrow \frac{1}{n}$, with $i=1,...,n$}
+				\FOR {$t=1$ to $T$}
+					\STATE {$error_t \leftarrow 0$}
+					\FOR {$m \epsilon M$}
+						\STATE {$h_j(x_i) \leftarrow predict(x_i)$ \%\tit{svm or gaussian distribution}}
+						\STATE {$error_j \leftarrow \sum^n_{i=1}D_t(i)[y_i \neq h_j(x_i)]$}
+						\IF {$error_j < error_t$}
+							\STATE {$error_t \leftarrow error_j$}
+							\STATE {$h_t \leftarrow h_j$}
+						\ENDIF
+					\ENDFOR
+					\STATE {$\alpha_t \leftarrow 0.5 \cdot \log{\frac{1-error_t}{error_t}}$}
+					\FOR {$i=1$ to $n$}
+						\STATE {$D_{t+1}(i) \leftarrow \frac{D_t(i)\exp{-\alpha_t \cdot y_i \cdot h_t(x_i)}}{Z_t}$}
+					\ENDFOR
+				\ENDFOR
+				\STATE {\tbf{return} $\alpha, h$}
+				\end{algorithmic}
+				\label{alg:AdaBoostLearn}
+			\end{algorithm}
 
+			\begin{algorithm}[!hbtp]
+				\caption{AdaBoost Prediction}
+				\label{AdaBoost_pred}
+				\begin{algorithmic}[1]
+				\medskip
+				\STATE \tbf{function} AdaBoostPredict($\alpha$, $h$, $I$)
+				\STATE { $\alpha$ = weights }
+				\STATE { $h$ = weak classifiers}
+				\STATE {$I$ = image}
+				\STATE {$p$ = prediction} 
+				\FOR {$t=1$ to $length(\alpha)$}
+					\STATE $p \leftarrow p + \alpha_th_t(I)$
+				\ENDFOR
+				\STATE {\tbf{return} $sign(p)$}
+				\end{algorithmic}
+				\label{alg:AdaBoostPredict}
+			\end{algorithm}
+								
 		\subsection{Haar-like features and convolution with Haar-like kernels}\label{sec:Haar}
-			The first idea that we have tried was to implement the \emph{Viola \& Jones} approach for object detection. The final cascade used in this paper was not implemented because the main idea of this cascade was not suitable for the purpose of this project. We have used the strong classifier computed in \emph{AdaBoost} as the final output.
-			
+			The \emph{Viola \& Jones} approach for object detection has been succesfully applied to face recognition tasks. In previous projects, the use of PCA for classification is motivated by its application in face recognition. The use of Haar-like features has proven its purpose in this field as well and therefore its plausible the technique could be adapted to our problem. The final cascade used in this paper however was not implemented because the main idea of this cascade was not suitable for the purpose of this project. We have used the strong classifier computed in \emph{AdaBoost} as the final output.
+
 			\begin{figure}[!hbtp]
-				\fbox{\epsfig{file=img/patterns.eps, width=0.9\linewidth} }	
+				\fbox{\epsfig{file=img/patterns.eps, width=0.9\linewidth}}
 				\caption{Patterns}
 				\label{patterns}
 			\end{figure}
-			
+
 			The first step of the algorithm is defining the patterns, that
 			are mainly matrixes of different dimensions containing low and high values
 			for intensity (-1 and 1) -- Figure\ref{patterns} indicates a subset of the
@@ -233,11 +270,11 @@
 			\begin{itemize}
 				\item the first one was essentially just choosing the best model (the one
 				that gives the minimum error) throughout all the repetitions and all the
-				rounds in the cross-validation;
+				rounds in the validation;
 				\item the second method was to use a system of voting -- each time a
 				feature was chosen by the \emph{AdaBoost} algorithm, it would receive a
 				vote. In the end the top \emph{T} most voted features throughout all the
-				cross-validation rounds and all the repetitions would be chosen from the
+				validation rounds and all the repetitions would be chosen from the
 				best model found. The corresponding weights would be generate by taking the
 				mean of the features\rq\@ $\alpha$-weights computed in the \emph{AdaBoost}
 				algorithm;
@@ -290,63 +327,15 @@
 			When doing this for all images we can again extract two gaussian
 			distributions of edge points per region (one for clean and one for dirty
 			bills).
-
-	\section{Implementation}\label{sec:implementation}
-		\begin{algorithm}[!hbtp]
-			\caption{AdaBoost learning features}
-			\label{AdaBoost}
-			\begin{algorithmic}[1]
-			\medskip
-			\STATE \tbf{function} AdaBoostLearn($T$, $M$, $S$) 
-			\STATE {$T$ = nr. of hypothesis}
-			\STATE {$M$ = Models}
-			\STATE {$S$ = training-set, \{$(x_1,y_1),...(x_n,y_n)$\} \\ with $x_i \epsilon X$ and $y_i \epsilon \{-1, 1\}$ }
-			\STATE {$D_{1(i)} \leftarrow \frac{1}{n}$, with $i=1,...,n$}
-			\FOR {$t=1$ to $T$}
-				\STATE {$error_t \leftarrow 0$}
-				\FOR {$m \epsilon M$}
-					\STATE {$h_j(x_i) \leftarrow predict(x_i)$ \%\tit{svm or gaussian distribution}}
-					\STATE {$error_j \leftarrow \sum^n_{i=1}D_t(i)[y_i \neq h_j(x_i)]$}
-					\IF {$error_j < error_t$}
-						\STATE {$error_t \leftarrow error_j$}
-						\STATE {$h_t \leftarrow h_j$}
-					\ENDIF
-				\ENDFOR
-				\STATE {$\alpha_t \leftarrow 0.5 \cdot \log{\frac{1-error_t}{error_t}}$}
-				\FOR {$i=1$ to $n$}
-					\STATE {$D_{t+1}(i) \leftarrow \frac{D_t(i)\exp{-\alpha_t \cdot y_i \cdot h_t(x_i)}}{Z_t}$}
-				\ENDFOR
-			\ENDFOR
-			\STATE {\tbf{return} $\alpha, h$}
-			\end{algorithmic}
-			\label{alg:AdaBoostLearn}
-		\end{algorithm}
-		\begin{algorithm}[!hbtp]
-			\caption{AdaBoost Prediction}
-			\label{AdaBoost_pred}
-			\begin{algorithmic}[1]
-			\medskip
-			\STATE \tbf{function} AdaBoostPredict($\alpha$, $h$, $I$)
-			\STATE { $\alpha$ = weights }
-			\STATE { $h$ = weak classifiers}
-			\STATE {$I$ = image}
-			\STATE {$p$ = prediction} 
-			\FOR {$t=1$ to $length(\alpha)$}
-				\STATE $p \leftarrow p + \alpha_th_t(I)$
-			\ENDFOR
-			\STATE {\tbf{return} $sign(p)$}
-			\end{algorithmic}
-			\label{alg:AdaBoostPredict}
-		\end{algorithm}
-
+			
 	\section{Results}\label{sec:results}
-		\hspace*{10px}The available image set was spilt into a holdout set and the
+		\hspace*{10px}The available image set was split into a holdout set and the
 		rest of the data was again split into a validation set and a part that was
 		used for training the final model by \emph{random sub-sampling
-		cross-validation} technique. The whole process of defining the validation set
-		and applying random sub-sampling cross-validation was repeated several times
+		validation} technique. The whole process of defining the validation set
+		and applying random sub-sampling validation was repeated several times
 		to ensure a correct estimation of the predictions. For each round of the
-		cross-validation, a model was trained using the \emph{AdaBoost algorithm}
+		validation, a model was trained using the \emph{AdaBoost algorithm}
 		described above. The obtained model was, then, tested by building the strong
 		classifier and computing the corresponding values for: \emph{true-positive
 		estimation}, \emph{true-negative estimation}, \emph{false-positive estimation}
@@ -357,7 +346,7 @@
 		gives 4,347 features, the training part is relatively slow for this method. In
 		order to create reliable model we have used 5 repetitions, 10 hypothesis
 		(features to be chosen by AdaBoost), 10 trials in the random sampling
-		cross-validation method.\\ \hspace*{10px}In Figure\ref{haar_regions10} are
+		validation method.\\ \hspace*{10px}In Figure\ref{haar_regions10} are
 		indicated the most voted regions for the 10 Euro bills in \emph{AdaBoost}
 		throughout all trials and all repetitions. We can notice that for the front of
 		the bills the regions selected are mainly positions on the water mark area,
@@ -483,7 +472,9 @@
 			\bibitem{Ada}
 				AdaBoost: \\
 				\tit{http://en.wikipedia.org/wiki/AdaBoost}	
-			\bibitem{MoNuSt}Eigen money approach: \\
-				\tit{Molenaar, Nusselder and Stefanov}	
+			\bibitem{MoNuSt}G. Molenaar, A. Nusselder and K. Stefanov: \\
+				\tit{Eigen money approach}
+			\bibitem{Geusebroek} J.M. Geusebroek: \\
+				\tit{Eigen money approach improved}		
 		\end{thebibliography}
 \end{document}
