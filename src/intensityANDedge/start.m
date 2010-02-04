@@ -2,13 +2,27 @@ function [ output_args ] = IErunAda( )
 
 	close all;
 
-	do5Euro           = 0;
-	do10Euro          = 1;
+	%seledt on what bills to learn
+	do5Euro           = 1;
+	do10Euro          = 0;
 
+	%select on what area of bill to learn on
 	doWholeNote       = 0;
 	doWholeNotePB     = 1;
 	doWhitePatchNote  = 0;
 
+	%select what side of the bill to learn on
+	useFront		  = 1;
+	useRear			  = 1;
+
+	%select what method to use
+	doEdge			  = 1;
+	doIntensity		  = 1;
+	doMethods(1)	  = doEdge;
+	doMethods(2)	  = doIntensity;
+	
+
+	%path to images is constructed
 	path = '../moneyDivided/';
 	if (doWholeNote)
 		path      = [path 'whole/'];
@@ -25,63 +39,70 @@ function [ output_args ] = IErunAda( )
 	pathFit		  = [path 'fit/'];
 	pathUnfit	  = [path 'unfit/'];
 
-	sizeHoldoutSet    = 75;
-	leave_n_out		  = 35;	% size of test-set
-	repetitions		  = 40;
-	trials			  = 40;
-	hypotheses 		  = 40;
 	
-	doEdge			  = 1;
-	doIntensity		  = 1;
+	sizeValidationSet = 75;
+	leave_n_out		  = 35;	% size of test set
 
-	doMethods(1)	  = doEdge;
-	doMethods(2)	  = doIntensity;
+	repetitions		  = 10; %number of repetitions of the test
+	trials			  = 20; %number of Repeated random sub-sampling validation 
+	hypotheses 		  = 10; %weak classifiers to be learned by adaBoost
 
+	%if invariant set to one. The mean intensity of each bill will be
+	%subtracted from the intensities of that bill
 	invariant         = 0;
 
+	%is used as threshold in canny edge detection
 	cannyThresh 	  = 0.0355;
 
-	useFront		  = 1;
-	useRear			  = 1;
-
-	xSegms			  = 5;
-	ySegms			  = 12;
-	
+	%define number of segments to split the bill in
+	xSegms			  = 3;
+	ySegms			  = 7;
+	%select if areas should overlap.
+	%if overlap is set to 1 the overlapping segments will be added to the
+	%xSegms and ySegms defined above.
 	overlap			  = 1;
 	
+	%calculate number of models that will be handled
 	modelCount		  = xSegms*ySegms*(useFront+useRear);
 	if (overlap)
 		modelCount	  = ((xSegms*2)-1)*((ySegms*2)-1)*(useFront+useRear);
 	end
-	
+
+	%initialization of variables and lists to be used
 	allDataE          = [];
 	allDataI          = [];
 	nrIndxesFit       = 0;
 	nrIndxesUnfit     = 0;
 
-    holdoutSetE       = [];
-    holdoutSetI       = [];
+    validationSetE       = [];
+    validationSetI       = [];
 	
 	modelsVotes       = zeros(5,modelCount*(doEdge+doIntensity));
 	finalModels		  = zeros(7,modelCount*(doEdge+doIntensity));
 	uberModels		  = zeros(7,modelCount*(doEdge+doIntensity));
 	
-	plotData1 = zeros(hypotheses,4);
-	plotData2 = zeros(hypotheses,4);
+	plotData = zeros(hypotheses,4);
 	
 	fprintf('\nconstructing data set...\n')
 	tic
 	if doEdge==1
+		% learning should be done on edges
+		%get edge data of fit images
 		allDataFitE      = IEgetDataSet( 'edge', pathFit,cannyThresh,...
 						   useFront, useRear, invariant,xSegms, ySegms,overlap);
+		%get edge data of unfit images
 		allDataUnfitE    = IEgetDataSet( 'edge', pathUnfit,cannyThresh,...
 						   useFront, useRear, invariant,xSegms, ySegms,overlap);
 
+		%put the fit and unfit data under each other in one matrix
 		allDataE         = [allDataFitE;allDataUnfitE];
+		%remember number of fit items
 		nrIndxesFit      = size(allDataFitE,1);
+		%remember number of fit items
 		nrIndxesUnfit    = size(allDataUnfitE,1);
 	end
 	if doIntensity==1
+		%same as for edges (above)
 		allDataFitI		 = IEgetDataSet( 'Intensity', pathFit,cannyThresh,...
 						   useFront, useRear, invariant,xSegms, ySegms,overlap);
 		allDataUnfitI    = IEgetDataSet( 'Intensity', pathUnfit,cannyThresh,...
@@ -93,45 +114,53 @@ function [ output_args ] = IErunAda( )
 	end
 	toc
 
+	%construct groundtruth labels
 	allDataClasses   = [ones(nrIndxesFit,1); zeros(nrIndxesUnfit,1)];
 	
+	% initialize  variables
 	sumTPRate = 0;
 	sumTNRate = 0;
 	
-	overAllBestHOResults = 0;
+	overAllBestValResults = 0;
 	overAllBestHOFitGoodClass = 0;
 	overAllBestHOUnfitGoodClass = 0;
 	
 	for r=1:repetitions
 		tic
-		randIndexAll     = randperm(nrIndxesFit+nrIndxesUnfit)';
-		randIndexHOAll   = randIndexAll(1:sizeHoldoutSet);
-		randIndexTTAll   = randIndexAll(sizeHoldoutSet+1:size(randIndexAll,1));
+		%split data in train-test set and validation set
+		randIndexAll    = randperm(nrIndxesFit+nrIndxesUnfit)';
+		randIndexValAll = randIndexAll(1:sizeValidationSet);
+		randIndexTTAll  = randIndexAll(sizeValidationSet+1:size(randIndexAll,1));
 		
+		%extract validation set
 		if (doEdge)
-			holdoutSetE     = allDataE(randIndexHOAll,:);
+			validationSetE   = allDataE(randIndexValAll,:);
 		end
 		if (doIntensity)
-			holdoutSetI     = allDataI(randIndexHOAll,:);
+			validationSetI   = allDataI(randIndexValAll,:);
 		end
 		
-		holdoutSetClasses	= allDataClasses(randIndexHOAll);
+		%get the groundtruth labels for validation set
+		validationSetClasses = allDataClasses(randIndexValAll);
 
-		sumModelsOverTrials = zeros(4,modelCount*(doEdge+doIntensity));
+		sumModelsOverTrials  = zeros(4,modelCount*(doEdge+doIntensity));
 		
 		for trial=1:trials
 			fprintf('repetition %d/%d\t trial %d/%d\n',r,repetitions,trial,trials)
+			%split train and test set (split labels)
 			randIndexTT  = randperm(length(randIndexTTAll));
 			testset		 = randIndexTTAll(randIndexTT(1:leave_n_out));
 			trainset	 = randIndexTTAll(randIndexTT(leave_n_out+1:end));
 			testLabels   = allDataClasses(testset);
 			trainLabels  = allDataClasses(trainset);
 			
+			%initialize lists to hold test and train set
 			trainsetE    = [];
 			testsetE     = [];
 			trainsetI    = [];
 			testsetI     = [];
 			
+			%get test and train set according splited labels
 			if (doEdge)
 				testsetE  = allDataE(testset,:);
 				trainsetE = allDataE(trainset,:);
@@ -141,24 +170,27 @@ function [ output_args ] = IErunAda( )
 				trainsetI = allDataI(trainset,:);
 			end
 
+			%calculate models from the train data
 			[EModels,IModels] = IEgetModels(doMethods,...
 				trainLabels,trainsetE,trainsetI,modelCount);
 
-			if doEdge & doIntensity
+			%combine intensity and edges sets according to requested
+			%methods to use (defined at the top)
+			if doEdge && doIntensity
 				trainSetCombi     = [trainsetE trainsetI];
 				testSetCombi      = [testsetE testsetI];
 				modelsCombi       = [EModels IModels];
-				holdoutSetCombi   = [holdoutSetE holdoutSetI];
+				validationSetCombi   = [validationSetE validationSetI];
 			elseif doEdge
 				trainSetCombi     = trainsetE;
 				testSetCombi      = testsetE;
 				modelsCombi       = EModels;
-				holdoutSetCombi   = holdoutSetE;
+				validationSetCombi   = validationSetE;
 			elseif doIntensity
 				trainSetCombi     = trainsetI;
 				testSetCombi      = testsetI;
 				modelsCombi       = IModels;
-				holdoutSetCombi   = holdoutSetI;
+				validationSetCombi   = validationSetI;
 			end
 			sumModelsOverTrials = sumModelsOverTrials+modelsCombi;
 
@@ -171,176 +203,146 @@ function [ output_args ] = IErunAda( )
 					testLabels,alpha,0);
 			%%%%%%%%%%%%%%%%%%%FINISHED TESTING TEST SET%%%%%%%%%%%%%%%%%%%
 			
+			%updates the models returned by adaboost according to test
+			%results
 			modelsVotes = IEupdateModelVotes(modelsVotes,...
 								bestModels,testGoodClassified);
-
 		end %trials
 
 		averageModelsOverTrials = sumModelsOverTrials./trials;
 		
 		%sort:
-		% modelsVotes(1,:) stores a sum of the weighted occurence in the
+		%modelsVotes(1,:) stores a sum of the weighted occurence in the
 		% chosen model list (chosen by adaboost). If an item is on the first
 		% place in a list it gets weight of the size of the list. 
-		% If it is last it gets one. modelsVotes(2,:) is a sum of the 
-		% occurences of a model in the chosen models (by adaboost)
+		% If it is last it gets one. 
+		%modelsVotes(2,:) is a sum of the occurences of a model in the 
+		% chosen models (by adaboost), one point for every occurence.
+		%modelsVotes(3,:) stores the sum of the alphas assigned by adaboost
+		%modelsVotes(4,:) stores the good classified rate
 		[ignore modelsHighestVotesIds] = sort(modelsVotes(4,:),'descend');
+
+		% select the best models. Number of models selected is the number
+		% of hypotheses.
 		chosenModelsAlphas = modelsVotes(3,modelsHighestVotesIds(1:hypotheses))./...
 							 modelsVotes(2,modelsHighestVotesIds(1:hypotheses));
-% 		averageGoodClassified = modelsVotes(4,modelsHighestVotesIds(1:hypotheses))./...
-% 								modelsVotes(2,modelsHighestVotesIds(1:hypotheses));
 		chosenModelsIdx    = modelsVotes(5,modelsHighestVotesIds(1:hypotheses));
 
-		%%%%%%%%%%%%%%%%%%%%%%%TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%%%%%%%%%%%%%%%%%%%%TESTING VALIDATION SET%%%%%%%%%%%%%%%%%%%%%%%%
 		
-		[WinnerModels, HOTPRate, HOTNRate, HOGoodClassified] =...
+		%run selected best models on the validation set
+		[ignore, ValTPRate, ValTNRate, ValGoodClassified] =...
 				IErunModels(averageModelsOverTrials,chosenModelsIdx',...
-				holdoutSetCombi,holdoutSetClasses,chosenModelsAlphas,0);
+				validationSetCombi,validationSetClasses,chosenModelsAlphas,0);
 
-		sumTPRate	 = sumTPRate + HOTPRate;
-		sumTNRate	 = sumTNRate + HOTNRate;
+		sumTPRate	 = sumTPRate + ValTPRate;
+		sumTNRate	 = sumTNRate + ValTNRate;
 			
 		fprintf('HOResults::  fitGood: %4.4g \t unfitGood: %4.4g \t-->  error: %4.4g\n',...
-			HOTPRate,HOTNRate,1-HOGoodClassified)
+			ValTPRate,ValTNRate,1-ValGoodClassified)
 		
-		if HOGoodClassified > overAllBestHOResults 
-			fprintf('new overall Model\n')
-			overAllBestHOResults = HOGoodClassified;
-			%reinitialize bestmodel list
-			finalModels = zeros(7,modelCount*(doEdge+doIntensity));
-			finalModels = IEupdateBestModels(finalModels,modelsCombi,...
-				chosenModelsIdx,chosenModelsAlphas);
-		elseif HOGoodClassified == overAllBestHOResults 
-			fprintf('overall Models updated\n')
-			%update bestModel list
-			finalModels = IEupdateBestModels(finalModels,modelsCombi,...
-				chosenModelsIdx,chosenModelsAlphas);
-		end
+% 		if ValGoodClassified > overAllBestValResults 
+% 			fprintf('new overall Model\n')
+% 			overAllBestValResults = ValGoodClassified;
+% 			%reinitialize bestmodel list
+% 			finalModels = zeros(7,modelCount*(doEdge+doIntensity));
+% 			finalModels = IEupdateBestModels(finalModels,modelsCombi,...
+% 				chosenModelsIdx,chosenModelsAlphas);
+% 		elseif ValGoodClassified == overAllBestValResults 
+% 			fprintf('overall Models updated\n')
+% 			%update bestModel list
+% 			finalModels = IEupdateBestModels(finalModels,modelsCombi,...
+% 				chosenModelsIdx,chosenModelsAlphas);
+% 		end
 	
-		
 		if r==1
 			%just to fill up in case no run is under 5% unfit error
-			uberModels = IEupdateBestModels(uberModels,modelsCombi,...
+			finalModels = IEupdateBestModels(uberModels,modelsCombi,...
 				chosenModelsIdx,chosenModelsAlphas);		
 		end
-		if HOTNRate > 0.95
+		if ValTNRate > 0.95
 			%if unfit error is smaller then 5%
-			if HOTPRate>overAllBestHOFitGoodClass
+			if ValTPRate>overAllBestHOFitGoodClass
 				%if fit error is smaller then smallest until now
 				fprintf('new uber model\n')
 				%if unfit good classified is better then current best results,
 				%clear uberModels and update it with the newest model
-				uberModels  = zeros(7,modelCount*(doEdge+doIntensity));
-				uberModels  = IEupdateBestModels(uberModels,modelsCombi,...
+				finalModels  = zeros(7,modelCount*(doEdge+doIntensity));
+				finalModels  = IEupdateBestModels(finalModels,modelsCombi,...
 					chosenModelsIdx,chosenModelsAlphas);
-				overAllBestHOFitGoodClass = HOTPRate;
-			elseif HOTPRate==overAllBestHOFitGoodClass
+				overAllBestHOFitGoodClass = ValTPRate;
+			elseif ValTPRate==overAllBestHOFitGoodClass
 				%if fit error is smaller then smallest until now
 				fprintf('uber model updated\n')
 				%if unfit good classified is better then current best results,
 				%clear uberModels and update it with the newest model
-				uberModels  = IEupdateBestModels(uberModels,modelsCombi,...
+				finalModels  = IEupdateBestModels(finalModels,modelsCombi,...
 					chosenModelsIdx,chosenModelsAlphas);
 			end
 		end
-		%%%%%%%%%%%%%%%%%%%FINISHED TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%
-		
+		%%%%%%%%%%%%%%%%%%%FINISHED TESTING VALIDATION SET%%%%%%%%%%%%%%%%%
 		toc
 		
-		%%%%%%%%%%%%%%%%%%%%%%RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%%%%%%%
-
+		%%%%%%%%%%%%%%%%%%%%%%RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%%%
+		% Every repetition the models are tested on the validation set to
+		% see how good the n first models work. n=1:hypotheses
+		% this is at the end averaged and plotted
 		%%%%%%%%%%%%%%%%%%%%%%RUNNING finalModels %%%%%%%%%%%%%%%%%%%%%%%%%
+		
+		% average the final models by the number of times they were updated
 		finalModels(2,:) = finalModels(2,:)./finalModels(1,:);
 		finalModels(3,:) = finalModels(3,:)./finalModels(1,:);
 		finalModels(4,:) = finalModels(4,:)./finalModels(1,:);
 		finalModels(5,:) = finalModels(5,:)./finalModels(1,:);
 		finalModels(6,:) = finalModels(6,:)./finalModels(1,:);
 
+		%filter out NaN values, make them 0
 		finalModelsMask			     = isnan(finalModels);
 		finalModels(finalModelsMask) = 0;
 
+		%order the final models by the alphas Adaboost assigned to them
 		[ignore finalModelsSortedIdxs] = sort(finalModels(2,:),'descend');
 		finalModelsToUse = finalModels(:,finalModelsSortedIdxs(1:hypotheses));
 
 		for modelNr=1:hypotheses
+			%get error for the first n models (n=1:number of hypotheses)
 			modelToUse				= finalModelsToUse(3:6,1:modelNr);
 			chosenModelsAlphasToUse	= finalModelsToUse(2,1:modelNr);
 			chosenModelsIdxToUse	= finalModelsSortedIdxs(1:modelNr);
 
-			[ignore, PlotTPRate1 PlotTNRate1, PlotGoodClassified1] =...
+			[ignore, PlotTPRate PlotTNRate, PlotGoodClassified] =...
 					IErunModels(modelToUse,chosenModelsIdxToUse',...
-					holdoutSetCombi,holdoutSetClasses,chosenModelsAlphasToUse,1);		
+					validationSetCombi,validationSetClasses,chosenModelsAlphasToUse,1);		
 
-			%goodClassified now holds the errors
-			plotData1(modelNr,1) = modelNr;
-			plotData1(modelNr,2) = plotData1(modelNr,2)+(1-PlotGoodClassified1);
-			plotData1(modelNr,3) = plotData1(modelNr,3)+(1-PlotTPRate1);
-			plotData1(modelNr,4) = plotData1(modelNr,4)+(1-PlotTNRate1);
+			%Update the plotData with the error generated using the first n
+			%models
+			plotData(modelNr,1) = modelNr;
+			plotData(modelNr,2) = plotData(modelNr,2)+(1-PlotGoodClassified);
+			plotData(modelNr,3) = plotData(modelNr,3)+(1-PlotTPRate);
+			plotData(modelNr,4) = plotData(modelNr,4)+(1-PlotTNRate);
 		end
 
-		%%%%%%%%%%%%%%%%%%%%%%RUNNING uberModels %%%%%%%%%%%%%%%%%%%%%%%%%
-		uberModels(2,:)  = uberModels(2,:)./uberModels(1,:);
-		uberModels(3,:)  = uberModels(3,:)./uberModels(1,:);
-		uberModels(4,:)  = uberModels(4,:)./uberModels(1,:);
-		uberModels(5,:)  = uberModels(5,:)./uberModels(1,:);
-		uberModels(6,:)  = uberModels(6,:)./uberModels(1,:);
-
-		uberModelsMask			   = isnan(uberModels);
-		uberModels(uberModelsMask) = 0;
-
-		[ignore uberModelsSortedIdxs] = sort(uberModels(2,:),'descend');
-		uberModelsToUse = uberModels(:,uberModelsSortedIdxs(1:hypotheses));
-
-		for modelNr=1:hypotheses
-
-			modelToUse				= uberModelsToUse(3:6,1:modelNr);
-			chosenModelsAlphasToUse	= uberModelsToUse(2,1:modelNr);
-			chosenModelsIdxToUse	= uberModelsSortedIdxs(1:modelNr);
-
-			[ignore, PlotTPRate2, PlotTNRate2, PlotGoodClassified2] =...
-					IErunModels(modelToUse,chosenModelsIdxToUse',...
-					holdoutSetCombi,holdoutSetClasses,chosenModelsAlphasToUse,1);		
-
-			%goodClassified now holds the errors
-			plotData2(modelNr,1) = modelNr;
-			plotData2(modelNr,2) = plotData2(modelNr,2)+(1-PlotGoodClassified2);
-			plotData2(modelNr,3) = plotData2(modelNr,3)+(1-PlotTPRate2);
-			plotData2(modelNr,4) = plotData2(modelNr,4)+(1-PlotTNRate2);
-		end
 	%%%%%%%%%%%%%%%%%%%FINISHED RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%		
 	end %repetitions
 	
-	plotData1(:,2) = plotData1(:,2)./repetitions;
-	plotData1(:,3) = plotData1(:,3)./repetitions;
-	plotData1(:,4) = plotData1(:,4)./repetitions;
+	%average plotData
+	plotData(:,2) = plotData(:,2)./repetitions;
+	plotData(:,3) = plotData(:,3)./repetitions;
+	plotData(:,4) = plotData(:,4)./repetitions;
 
-	plotData2(:,2) = plotData2(:,2)./repetitions;
-	plotData2(:,3) = plotData2(:,3)./repetitions;
-	plotData2(:,4) = plotData2(:,4)./repetitions;
-
+	%plot the errors
 	figure
-	plot(plotData1(:,1),plotData1(:,2),'b',...
-		 plotData1(:,1),plotData1(:,3),'r',...
-		 plotData1(:,1),plotData1(:,4),'g')
+	plot(plotData(:,1),plotData(:,2),'b',...
+		 plotData(:,1),plotData(:,3),'r',...
+		 plotData(:,1),plotData(:,4),'g')
 	legend('overall error','fit error','unfit error',3,'location','SouthEast');
 	xlabel('weak classifiers used')
 	ylabel('classification error')
-	title('results classification error model1 (overall best)')
+	title('results classification error')
 
+	%show used segments on the bill
 	IEshowAreasOnBill( xSegms, ySegms,useFront,useRear,...
-		finalModelsToUse(7,:),do5Euro,do10Euro, 'best overall models',overlap)
-
-	figure
-	plot(plotData2(:,1),plotData2(:,2),'b',...
-		 plotData2(:,1),plotData2(:,3),'r',...
-		 plotData2(:,1),plotData2(:,4),'g')
-	legend('overall error','fit error','unfit error',3,'location','SouthEast');
-	xlabel('weak classifiers used')
-	ylabel('classification error')
-	title('results classification error model2 (best fit, unfit<5)')
-
-	IEshowAreasOnBill( xSegms, ySegms,useFront,useRear,...
-		uberModelsToUse(7,:),do5Euro,do10Euro, 'bestUnfit models',overlap)
+		finalModelsToUse(7,:),do5Euro,do10Euro, 'best models',overlap)
 
 	fprintf('\n\nresults for %d repetitions:\n',repetitions)
 	fprintf('fit right:   \t%4.4g%%\n',(sumTPRate/(repetitions))*100)
@@ -348,11 +350,12 @@ function [ output_args ] = IErunAda( )
 	fprintf('unfit right: \t%4.4g%%\n',(sumTNRate/(repetitions))*100)
 	fprintf('unfit wrong: \t%4.4g%%\n',(1-(sumTNRate/(repetitions)))*100)
 	
-	
-	save resultModels.mat finalModelsToUse
-	save uberModels.mat uberModelsToUse
+	%save models
+	save finalModels.mat finalModelsToUse
 end
 
+%on some computers randperm does not work, so just in case it is defined
+%here:
 function p = randperm(n)
     [ignore,p] = sort(rand(1,n));
 end
