@@ -1,31 +1,34 @@
 function [ labels ] = IEgetLabelsByGauss(data,models)
 
-		meanFit   = models(1,:);
-		covFit    = models(2,:);
-		meanUnfit = models(3,:);
-		covUnfit  = models(4,:);
+	%get the values for the gaussian distributions from models
+	meanFit   = models(1,:);
+	covFit    = models(2,:);
+	meanUnfit = models(3,:);
+	covUnfit  = models(4,:);
 
-% 	testFitMask    = testClasses==1;
-% 	testUnfitMask  = testClasses==0;
-
-% 	if isempty(data)
-% 		dataFit    = [];
-% 		dataUnfit  = [];
-% 	else
-% 		dataFit    = data(testFitMask,:);
-% 		dataUnfit  = data(testUnfitMask,:);
-% 	end
-
+	%initialize labels
 	labels = zeros(size(data,1),size(data,2));
 	if ~isempty(data)
 		for x=1:size(models,2)
+			%for all models
 			for y=1:size(data,1)
-%				probBeFit   = gaussProb(meanFit(x),covFit(x),data(y,x))
-				probBeFit = mvnpdf(data(y,x),meanFit(x),covFit(x));
-%				probBeUnfit = gaussProb(meanUnfit(x),covUnfit(x),data(y,x))
-				probBeUnfit = mvnpdf(data(y,x),meanUnfit(x),covUnfit(x));
+				%for all data (images/segments)
+				
+				%get the probability of the data belonging to fit or unfit
+				probBeFit      = mvnpdf(data(y,x),meanFit(x),covFit(x));
+				probBeUnfit    = mvnpdf(data(y,x),meanUnfit(x),covUnfit(x));
 
-				if probBeFit>probBeUnfit
+				%calculate the final probability using MAP
+				% prior probability for a fit bill is 60% 
+				% and for a unfit bill is 40%
+				sumProb = (0.6 * probBeFit + 0.4 * probBeUnfit);
+				finalFitProb   = (0.6 * probBeFit)/sumProb; 
+				finalUnfitProb = (0.4 * probBeUnfit)/sumProb; 
+
+				%if the probability for a fit bill is higher then the
+				%probability of an unfit bill label 1 is given to this
+				%data-item
+				if finalFitProb>finalUnfitProb
 					labels(y,x) = 1;
 				else
 					labels(y,x) = 0;
@@ -33,21 +36,6 @@ function [ labels ] = IEgetLabelsByGauss(data,models)
 			end
 		end
 	end
-% 	probUnfitBeTrain = ones(sum(sum(testUnfitMask)), modelCount);
-% 	if ~isempty(dataUnfit)
-% 		for x=1:size(models,2)
-% 			for y=1:size(dataUnfit,1)
-% 				%for test images in test set:
-% 				% calculate and store probability of x according to mean and covariance
-% 				probUnfitBeTrain(y,x) = gaussProb(meanTrain(x),covTrain(x),dataUnfit(y,x));
-% 			end
-% 		end
-% 	end
 end
 
-% function p = gaussProb(mu,c,x)
-% 	a = 2 * pi * sqrt(det(c));
-% 	b = (x - mu) * inv(c) * (x - mu)';
-% 	p = (1/a) * exp(-b/2);
-% end
-
+        
