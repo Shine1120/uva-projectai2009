@@ -230,28 +230,24 @@
 			As we would have expected, the voting method for defining the best model, proved to give better results in this case so it was chosen to be applied.
 
 		\subsection{PCA and SVM}\label{sec:PCA}
-			In previous research, the use of SVM in combination with PCA already gave great error reduction on both the 5 and 10 euro bills. The best results were conducted from performing PCA on the whitepatch area only, and propagate the projections in SVM. PCA on the whitepatch as well as the whole bill made it possible to reduce the data from a dimensionality equal to the number of pixels of the respective area to only a 30 components. This reduction ensures faster training and classification with SVM. The idea is to identify more regions with similar discriminative features as the whitepatch. This is done by dividing the bill up in an arbitrary number of regions, and performing PCA for each of these regions in all the bills. The PCA segments then can be used to train SVM models for each segment. These SVM models in combination with their respective PCA segments in turn can be used as weak classifiers in AdaBoost. The dimensions for division are chosen using empirical evidence of the error rates, and as to be expected the segments cannot be too local for PCA to work.
+			In previous research, the use of SVM in combination with PCA already gave great error reduction on both the 5 and 10 euro bills. The best results were conducted from performing PCA on the whitepatch area only, and propagate the projections through the SVM. PCA on the whitepatch as well as the whole bill made it possible to reduce the data from a dimensionality equal to the number of pixels of the respective area to only a 30 components. This reduction ensures faster training and classification with SVM. The idea is to identify more regions with similar discriminative features as the whitepatch. This is done by dividing the bill up in an arbitrary number of regions, and performing PCA for each of these regions in all the bills. The PCA segments then can be used to train SVM models for each segment. These SVM models in combination with their respective PCA segments in turn can be used as weak classifiers in AdaBoost. The dimensions for division are chosen using empirical evidence of the error rates, and as to be expected the segments cannot be too local for PCA to work.
 
 		\subsection{Intensity and Edge distributions}\label{sec:Intensity_Edge}
-			Besides the more complex approaches we decided to implement	also two more simple implementations, based on the intensities on the image and on the edges on the bill. The idea of using the intensity is based on	the current approach used in the DNB (e.g. measureing the reflection of light on a small patch near the watermark \todo{see section background}). The idea of using the edges is based on the assumption that dirty and old	bills have significantly more wrinkels and folds than relative new bills. In
-			the first simple implementation the \todo{raw} intensity of the image of the
-			bill is used. Herefor the bills are segmented in small regions (5 by 12)
-			(\todo{see figure ??}). Over these regions the average intensity is
-			calculated. In this way it is possible to retrieve two gaussian distributions
-			of the intensity of all the regions over all the images, one for clean bills
-			and one for dirty bills. This provides a tool to compare the probability
-			of a region on a bill belonging to a clean or dirty bill.
-			In the edge approach the image is first filtered using the canny-edge
-			detector. The canny edge filter works in 5 steps: 
+			Next to the more complex approaches we decided to implement	also two more simple techniques, based on the intensities on the image and on the edges on the bill. The idea of using the intensity is based on	the current approach used in the DNB (e.g. measuring the reflection of light on a small patch near the watermark). The idea of using the edges is based on the assumption that dirty and old	bills have significantly more wrinkels and folds than relative new bills. In the first simple implementation the raw intensity values of the image of the bill are used. This is done by segmenting the bills into small regions (5 by 12 showed best results). Over these regions the average intensity is calculated. In this way it is possible to retrieve two Gaussian distributions	of the intensity of all the regions over all the images, one for clean bills and one for dirty bills. This provides a tool to compare the probability of a region on a bill belonging to a clean or dirty bill.
+			
+			In the edge approach the image is first filtered using the canny-edge detector. The canny edge filter works in 5 steps: 
+			
 			\begin{itemize} 
 				\item Step 1: Gaussian smoothing 
-				\item Step 2: extract the gradient of the image by convolving the image with 2 kernels, one to find the derivative in the X direction and one to find the derivative in the Y direction				
-				\item Step 3: determin the direction of the edge using results from step 2  
-				\item Step 4: apply nonmaximum suppression to find the real edge (selecting only the maximum edge points found)
-				\item Step 5: finally the \todo{hysterisis} is used to make the lines continues
+				\item Step 2: Extract the gradient of the image by convolving the image with 2 kernels, one to find the derivative in the X direction and one to find the derivative in the Y direction				
+				\item Step 3: Determine the direction of the edge using results from step 2  
+				\item Step 4: Apply nonmaximum suppression to find the real edge (selecting only the maximum edge points found)
+				\item Step 5: Finally the hysterisis is used to make the lines continues
             \end{itemize} 
+            
             The result of an image of a bill after applying canny edge filter
             can be seen in figure \ref{canny5Euro}.
+            
             \begin{figure}[!hbtp]
 				\centering 
 				\epsfig{file=img/canny5euro.eps, width=1\linewidth}
@@ -259,29 +255,17 @@
 				bill} 
 				\label{canny5Euro} 
 			\end{figure} 
-			After applying the canny edge filter to the images the resulting images are
-			segmented in small regions. Per region the sum of edge points is calculated.
-			When doing this for all images we can again extract two gaussian
-			distributions of edge points per region (one for clean and one for dirty
-			bills).
+			
+			After applying the canny edge filter to the images the resulting images are segmented in small regions. Per region the sum-of-edge-points is calculated. When doing this for all images we can again extract two Gaussian distributions of edge points per region (one for clean and one for dirty bills). Since calculating the average intensity and sum-of-edge-points only need to be calculated once, the learning phase is much faster than compared to the other two techniques which makes it possible to have more convergence in finding the best model during training.
 			
 	\section{Results}\label{sec:results}
-		The available image set was split into a holdout set and the
-		rest of the data was again split into a validation set and a part that was
-		used for training the final model by \emph{random sub-sampling
-		validation} technique. The whole process of defining the validation set
-		and applying random sub-sampling validation was repeated several times
-		to ensure a correct estimation of the predictions. For each round of the
-		validation, a model was trained using the \emph{AdaBoost algorithm}
-		described above. The obtained model was, then, tested by building the strong
-		classifier and computing the corresponding values for: \emph{true-positive
-		estimation}, \emph{true-negative estimation}, \emph{false-positive estimation}
-		and \emph{false-negative estimation}.\\
+		The available image data set was split into a holdout-set and the remaining data was used to develop and train our algorithms on. The holdout-set consists of 60 fit and 40 unfit bills, selected randomly out of the total set of images (both for 5 and 10 euro). During training on the remaining set, it was split up into a validation-set, a training-set and a test-set to perform \emph{random sub-sampling validation}.
+				
+		The whole process of defining the validation set and applying random sub-sampling validation was repeated several times to ensure a correct estimations of the error-rates. For each round of the validation, a model was trained using the \emph{AdaBoost algorithm} described in section \ref{sec:Methods}. The obtained model after training was tested by building the strong classifier and computing the corresponding confusion matrix values: \emph{true-positive estimation} (unfit classified as unfit), \emph{true-negative estimation} (fit classified as fit), \emph{false-positive estimation} (fit classified as unfit) and \emph{false-negative estimation} (unfit classified as fit).
+
 		\subsection{Convolution Results}\label{sec:haar_results}
 		%% 13x5 regions, overlapping 50% in total 1365 features
-
-		\hspace*{10px}Due to the fact that the number of features generated for only
-		21 patterns and a segmentation for each image of 23 overlapping regions by 9
+		Due to the fact that the number of features generated for only 21 patterns and a segmentation for each image of 23 overlapping regions by 9
 		gives 4,347 features, the training part is relatively slow for this method. In
 		order to create reliable model we have used 5 repetitions, 10 hypothesis
 		(features to be chosen by AdaBoost), 10 trials in the random sampling
@@ -294,7 +278,7 @@
 		is selected as containing discriminative information.\\ 
 		\begin{figure}[!hbtp]
 			\centering
-			\epsfig{file=img/haar_regions10.eps, width=1\linewidth}
+			\epsfig{file=img/5x12_haar_regions10.eps, width=1\linewidth}
 			\caption{Best regions for 10 Euro bills}
 			\label{haar_regions10}
 		\end{figure}
@@ -306,7 +290,7 @@
 		spread throughout the image.\\ 
 		\begin{figure}[!hbtp]
 			\centering
-			\epsfig{file=img/haar_regions5.eps, width=1\linewidth}
+			\epsfig{file=img/5x12_haar_regions5.eps, width=1\linewidth}
 			\caption{Best regions for 5 Euro bills}
 			\label{haar_regions5}
 		\end{figure} 
@@ -411,9 +395,9 @@
 			\bibitem{Ada}
 				AdaBoost: \\
 				\tit{http://en.wikipedia.org/wiki/AdaBoost}	
-			\bibitem{MoNuSt}G. Molenaar, A. Nusselder and K. Stefanov: \\
-				\tit{Eigen money approach}
+			\bibitem{MoNuSt}G. Molenaar, A. Nusselder and K. M. Stefanov: \\
+				\tit{Classifying Bank Notes for Scheduled Destruction} (2009)
 			\bibitem{Geusebroek} J.M. Geusebroek: \\
-				\tit{Eigen money approach improved}		
+				\tit{Computer Vision for Banknote Sorting} (2009)		
 		\end{thebibliography}
 \end{document}
