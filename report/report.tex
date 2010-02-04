@@ -260,45 +260,34 @@
 			
 	\section{Results}\label{sec:results}
 		The available image data set was split into a holdout-set and the remaining data was used to develop and train our algorithms on. The holdout-set consists of 60 fit and 40 unfit bills, selected randomly out of the total set of images (both for 5 and 10 euro). During training on the remaining set, it was split up into a validation-set, a training-set and a test-set to perform \emph{random sub-sampling validation}.
-				
+
 		The whole process of defining the validation set and applying random sub-sampling validation was repeated several times to ensure a correct estimations of the error-rates. For each round of the validation, a model was trained using the \emph{AdaBoost algorithm} described in section \ref{sec:Methods}. The obtained model after training was tested by building the strong classifier and computing the corresponding confusion matrix values: \emph{true-positive estimation} (unfit classified as unfit), \emph{true-negative estimation} (fit classified as fit), \emph{false-positive estimation} (fit classified as unfit) and \emph{false-negative estimation} (unfit classified as fit).
+		
+		In order to derive a number of hypothesis to use for AdaBoost, we have plotted the error-rates for each technique for a number of hypothesis. However, different decisions had to be made here for each technique since some take much longer to train.
 
 		\subsection{Convolution Results}\label{sec:haar_results}
 		%% 13x5 regions, overlapping 50% in total 1365 features
-		Due to the fact that the number of features generated for only 21 patterns and a segmentation for each image of 23 overlapping regions by 9
-		gives 4,347 features, the training part is relatively slow for this method. In
-		order to create reliable model we have used 5 repetitions, 10 hypothesis
-		(features to be chosen by AdaBoost), 10 trials in the random sampling
-		validation method.\\ \hspace*{10px}In Figure\ref{haar_regions10} are
-		indicated the most voted regions for the 10 Euro bills in \emph{AdaBoost}
-		throughout all trials and all repetitions. We can notice that for the front of
-		the bills the regions selected are mainly positions on the water mark area,
-		while for the rear side of the bills, there are some regions considered as
-		being the most informative on the white patch, but also the area in the middle
-		is selected as containing discriminative information.\\ 
+		Figure \ref{haar_plot10} and figure \ref{haar_plot5} show how the error evolves depending on the number of models for the 10 Euro bills, respectively for the 5 Euro bills. Due to the fact that the number of features generated for only 21 patterns and a segmentation for each image of 23 by 9 overlapping regions gives a total of 4,347 features, the training part will be relatively slow for this method. In order to create reliable models we have used 5 repetitions, 10 hypothesis (features to be chosen by AdaBoost), 10 trials in the random sub-sampling validation method. The choice for 10 hypothesis is based on the fact that for 10 euro bills the error-rate got stable around this number, and using more hypothesis would result in time consuming learning trials.
+
+		In figure \ref{haar_regions10} are indicated the most voted regions for the 10 Euro bills in \emph{AdaBoost} throughout all trials and all repetitions. We can notice that for the front of the bills the regions selected are mainly positions on the water mark area, while for the rear side of the bills, there are some regions considered as being the most informative on the white patch, but also the area in the middle is selected as containing discriminative information. This could be explained by the fold in the middle of the bills.
+
 		\begin{figure}[!hbtp]
 			\centering
 			\epsfig{file=img/5x12_haar_regions10.eps, width=1\linewidth}
 			\caption{Best regions for 10 Euro bills}
 			\label{haar_regions10}
 		\end{figure}
-		\hspace*{10px}Figure\ref{haar_regions5} shows the most voted regions for the 5
-		Euro bills in \emph{AdaBoost} throughout all trials and all repetitions. For
-		the 5 Euro bills the regions for front and rear that were chosen as being the
-		most informative ones are again mainly around the water mark area, but unlike
-		those for 10 Euro Bills, the regions for front side are the ones that are more
-		spread throughout the image.\\ 
+
+		Figure\ref{haar_regions5} shows the most voted regions for the 5 Euro bills in \emph{AdaBoost} throughout all trials and all repetitions. For the 5 Euro bills the regions for front and rear that were chosen as being the most informative ones are again mainly around the water mark area, but unlike those for 10 Euro Bills, the regions for front side are the ones that are more spread throughout the image.
+
 		\begin{figure}[!hbtp]
 			\centering
 			\epsfig{file=img/5x12_haar_regions5.eps, width=1\linewidth}
 			\caption{Best regions for 5 Euro bills}
 			\label{haar_regions5}
-		\end{figure} 
-		\hspace*{10px}In order to determine the optimal number of features that should
-		be chosen in the end for the best model, we have plotted the error with
-		respect to the number of features chosen. Figure\ref{haar_plot10} and
-		Figure\ref{haar_plot5} show how the error evolves depending on the number of
-		models for the 10 Euro bills, respectively for the 5 Euro bills. 
+		\end{figure}
+
+
 		\begin{figure}[!hbtp]
 			\centering
 			\epsfig{file=img/haar_plot10.eps, width=1\linewidth}
