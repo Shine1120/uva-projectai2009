@@ -305,7 +305,24 @@
 			\todo{RESULTS PCA}
 	
 		\subsection{Intensity \& Edges Results}\label{sec:ie_results}
-			\todo{RESULTS IE}
+			For the intensity and edges implementation we used overlapping
+			regions, 9 in the x-direction and 23 in the y-direction for front and
+			for the rear of the bill. This results in 414 weak
+			classifiers/features. For every region there is only one value/number
+			that represents the edge count or the average intensity. So there is a
+			relative small amout of models to train on. Herefor we could run
+			bigger tests in order to achieve a reliable model. In order to create
+			these models we have used 40 repetitions, 40 hypotheses and 40 random
+			sampling validation runs. To determin the optimal number of weak
+			classifiers to use for the 5 and 10 euro bills we have plotted the
+			errors with respect to the number of weak classifiers used. We choose
+			the weak classifiers that reduced the error 'substantially' (see
+			figure ??? and ??? 10 and 5 euro plots). For the 10 euro bills we used
+			?25? \todo{(not sure yet)} weak classifiers and for the 5 euro we used
+			?10? \todo{(not sure yet)} classifiers (see figure ??? and ??? figures
+			of areas on bills for 10 and 5 euro).
+			\todo{Do we want some average results from dring the training to show
+			how individual results were??}
 	
 		\subsection{Combined Results}\label{sec:comb_results}
 			\hspace*{10px}Once all the strong classifiers for each of the methods above
