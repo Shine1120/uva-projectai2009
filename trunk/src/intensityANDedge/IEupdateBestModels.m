@@ -1,7 +1,13 @@
 function finalModels =...
 	IEupdateBestModels(finalModels,allModels,chosenModelsIdx,chosenModelsAlphas)
-	for i=1:size(chosenModelsIdx,2)
+	
+	%when the first best model is found or a better new model is found
+	%finalModels were set to zeros and here the new model is added to this.
+	%when a model is found that has the exact same results as the best up
+	%to that point, finalModels is updated with these new found models
 
+	for i=1:size(chosenModelsIdx,2)
+		%for all models do
 		finalModels(1,chosenModelsIdx(i)) =... %occurence
 			finalModels(1,chosenModelsIdx(i)) + 1;
 		finalModels(2,chosenModelsIdx(i)) =... %alphas
