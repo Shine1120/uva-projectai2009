@@ -1,4 +1,4 @@
-function [ output_args ] = IErunAda( )
+function start( )
 
 	close all;
 
