@@ -273,20 +273,19 @@
 
 		\begin{figure}[!hbtp]
 			\centering
-			\epsfig{file=img/5x12_haar_regions10.eps, width=1\linewidth}
-			\caption{Best regions for 10 Euro bills}
-			\label{haar_regions10}
+			\epsfig{file=img/5x12_haar_regions5.eps, width=1\linewidth}
+			\caption{Best regions for 5 Euro bills (Haar)}
+			\label{haar_regions5}
 		\end{figure}
 
 		Figure\ref{haar_regions5} shows the most voted regions for the 5 Euro bills in \emph{AdaBoost} throughout all trials and all repetitions. For the 5 Euro bills the regions for front and rear that were chosen as being the most informative ones are again mainly around the water mark area, but unlike those for 10 Euro Bills, the regions for front side are the ones that are more spread throughout the image.
 
 		\begin{figure}[!hbtp]
 			\centering
-			\epsfig{file=img/5x12_haar_regions5.eps, width=1\linewidth}
-			\caption{Best regions for 5 Euro bills}
-			\label{haar_regions5}
+			\epsfig{file=img/5x12_haar_regions10.eps, width=1\linewidth}
+			\caption{Best regions for 10 Euro bills (Haar)}
+			\label{haar_regions10}
 		\end{figure}
-
 
 		\begin{figure}[!hbtp]
 			\centering
@@ -303,8 +302,36 @@
 		\end{figure} 
 
 		\subsection{PCA Results}\label{sec:pca_results}
-		
+			Defining the number of regions to perform PCA on was derived from a few experiments on different number of segments. When trying too small segments, the information captured by PCA could not represent the dirt on the bills anymore. When defining the segments too large, the information gets too general, and similar results are measured as for the whole bill. Dividing the bill into 3 (in the x-direction) by 7 (in the y-direction) regions gave promising error-rates during the training part as can be seen in figure \ref{pca_plot5} and \ref{pca_plot10}. Surprisingly, the number of regions to choose to get a maximal error of 5\% on unfit bills (the baseline for DNB) is only measured at 1 and 2 weak classifiers. Because the error for the fit bills is lowest when using one weak classifier only, the final model is trained on finding only one region. The most discriminating regions can be seen in figure \ref{pca_regions5} and \ref{pca_regions10}. Note that the learning process of this technique is very slow because after obtaining a new train- and test-set during random sub-sampling validation the eigen-faces for every region need to be calculated.
 
+		\begin{figure}[!hbtp]
+			\centering
+			\epsfig{file=img/pca_plot5.eps, width=1\linewidth}
+			\caption{Error depending on the number of features - 5 Euro bills (PCA)}
+			\label{pca_plot5}
+		\end{figure}
+
+		\begin{figure}[!hbtp]
+			\centering
+			\epsfig{file=img/pca_plot10.eps, width=1\linewidth}
+			\caption{Error depending on the number of features - 10 Euro bills (PCA)}
+			\label{pca_plot10}
+		\end{figure}
+
+		\begin{figure}[!hbtp]
+			\centering
+			\epsfig{file=img/pca_regions5.eps, width=1\linewidth}
+			\caption{Best regions for 5 Euro bills (PCA)}
+			\label{pca_regions5}
+		\end{figure}
+		\begin{figure}[!hbtp]
+			\centering
+			\epsfig{file=img/pca_regions10.eps, width=1\linewidth}
+			\caption{Best regions for 10 Euro bills (PCA)}
+			\label{pca_regions5}
+		\end{figure}
+		
+		
 		\subsection{Intensity \& Edges Results}\label{sec:ie_results}
 			For the intensity and edges implementation we also used overlapping regions, 9 (in the x-direction) by 23 (in the y-direction) for front and for the rear of the bill. This results in 414 weak classifiers/features. For every region there is only one value/number that represents the edge count or the average intensity, So there is a relative small amount of models to train on. Therefore we could run bigger tests in order to achieve reliable models. In order to create these models we have used 40 repetitions, 40 hypotheses and 40 random sub-sampling validation runs. To determine the optimal number of weak classifiers to use for the 5 and 10 euro bills we have plotted the errors with respect to the number of weak classifiers used. We choose the weak classifiers that reduced the error 'substantially' (see figure \ref{IE_plot5} and \ref{IE_plot10} 10 and 5 euro plots). For the 10 euro bills we used 25 weak classifiers and for the 5 euro we used 10 classifiers (see figure \ref{ie_regions5} and \ref{ie_regions10} figures of areas on bills for 10 and 5 euro).
 
@@ -325,41 +352,23 @@
 		\begin{figure}[!hbtp]
 			\centering
 			\epsfig{file=img/5x12_ie_regions5.eps, width=1\linewidth}
-			\caption{Best regions for 5 Euro bills}
+			\caption{Best regions for 5 Euro bills (IE)}
 			\label{ie_regions5}
 		\end{figure}
 		
 		\begin{figure}[!hbtp]
 			\centering
 			\epsfig{file=img/5x12_ie_regions10.eps, width=1\linewidth}
-			\caption{Best regions for 10 Euro bills}
+			\caption{Best regions for 10 Euro bills (IE)}
 			\label{ie_regions10}
 		\end{figure}
 		
 					
 		\subsection{Combined Results}\label{sec:comb_results}
-			Once all the strong classifiers for each of the methods above
-			has been generated, we have combined their predictions using \emph{Naive
-			Bayes}.\\ 
-			\hspace*{10px}The results for 10 Euro bills, respectively 5 Euro bills are
-			shown in the Table\ref{table10} and Table\ref{table5}. 
-			\begin{table}[!htbp]
-				\caption{Results for 10 Euro bills}
-				\fontfamily{ccr}\selectfont\small
-				\label{table10}
-				\centering 
-				\begin{tabular}{ | c | c | c|}
-					\hline\hline & \emph{Fit Error} & \emph{Unfit Error} \\ [0.5ex]\hline 
-					\emph{Haar} & 0.05 & 0.15 \\ [0.5ex]\hline
-					\emph{IE} & 0.1 & 0.025 \\ [0.5ex]\hline
-					\emph{PCA} & 0.083 & 0.05 \\ [0.5ex]\hline
-					\emph{Haar \& IE} & 0.033 & 0.15 \\ [0.5ex]\hline
-					\emph{Haar \& PCA} & 0.017 & 0.2 \\ [0.5ex]\hline
-					\emph{IE \& PCA} & 0.017 & 0.075 \\ [0.5ex]\hline
-					\emph{Haar \& IE \& PCA} & 0.033 & 0.025 \\ [0.5ex]\hline
-				\end{tabular} 
-				\label{table:nonlin10eur} 
-			\end{table}		
+			Once all the strong classifiers for each of the methods above have been generated, we have combined their predictions using \emph{Naive Bayes} rule. Since all of our final models are prepared with a number of hypothesis which are equal or below the 5\% baseline from DNB, we choose to bias the Naive Bayes towards the fit bills with the motivation that there are more fit bills being destroyed relative to the number of unfit bills. The combined classifiers are tested on our holdout-set of 100 bills for each 5 and 10 Euro.
+
+			The results for 10 Euro bills, respectively 5 Euro bills are shown in the Table\ref{table10} and Table\ref{table5}. For the 5 Euro bills the performance of both single classifiers Haar and IE look very promising already, and in combination we can only expect them to be as good or slightly worse in performance.
+
 			\begin{table}[!htbp]
 				\caption{Results for 5 Euro bills}
 				\fontfamily{ccr}\selectfont\small
@@ -378,33 +387,34 @@
 				\label{table:nonlin5eur} 
 			\end{table}
 
+			\begin{table}[!htbp]
+				\caption{Results for 10 Euro bills}
+				\fontfamily{ccr}\selectfont\small
+				\label{table10}
+				\centering 
+				\begin{tabular}{ | c | c | c|}
+					\hline\hline & \emph{Fit Error} & \emph{Unfit Error} \\ [0.5ex]\hline 
+					\emph{Haar} & 0.05 & 0.15 \\ [0.5ex]\hline
+					\emph{IE} & 0.1 & 0.025 \\ [0.5ex]\hline
+					\emph{PCA} & 0.083 & 0.05 \\ [0.5ex]\hline
+					\emph{Haar \& IE} & 0.033 & 0.15 \\ [0.5ex]\hline
+					\emph{Haar \& PCA} & 0.017 & 0.2 \\ [0.5ex]\hline
+					\emph{IE \& PCA} & 0.017 & 0.075 \\ [0.5ex]\hline
+					\emph{Haar \& IE \& PCA} & 0.033 & 0.025 \\ [0.5ex]\hline
+				\end{tabular} 
+				\label{table:nonlin10eur} 
+			\end{table}		
+			
 
 	\section{Conclusion}\label{sec:conclusion}
-		\hspace*{10px}From our experiments we have been able to learn the regions
-		that contain the largest amount of information and help us distinguish
-		between fit and unfit bills. These regions differ from one method to another,
-		but in general the areas around the water-mark region and the middle of the
-		bills have been proven to be the ones containing the most discriminative
-		features.\\ 
-		\hspace*{10px}As it can be noticed from the results in
-		Section\ref{sec:comb_results}, combining different techniques leads to an
-		improvement in the performance of the final classifier.\\
-		\hspace*{10px}Although the results obtained using these 3 methods are as good
-		as we would have expected them to be, future work is possible and it should
-		be mainly focused on finding a more powerful way of combining all the
-		features used by all 3 techniques (Haar, PCA, Intensity \& Edge) into a
-		strong classifier.\\ \hspace*{10px}We would also recommend that special
-		attention should be payed to the validity of certain features of the images
-		from the data set (intensity).\\
+		From our experiments we have been able to learn the regions that contain the largest amount of information and help us distinguish between fit and unfit bills. These regions differ from one method to another, but in general the areas around the water-mark region and the middle of the bills have been proven to be the ones containing the most discriminative features.
 		
-		\todo{EDGE::  future work: Finding the intensity gradient of the image in
-		stead of just canny edge detection and Non-maximum suppression\\
-		the first step of canny edge detection is to apply gaussian smoothing on the
-		image. If the kernel used is too big and the borders are smoothed using zero
-		padding this can eliminate very important data from the borders, which could
-		hold very important distictive features for classifying clean and dirty/used
-		bills.}
+		As it can be noticed from the results in section \ref{sec:comb_results}, combining different techniques can lead to an improvement in the performance of the final classifier although running single classifiers only give great results as well. In terms of robustness it make sense to do combinations of strong classifiers for 5 and 10 Euro both bills, since the different techniques can cover different aspects of dirt on the bills. To test this hypothesis however, it is mandatory to have many more holdout-sets to test the final models on since our project does not give any proof on scalability yet.
+
+		Although the results obtained using the various techniques discussed are very promising already, future work is possible and it should be mainly focused on finding a more powerful way of combining all the features used by all 3 techniques (Haar, PCA, Intensity \& Edge) into a strong classifier as AdaBoost can be capable of doing this. Also, combining the models for both front and rear can also be improved if certain prior knowledge can be incorporated.
 		
+		We would also recommend that special attention should be payed to the validity of certain features of the images from the data set by retrieving the origin on how the data-set is built up. We mention this because the results for average intensity are really promising, but this could be caused by bills being scanned in each class at the time and having the scanner being heated up.
+	
 		\bibliographystyle{alpha} 
 		\begin{thebibliography}{3} 
 			\bibitem{Haar}
@@ -419,4 +429,5 @@
 			\bibitem{Geusebroek} J.M. Geusebroek: \\
 				\tit{Computer Vision for Banknote Sorting} (2009)		
 		\end{thebibliography}
+		
 \end{document}
