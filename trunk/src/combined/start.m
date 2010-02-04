@@ -1,4 +1,4 @@
-function eval_combined()
+function start()
 
 	doread		= 1;
 % 	docreate	= 0;
