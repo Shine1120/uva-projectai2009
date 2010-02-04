@@ -27,9 +27,9 @@ function [ output_args ] = IErunAda( )
 
 	sizeHoldoutSet    = 75;
 	leave_n_out		  = 35;	% size of test-set
-	repetitions		  = 1;
-	trials			  = 10;
-	hypotheses 		  = 5;
+	repetitions		  = 40;
+	trials			  = 40;
+	hypotheses 		  = 40;
 	
 	doEdge			  = 1;
 	doIntensity		  = 1;
@@ -47,11 +47,11 @@ function [ output_args ] = IErunAda( )
 	xSegms			  = 5;
 	ySegms			  = 12;
 	
-	overlap			  = 0;
+	overlap			  = 1;
 	
 	modelCount		  = xSegms*ySegms*(useFront+useRear);
 	if (overlap)
-		modelCount		  = ((xSegms*2)-1)*((ySegms*2)-1)*(useFront+useRear);
+		modelCount	  = ((xSegms*2)-1)*((ySegms*2)-1)*(useFront+useRear);
 	end
 	
 	allDataE          = [];
@@ -66,8 +66,9 @@ function [ output_args ] = IErunAda( )
 	finalModels		  = zeros(7,modelCount*(doEdge+doIntensity));
 	uberModels		  = zeros(7,modelCount*(doEdge+doIntensity));
 	
-	fprintf('\n\nDank je lieve mama!!! :) \n\n')
-
+	plotData1 = zeros(hypotheses,4);
+	plotData2 = zeros(hypotheses,4);
+	
 	fprintf('\nconstructing data set...\n')
 	tic
 	if doEdge==1
@@ -232,6 +233,7 @@ function [ output_args ] = IErunAda( )
 				uberModels  = zeros(7,modelCount*(doEdge+doIntensity));
 				uberModels  = IEupdateBestModels(uberModels,modelsCombi,...
 					chosenModelsIdx,chosenModelsAlphas);
+				overAllBestHOFitGoodClass = HOTPRate;
 			elseif HOTPRate==overAllBestHOFitGoodClass
 				%if fit error is smaller then smallest until now
 				fprintf('uber model updated\n')
@@ -241,124 +243,101 @@ function [ output_args ] = IErunAda( )
 					chosenModelsIdx,chosenModelsAlphas);
 			end
 		end
+		%%%%%%%%%%%%%%%%%%%FINISHED TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%
 		
-% 		if HOTNRate > overAllBestHOUnfitGoodClass
-% 			fprintf('new uber model\n')
-% 			%if unfit good classified is better then current best results,
-% 			%clear uberModels and update it with the newest model
-% 			overAllBestHOUnfitGoodClass = HOTNRate;
-% 			overAllBestHOFitGoodClass   = HOTPRate;
-% 			uberModels = zeros(7,modelCount*(doEdge+doIntensity));
-% 			uberModels = IEupdateBestModels(uberModels,modelsCombi,...
-% 				chosenModelsIdx,chosenModelsAlphas);
-% 		elseif HOTNRate == overAllBestHOUnfitGoodClass
-% 			%if unfit good classified is as good as the current one
-% 			%check if fit bills are classified better then the current best
-% 			%results. If so, clear uberModel and reinitialize it with
-% 			%current model
-% 			
-% 			if HOTPRate > overAllBestHOFitGoodClass
-% 				fprintf('new uber model\n')
-% 				overAllBestHOFitGoodClass = HOTPRate;
-% 				uberModels = zeros(7,modelCount*(doEdge+doIntensity));
-% 				uberModels = IEupdateBestModels(uberModels,modelsCombi,...
-% 					chosenModelsIdx,chosenModelsAlphas);
-% 			elseif HOTPRate == overAllBestHOFitGoodClass
-% 				fprintf('uber models updated\n')
-% 				%if unfit and fit bills are classified as good ad the
-% 				%current best model, update uberModel with the corrent
-% 				%model (to average on it later on)
-% 				uberModels = IEupdateBestModels(uberModels,modelsCombi,...
-% 					chosenModelsIdx,chosenModelsAlphas);
-% 			end
-% 		end
-
-	%%%%%%%%%%%%%%%%%%%FINISHED TESTING HOLDOUT SET%%%%%%%%%%%%%%%%%%%%
 		toc
+		
+		%%%%%%%%%%%%%%%%%%%%%%RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%%%%%%%
+
+		%%%%%%%%%%%%%%%%%%%%%%RUNNING finalModels %%%%%%%%%%%%%%%%%%%%%%%%%
+		finalModels(2,:) = finalModels(2,:)./finalModels(1,:);
+		finalModels(3,:) = finalModels(3,:)./finalModels(1,:);
+		finalModels(4,:) = finalModels(4,:)./finalModels(1,:);
+		finalModels(5,:) = finalModels(5,:)./finalModels(1,:);
+		finalModels(6,:) = finalModels(6,:)./finalModels(1,:);
+
+		finalModelsMask			     = isnan(finalModels);
+		finalModels(finalModelsMask) = 0;
+
+		[ignore finalModelsSortedIdxs] = sort(finalModels(2,:),'descend');
+		finalModelsToUse = finalModels(:,finalModelsSortedIdxs(1:hypotheses));
+
+		for modelNr=1:hypotheses
+			modelToUse				= finalModelsToUse(3:6,1:modelNr);
+			chosenModelsAlphasToUse	= finalModelsToUse(2,1:modelNr);
+			chosenModelsIdxToUse	= finalModelsSortedIdxs(1:modelNr);
+
+			[ignore, PlotTPRate1 PlotTNRate1, PlotGoodClassified1] =...
+					IErunModels(modelToUse,chosenModelsIdxToUse',...
+					holdoutSetCombi,holdoutSetClasses,chosenModelsAlphasToUse,1);		
+
+			%goodClassified now holds the errors
+			plotData1(modelNr,1) = modelNr;
+			plotData1(modelNr,2) = plotData1(modelNr,2)+(1-PlotGoodClassified1);
+			plotData1(modelNr,3) = plotData1(modelNr,3)+(1-PlotTPRate1);
+			plotData1(modelNr,4) = plotData1(modelNr,4)+(1-PlotTNRate1);
+		end
+
+		%%%%%%%%%%%%%%%%%%%%%%RUNNING uberModels %%%%%%%%%%%%%%%%%%%%%%%%%
+		uberModels(2,:)  = uberModels(2,:)./uberModels(1,:);
+		uberModels(3,:)  = uberModels(3,:)./uberModels(1,:);
+		uberModels(4,:)  = uberModels(4,:)./uberModels(1,:);
+		uberModels(5,:)  = uberModels(5,:)./uberModels(1,:);
+		uberModels(6,:)  = uberModels(6,:)./uberModels(1,:);
+
+		uberModelsMask			   = isnan(uberModels);
+		uberModels(uberModelsMask) = 0;
+
+		[ignore uberModelsSortedIdxs] = sort(uberModels(2,:),'descend');
+		uberModelsToUse = uberModels(:,uberModelsSortedIdxs(1:hypotheses));
+
+		for modelNr=1:hypotheses
+
+			modelToUse				= uberModelsToUse(3:6,1:modelNr);
+			chosenModelsAlphasToUse	= uberModelsToUse(2,1:modelNr);
+			chosenModelsIdxToUse	= uberModelsSortedIdxs(1:modelNr);
+
+			[ignore, PlotTPRate2, PlotTNRate2, PlotGoodClassified2] =...
+					IErunModels(modelToUse,chosenModelsIdxToUse',...
+					holdoutSetCombi,holdoutSetClasses,chosenModelsAlphasToUse,1);		
+
+			%goodClassified now holds the errors
+			plotData2(modelNr,1) = modelNr;
+			plotData2(modelNr,2) = plotData2(modelNr,2)+(1-PlotGoodClassified2);
+			plotData2(modelNr,3) = plotData2(modelNr,3)+(1-PlotTPRate2);
+			plotData2(modelNr,4) = plotData2(modelNr,4)+(1-PlotTNRate2);
+		end
+	%%%%%%%%%%%%%%%%%%%FINISHED RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%		
 	end %repetitions
 	
-	%%%%%%%%%%%%%%%%%%%%%%RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%%%%%%%
+	plotData1(:,2) = plotData1(:,2)./repetitions;
+	plotData1(:,3) = plotData1(:,3)./repetitions;
+	plotData1(:,4) = plotData1(:,4)./repetitions;
 
-	%%%%%%%%%%%%%%%%%%%%%%RUNNING finalModels %%%%%%%%%%%%%%%%%%%%%%%%%
-	finalModels(2,:) = finalModels(2,:)./finalModels(1,:);
-	finalModels(3,:) = finalModels(3,:)./finalModels(1,:);
-	finalModels(4,:) = finalModels(4,:)./finalModels(1,:);
-	finalModels(5,:) = finalModels(5,:)./finalModels(1,:);
-	finalModels(6,:) = finalModels(6,:)./finalModels(1,:);
-
-	finalModelsMask			     = isnan(finalModels);
-	finalModels(finalModelsMask) = 0;
-
-	[ignore finalModelsSortedIdxs] = sort(finalModels(2,:),'descend');
-	finalModelsToUse = finalModels(:,finalModelsSortedIdxs(1:hypotheses));
-	
-	GoodClassified1 = zeros(size(finalModelsToUse,2),4);
-	for modelNr=1:size(finalModelsToUse,2)
-		modelToUse				= finalModelsToUse(3:6,1:modelNr);
-		chosenModelsAlphasToUse	= finalModelsToUse(2,1:modelNr);
-		chosenModelsIdxToUse	= finalModelsSortedIdxs(1:modelNr);
-
-		[ignore, PlotTPRate1 PlotTNRate1, PlotGoodClassified1] =...
-				IErunModels(modelToUse,chosenModelsIdxToUse',...
-				holdoutSetCombi,holdoutSetClasses,chosenModelsAlphasToUse,1);		
-
-		GoodClassified1(modelNr,1) = modelNr;
-		GoodClassified1(modelNr,2) = PlotGoodClassified1;
-		GoodClassified1(modelNr,3) = PlotTPRate1;
-		GoodClassified1(modelNr,4) = PlotTNRate1;
-	end
-
-	%%%%%%%%%%%%%%%%%%%%%%RUNNING uberModels %%%%%%%%%%%%%%%%%%%%%%%%%
-	uberModels(2,:)  = uberModels(2,:)./uberModels(1,:);
-	uberModels(3,:)  = uberModels(3,:)./uberModels(1,:);
-	uberModels(4,:)  = uberModels(4,:)./uberModels(1,:);
-	uberModels(5,:)  = uberModels(5,:)./uberModels(1,:);
-	uberModels(6,:)  = uberModels(6,:)./uberModels(1,:);
-
-	uberModelsMask			   = isnan(uberModels);
-	uberModels(uberModelsMask) = 0;
-
-	[ignore uberModelsSortedIdxs] = sort(uberModels(2,:),'descend');
-	uberModelsToUse = uberModels(:,uberModelsSortedIdxs(1:hypotheses));
-	
-	GoodClassified2 = zeros(size(uberModelsToUse,2),4);
-	for modelNr=1:size(uberModelsToUse,2)
-		
-		modelToUse				= uberModelsToUse(3:6,1:modelNr);
-		chosenModelsAlphasToUse	= uberModelsToUse(2,1:modelNr);
-		chosenModelsIdxToUse	= uberModelsSortedIdxs(1:modelNr);
-		
-		[ignore, PlotTPRate2, PlotTNRate2, PlotGoodClassified2] =...
-				IErunModels(modelToUse,chosenModelsIdxToUse',...
-				holdoutSetCombi,holdoutSetClasses,chosenModelsAlphasToUse,1);		
-
-		GoodClassified2(modelNr,1) = modelNr;
-		GoodClassified2(modelNr,2) = PlotGoodClassified2;
-		GoodClassified2(modelNr,3) = PlotTPRate2;
-		GoodClassified2(modelNr,4) = PlotTNRate2;
-	end
-	%%%%%%%%%%%%%%%%%%%FINISHED RUNNING MODELS FOR PLOT %%%%%%%%%%%%%%%%%%%
+	plotData2(:,2) = plotData2(:,2)./repetitions;
+	plotData2(:,3) = plotData2(:,3)./repetitions;
+	plotData2(:,4) = plotData2(:,4)./repetitions;
 
 	figure
-	plot(GoodClassified1(:,1),GoodClassified1(:,2),'b',...
-		 GoodClassified1(:,1),GoodClassified1(:,3),'r',...
-		 GoodClassified1(:,1),GoodClassified1(:,4),'g')
-	legend('overall','good fit','good unfit',3,'location','SouthEast');
+	plot(plotData1(:,1),plotData1(:,2),'b',...
+		 plotData1(:,1),plotData1(:,3),'r',...
+		 plotData1(:,1),plotData1(:,4),'g')
+	legend('overall error','fit error','unfit error',3,'location','SouthEast');
 	xlabel('weak classifiers used')
-	ylabel('good classification rate')
-	title('results good classified')
+	ylabel('classification error')
+	title('results classification error model1 (overall best)')
 
 	IEshowAreasOnBill( xSegms, ySegms,useFront,useRear,...
 		finalModelsToUse(7,:),do5Euro,do10Euro, 'best overall models',overlap)
 
 	figure
-	plot(GoodClassified2(:,1),GoodClassified2(:,2),'b',...
-		 GoodClassified2(:,1),GoodClassified2(:,3),'r',...
-		 GoodClassified2(:,1),GoodClassified2(:,4),'g')
-	legend('overall','good fit','good unfit',3,'location','SouthEast');
+	plot(plotData2(:,1),plotData2(:,2),'b',...
+		 plotData2(:,1),plotData2(:,3),'r',...
+		 plotData2(:,1),plotData2(:,4),'g')
+	legend('overall error','fit error','unfit error',3,'location','SouthEast');
 	xlabel('weak classifiers used')
-	ylabel('good classification rate')
-	title('results uber models')
+	ylabel('classification error')
+	title('results classification error model2 (best fit, unfit<5)')
 
 	IEshowAreasOnBill( xSegms, ySegms,useFront,useRear,...
 		uberModelsToUse(7,:),do5Euro,do10Euro, 'bestUnfit models',overlap)
