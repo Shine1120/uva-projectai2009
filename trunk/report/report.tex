@@ -164,13 +164,12 @@
 				\label{convolved}
 			\end{figure}
 
-			
 			%% Could this be written more clear?
 			The resulted set would represent the input features used in \emph{AdaBoost}. For establishing the set of the best \emph{T} features we have tried using both \emph{SVM} and \emph{Gaussian distributions}, and the results retrieved by the last one seemed slightly better than the ones obtained while using \emph{SVM}. In the case in which \emph{SVM} was used, a model was generated for each available feature. This model would give the best separation between the values corresponding to that feature for fit images and those for unfit images. In the case of the \emph{Gaussian distribution}, the \emph{mean} and \emph{covariance} of features corresponding to fit images were computed, respectively the mean and covariance for the features corresponding to unfit images. In order to determine the predicted class of the input images we have tried two methods.
 
 			In the first method we would simply compute the \emph{mean} and \emph{covariance} for the values corresponding to fit, respectively unfit values corresponding to a specific feature. During testing, for each input value, we would compare the two numbers returned by \emph{Gaussian density function} for fit, respectively unfit and we would choose the predicted class to be the maximum of the two.
 
-			The second method was using \emph{Naive Bayes} in order to make use of the prior knowledge available. We know that in a real-life situation there are always more fit bills than unfit one and we would like to use this information to improve our classifiers. The predicted class was defined by using the \emph{MAP} (maximum aposterior probability) estimation. The formula for computing the maximum aposterior probability for fit, respectively unfit class is given by the formulas depicted in Figure\ref{MAP_formula}.
+			The second method was using \emph{Naive Bayes} in order to make use of the prior knowledge available. We know that in a real-life situation there are always more fit bills than unfit one and we would like to use this information to improve our classifiers. The predicted class was defined by using the \emph{MAP} (maximum aposterior probability) estimation. The formula for computing the maximum aposterior probability for fit, respectively unfit class is given by the formulas depicted in figure \ref{MAP_formula}.
 
 			\begin{figure}[!hbtp] \fontfamily{ccr}\selectfont\small
 				\caption{}
@@ -193,12 +192,9 @@
 					\end{itemize} 
 			\label{MAP_formula}
 			\end{figure}
-			
-			It can be easily shown that the values of the parameters $\theta$ for a
-			normal distribution (mean and covariance) that would maximize the probability
-			of the classes are exactly the corresponding formulas indicated in
-			Figure\ref{mu_sigma}.\\ 
-			
+
+			It can be easily shown that the values of the parameters $\theta$ for a normal distribution (mean and covariance) that would maximize the probability of the classes are exactly the corresponding formulas indicated in figure \ref{mu_sigma}.
+
 			\emph{ \begin{figure}[!hbtp] \fontfamily{ccr}\selectfont\small
 				\caption{}
 				\begin{tabular}{|lr|} \hline
@@ -213,15 +209,11 @@
 				\label{mu_sigma}
 			\end{figure}
 			}
-			The second technique used for determining the predicted class of the data
-			given the parameters seemed to provides slightly better results in practice
-			due to the fact that it also incorporates some prior knowledge of the data.\\
-			\hspace*{10px}For this approach we have used two classifiers: one for the
-			rear side and another for the front side of the bills and the predictions
-			given by the two classifiers were combined into a third one using Naive
-			Bayes.\\ 
-			\hspace*{10px}In order to create the final model, we have tried two different
-			methods:
+			The second technique used for determining the predicted class of the data given the parameters seemed to provides slightly better results in practice	due to the fact that it also incorporates some prior knowledge of the data.
+
+			For this approach we have used two classifiers: one for the rear side and another for the front side of the bills and the predictions	given by the two classifiers were combined into a third one using Naive Bayes.
+
+			In order to create the final model, we have tried two different methods:
 			\begin{itemize}
 				\item the first one was essentially just choosing the best model (the one
 				that gives the minimum error) throughout all the repetitions and all the
@@ -234,20 +226,14 @@
 				mean of the features\rq\@ $\alpha$-weights computed in the \emph{AdaBoost}
 				algorithm;
 			\end{itemize}
-			As we would have expected, the second method for defining the best model,
-			proved to give better results in this case so it was chosen to be applied.
-		
+
+			As we would have expected, the voting method for defining the best model, proved to give better results in this case so it was chosen to be applied.
+
 		\subsection{PCA and SVM}\label{sec:PCA}
-			\hspace*{10px}In previous research, the use of SVM in combination with PCA already gave great error reduction on both the 5 and 10 euro bills. These results were conducted from performing PCA on the whitepatch area only, and propagate the projections in SVM. PCA on the whitepatch as well as the whole bill made it possible to reduce the data from a dimensionality equal to the number of pixels of the respective area to only a 30 components. This reduction ensures faster training and classification with SVM. The idea in this project is to identify more regions with similar discriminative features as the whitepatch. This is done by dividing the bill up in an arbitrary number of regions, and performing PCA for each of these regions in all the bills. The PCA segments then can be used to train SVM models for each segment. These SVM models in combination with their respective PCA segments in turn can be used as weak classifiers in AdaBoost.
+			In previous research, the use of SVM in combination with PCA already gave great error reduction on both the 5 and 10 euro bills. The best results were conducted from performing PCA on the whitepatch area only, and propagate the projections in SVM. PCA on the whitepatch as well as the whole bill made it possible to reduce the data from a dimensionality equal to the number of pixels of the respective area to only a 30 components. This reduction ensures faster training and classification with SVM. The idea is to identify more regions with similar discriminative features as the whitepatch. This is done by dividing the bill up in an arbitrary number of regions, and performing PCA for each of these regions in all the bills. The PCA segments then can be used to train SVM models for each segment. These SVM models in combination with their respective PCA segments in turn can be used as weak classifiers in AdaBoost. The dimensions for division are chosen using empirical evidence of the error rates, and as to be expected the segments cannot be too local for PCA to work.
 
 		\subsection{Intensity and Edge distributions}\label{sec:Intensity_Edge}
-			\hspace*{10px}Besides the more complex approaches we desided to implement
-			also two more simple implementations, based on the intensities on the image
-			and on the edges on the bill. The idea of using the intensity is based on
-			the current approach used in the DNB (e.g. measureing the reflection of
-			light on a small patch near the watermark \todo{see section background}).
-			The idea of using the edges is based on the assumption that dirty and old
-			bills have significantly more wrinkels and folds then relative new bills. In
+			Besides the more complex approaches we decided to implement	also two more simple implementations, based on the intensities on the image and on the edges on the bill. The idea of using the intensity is based on	the current approach used in the DNB (e.g. measureing the reflection of light on a small patch near the watermark \todo{see section background}). The idea of using the edges is based on the assumption that dirty and old	bills have significantly more wrinkels and folds than relative new bills. In
 			the first simple implementation the \todo{raw} intensity of the image of the
 			bill is used. Herefor the bills are segmented in small regions (5 by 12)
 			(\todo{see figure ??}). Over these regions the average intensity is
@@ -258,15 +244,11 @@
 			In the edge approach the image is first filtered using the canny-edge
 			detector. The canny edge filter works in 5 steps: 
 			\begin{itemize} 
-				\item Step 1: gaussian smoothing 
-				\item Step 2: extract the gradient of the image by convolving the image
-						with 2 kernels, one to find the derivative in the X direction and one to
-						find the derivative in the Y direction				
+				\item Step 1: Gaussian smoothing 
+				\item Step 2: extract the gradient of the image by convolving the image with 2 kernels, one to find the derivative in the X direction and one to find the derivative in the Y direction				
 				\item Step 3: determin the direction of the edge using results from step 2  
-				\item Step 4: apply nonmaximum suppression to find the real edge (selecting
-						only the maximum edge points found)
-				\item Step 5: finally the \todo{hysterisis} is used to make the lines
-						continues
+				\item Step 4: apply nonmaximum suppression to find the real edge (selecting only the maximum edge points found)
+				\item Step 5: finally the \todo{hysterisis} is used to make the lines continues
             \end{itemize} 
             The result of an image of a bill after applying canny edge filter
             can be seen in figure \ref{canny5Euro}.
@@ -284,7 +266,7 @@
 			bills).
 			
 	\section{Results}\label{sec:results}
-		\hspace*{10px}The available image set was split into a holdout set and the
+		The available image set was split into a holdout set and the
 		rest of the data was again split into a validation set and a part that was
 		used for training the final model by \emph{random sub-sampling
 		validation} technique. The whole process of defining the validation set
