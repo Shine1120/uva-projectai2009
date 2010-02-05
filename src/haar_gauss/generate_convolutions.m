@@ -6,7 +6,7 @@
 %		patterns -- rectangular patterns 
 %		Images   -- the set of images 
 %OUTPUT:
-%		values   -- the values obtained by convolving the image with the rectangles 
+%		reuslt   -- the values obtained by convolving the image with the rectangles 
 %__________________________________________________________________________
 function result = generate_convolutions(ySegms,xSegms,size_y,size_x,patterns,Image)
 	%DEFINE THE SIZE OF THE SEGMENTS_______________________________________
