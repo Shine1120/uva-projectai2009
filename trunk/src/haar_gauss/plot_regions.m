@@ -2,6 +2,7 @@
 %		Xsegs      -- number of regions for X
 %		Ysegs      -- number of regions for Y 
 %		bestModels -- indexes of the best best models
+%		path       -- path of the image used as background
 %		side       -- front/rear
 %__________________________________________________________________________
 function plot_regions(Ysegs,Xsegs,bestModels,path,side)

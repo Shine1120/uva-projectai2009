@@ -6,6 +6,8 @@
 %       target     -- array of targets for the images
 %       convImg    -- the images of the training set saved as a matrix   
 %       classifier -- 0 if is not computed yet / the array containing the probabilities   
+%		isplot     -- 1 = plots the error with respect to the nr of
+%		              features / 0 = no plot
 %OUTPUT:
 %       true_pos   -- the number of the true positives
 %       false_pos  -- the number of false positives

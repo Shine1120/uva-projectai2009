@@ -4,17 +4,18 @@
 %       T              -- number of features to be used (not too large :P)
 %       rounds         -- number of rounds for cross-validation
 %		pattern_scales -- number of different scales generated for each	pattern
+%		money_dir      -- the name of the money folder: 'neur10'/'neur05'
+%		repetitions    -- number of repetitions (not too large: preferable 5)
+%		ySegs          -- number of regions on Y coordinate (preferable 12)
+%		xSegs          -- number of reguons on X coordinate (preferable 5)
+%		if_load        -- 1 = load convolved images/ 0 = generate convolutions
 %__________________________________________________________________________
-function classification_haar(T, rounds, pattern_scales)
+function classification_haar(T, rounds, repetitions, ySegms, xSegms, money_dir, pattern_scales, if_load)
 	close all;
-    money_dir       = 'neur10'; % 'neur05';  
     fit             = ['moneyDivided/wholeplusborder/' money_dir '/fit/'];
     unfit           = ['moneyDivided/wholeplusborder/' money_dir '/unfit/'];	
 	hold_n_out      = 75;
 	slice           = 35;
-	repetitions     = 5;
-	ySegms			= 7;
-	xSegms			= 3;
 	%______________________________________________________________________
 	dir_fit_rear    = dir([fit 'r*.bmp']);
 	dir_unfit_rear  = dir([unfit 'r*.bmp']);
@@ -32,12 +33,15 @@ function classification_haar(T, rounds, pattern_scales)
 		end
 	end		
 	%CONVOLVE IMAGES WITH THE PATTERNS_____________________________________
-    patterns           = save_patterns(250,400,pattern_scales);						
-    convolutions_rear  = preprocess(ySegms,xSegms,1,names_rear,patterns,'rear'); 
-    convolutions_front = preprocess(ySegms,xSegms,1,names_front,patterns,'front'); 
-%  	load 'convolved_images_front'
-%  	load 'convolved_images_rear'
-%  	load 'patterns'	
+	if (if_load == 0)
+		patterns           = save_patterns(250,400,pattern_scales);						
+		convolutions_rear  = preprocess(ySegms,xSegms,1,names_rear,patterns,'rear'); 
+		convolutions_front = preprocess(ySegms,xSegms,1,names_front,patterns,'front'); 
+	else
+		load 'convolved_images_front';
+		load 'convolved_images_rear';
+		load 'patterns';
+	end;
 	min_error_rear   = 1; min_error_front  = 1;
 	best_index_rear  = 0; best_index_front = 0;
 	%START REPETITIONS OF CROSSVALIDATION__________________________________
@@ -120,10 +124,6 @@ function classification_haar(T, rounds, pattern_scales)
 				min_error_front  = error_front(i);
 				best_index_front = rounds*(r-1)+i;
 			end	
-			
-errRear   = error_rear
-truepRear = tp_rear
-			
 		end		
 		%COMPUTE THE MEAN OF THE RESULTS FROM THE CORSSVALIDATION__________
 		tpRear(r)    = mean(tp_rear);
@@ -168,12 +168,7 @@ truepRear = tp_rear
 										
 		save(['model_' money_dir '_handout_rear.mat'], 'model');
 		[tp_holdout_rear(r), tn_holdout_rear(r), error_holdout_rear(r), ...
-			classifier_holdout_rear] = eval_bills(model,labels_holdout,ImgHoldout_rear,0,'r');
-
-best_index_rear		
-tpHoldRear = tp_holdout_rear(r)			
-
-		
+			classifier_holdout_rear] = eval_bills(model,labels_holdout,ImgHoldout_rear,0,0);
 		%LOAD THE BEST MODEL FROM THE CROSSVALIDAITON(FRONT)_______________		
 		model_name = ['model_' money_dir sprintf('_front%d.mat', best_index_front)];
 		load(model_name);	
@@ -182,7 +177,7 @@ tpHoldRear = tp_holdout_rear(r)
 						model.mean_unfit,'cov_unfit',model.cov_unfit);
 		save(['model_' money_dir '_handout_front.mat'], 'model');
 		[tp_holdout_front(r), tn_holdout_front(r), error_holdout_front(r), ...
-			classifier_holdout_front] = eval_bills(model,labels_holdout,ImgHoldout_front,0,'g');
+			classifier_holdout_front] = eval_bills(model,labels_holdout,ImgHoldout_front,0,0);
 		%REAR&FRONT CLASSIFIER - JUST LABELS NEEDED________________________
 		both_holdout = 1-(1-classifier_holdout_front).*(1-classifier_holdout_rear); 				
 		[tp_holdout_both(r), tn_holdout_both(r), error_holdout_both(r),both_holdout] = ...
