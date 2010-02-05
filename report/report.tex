@@ -53,20 +53,20 @@
 		
 		In section \ref{sec:Background}, related work on the project is discussed. In section \ref{sec:Methods}, the implementation of the \emph{AdaBoost} algorithm applied on the different techniques \emph{Haar-like features}, \emph{convolution with kernels}, \emph{PCA}, \emph{SVM}, \emph{AdaBoost}, \emph{edge detection} and \emph{intensity} are discussed. We explain our experiments and their results in section \ref{sec:results}. Finally, we conclude in section \ref{sec:conclusion} and propose some topics for future research.
 	\section{Background}\label{sec:Background}
-		In Europe a lot of different factories produce Euro bills using different ink and paper. This makes the task of detecting dirty bills hard because looking at the global features will not work perfectly due to these small differences in printing. In The Netherlands, on average bills return 2 to 3 times a year to the Dutch National Bank (DNB) with a total value of 1.1 billion bills a year. 
+		In Europe a lot of different factories produce Euro bills using different ink and paper. This makes the task of detecting dirty bills hard because looking at the global features will not work perfectly due to these small differences in printing. In The Netherlands, on average bills return 2 to 3 times a year to the Dutch National Bank (DNB), in total of 1.1 billion bills a year. 
 
 		The current approach used in the DNB is to measure the reflection of the bill on a small area near the water mark. With this approach 30\% of all bills are destroyed in order to destroy 95\% of the dirty bills. In a first attempt to make this selection process more		sophisticated global features (eigen-money) of clean and dirty bills are extracted using PCA analysis \cite{MoNuSt}. This approach improved on the results of the current method used by the DNB. The implementation was again improved by learning more local features of the water mark region (also referred to as white patch) of the bill \cite{Geusebroek}. 
 	\section{Methods}\label{sec:Methods}
 		\subsection{Adaboost}\label{sec:Adaboost}
-			The \emph{AdaBoost} algorithm will be used in combination with different techniques throughout this project, such as: \emph{PCA}, \emph{Haar-like features} or \emph{edge} and \emph{intensity} distributions over different regions.
+			The \emph{AdaBoost} algorithm will be used in combination with different techniques throughout this project, such as: \emph{PCA}, \emph{Haar-like features} and \emph{edge} and \emph{intensity} distributions over different regions.
 
-		AdaBoost is a machine learning technique which can be used in conjunction with various other learning algorithms. The idea is to have a (convex) set of weak classifiers (classifiers that perform at least better than random) and then minimize the total error over the training-set by finding the best classifier at each stage of the algorithm.
+AdaBoost is a machine learning technique which can be used in conjunction with various other learning algorithms. The idea is to have a (convex) set of weak classifiers (classifiers that perform at least better than random) and then minimize the total error over the training-set by finding the best classifier at each stage of the algorithm.
 
-		The theoretical basis of this algorithm is that given a set of models (or features), \emph{M}, the algorithm will determine the subset of \emph{T} models that	 are the best for distinguishing between the two classes (clean and dirty bills). Thus, \emph{AdaBoost} will learn the most representative features of the two classes. The algorithm for determining the best models is shown in \emph{Algorithm~\ref{AdaBoost}}. Another very important characteristic of this algorithm is the fact that it also specifies a method in which the models that were chosen as being the best, can be combined in order to give a strong classifier. The corresponding algorithm can be seen in \emph{Algorithm~\ref{AdaBoost_pred}}. 
+The theoretical basis of this algorithm is that given a set of models (or features), \emph{M}, the algorithm will determine the subset of \emph{T} models that	 are the best for distinguishing between the two classes (clean and dirty bills). Thus, \emph{AdaBoost} will learn the most representative features of the two classes. The algorithm for determining the best models is shown in \emph{Algorithm~\ref{AdaBoost}}. Another very important characteristic of this algorithm is the fact that it also specifies a method in which the models that were chosen as being the best, can be combined in order to give a strong classifier. The corresponding algorithm can be seen in \emph{Algorithm~\ref{AdaBoost_pred}}.
 
-			Note that although this algorithm looks slightly different, is equivalent to the one described in \cite{Haar}.
+Note that although this algorithm looks slightly different, is equivalent to the one described in \cite{Haar}.
 			
-			\begin{algorithm}[!hbtp]
+		\begin{algorithm}[!hbtp]
 				\caption{AdaBoost learning features}
 				\label{AdaBoost}
 				\begin{algorithmic}[1]
@@ -333,7 +333,7 @@
 		
 		
 		\subsection{Intensity \& Edges Results}\label{sec:ie_results}
-			For the intensity and edges implementation we also used overlapping regions, 9 (in the x-direction) by 23 (in the y-direction) for front and for the rear of the bill. This results in 414 weak classifiers/features. For every region there is only one value/number that represents the edge count or the average intensity, thus there is a relative small amount of models to train on. Therefore we could run bigger tests in order to achieve reliable models. In order to create these models we have used 40 repetitions, 40 hypotheses and 40 random sub-sampling validation runs. To determine the optimal number of weak classifiers to use for the 5 and 10 Euro bills we have plotted the errors with respect to the number of weak classifiers used. We choose the weak classifiers that reduced the error "substantially" (see Figure \ref{IE_plot5} and Figure \ref{IE_plot10} for the 10 Euro and 5 Euro plots). For the 10 Euro bills we used 25 weak classifiers and for the 5 Euro we used 10 classifiers. Figure \ref{ie_regions5} and Figure \ref{ie_regions10} indicate the selected areas on 10 and 5 Euro bills. The blue rectangles represent the regions found as being the most representative ones for intensity, while the red regions indicate the most discriminative regions when using edge detection.
+			For the intensity and edges implementation we also used overlapping regions, 9 (in the x-direction) by 23 (in the y-direction) for front and for the rear of the bill. This results in 414 features. For every region there is only one value that represents the edge count or the average intensity, thus there is a relative small amount of models to train on. Therefore we could run bigger tests in order to achieve reliable models. In order to create these models we have used 40 repetitions, 40 hypotheses and 40 random sub-sampling validation runs. To determine the optimal number of weak classifiers to use for the 5 and 10 Euro bills we have plotted the errors with respect to the number of weak classifiers used. We choose the weak classifiers that reduced the error "substantially" (see Figure \ref{IE_plot5} and Figure \ref{IE_plot10} for the 10 Euro and 5 Euro plots). For the 10 Euro bills we used 40 weak classifiers and for the 5 Euro we used 10 classifiers. Figure \ref{ie_regions5} and Figure \ref{ie_regions10} indicate the selected areas on 10 and 5 Euro bills. The blue rectangles represent the regions found as being the most representative ones for intensity, while the red regions indicate the most discriminative regions when using edge detection.
 
 		\begin{figure}[!hbtp]
 			\centering
@@ -358,7 +358,7 @@
 		
 		\begin{figure}[!hbtp]
 			\centering
-			\epsfig{file=img/5x12_ie_regions10.eps, width=1\linewidth}
+			\epsfig{file=img/5x12_ie_regions10b.eps, width=1\linewidth}
 			\caption{Best regions for 10 Euro bills (IE)}
 			\label{ie_regions10}
 		\end{figure}
