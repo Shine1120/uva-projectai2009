@@ -40,18 +40,10 @@
 	\large{\textbf{CONFIDENTIAL}}
  \end{titlepage}
 
-	
 	\begin{abstract}
-		In the month January of 2010 a project on the classification of
-		the fitness of money was proposed. During this month we have tested and
-		implemented various techniques to handle the problem of money classification.
-		The results from our experiment show promising development comparing to the
-		current state of research.
-		
-		In the below sections we have described the approaches that we
-		have tried and the results obtained for each one of them.
+		In the month January of 2010 a project on the classification of the fitness of money was proposed. During this month we have developed and implemented various techniques to handle the problem of money classification and identify discriminative features on the image data using the method of Adaptive Boosting. The results from our experiment show promising development when comparing to the current state of research.
 	\end{abstract}
-	
+
 	\section{Introduction}
 		The goal of this project is to research several techniques that have a potential to distinguish between clean bills and dirty bills. In order to achieve this goal we had to think of what are the representative features of dirt that can be found on money bills and what techniques can be applied to model this.
 		 		
@@ -60,18 +52,18 @@
 		In section \ref{sec:Background}, related work on the project is discussed. In section \ref{sec:Methods}, the implementation of the \emph{AdaBoost} algorithm applied on the different techniques \emph{Haar-like features}, \emph{convolution with kernels}, \emph{PCA}, \emph{SVM}, \emph{AdaBoost}, \emph{edge detection} and \emph{intensity} are discussed. We explain our experiments and their results in section \ref{sec:results}. Finally, we conclude in section \ref{sec:conclusion} and propose some topics for future research.
 
 	\section{Background}\label{sec:Background}
-		In Europe a lot of different factories produce Euro bills using different ink and paper. This makes the task of detecting dirty bills hard because looking at the global features will not work perfectly due to these small differences in printing. In The Netherlands, on average bills return 2 to 3 times a year to the Dutch National Bank (DNB), in total of 1.1 billion bills a year. 
+		In Europe a lot of different factories produce Euro bills using different ink and paper. This makes the task of detecting dirty bills hard because looking at the global features will not work perfectly due to these small differences in printing. In The Netherlands, on average bills return 2 to 3 times a year to the Dutch National Bank (DNB), in total of 1.1 billion bills a year.
 
 		The current approach used in the DNB is to measure the reflection of the bill on a small area near the water mark. With this approach 30\% of all bills are destroyed in order to destroy 95\% of the dirty bills. In a first attempt to make this selection process more sophisticated global features (eigen-money) of clean and dirty bills are extracted using PCA analysis \cite{MoNuSt}. This approach improved on the results of the current method used by the DNB. For 5 Euro bills the error on clean bills was 12\%, on dirty bills 10.5\% and for 10 Euro the error on clean bills was 15\%, on dirty bills 7.5\%.  The implementation was again improved by learning more local features of the water mark region (also referred to as white patch) of the bill \cite{Geusebroek}.  For 5 Euro bills the error on clean bills was 3\%, on dirty bills 0\% and for 10 Euro the error on clean bills was 16\%, on dirty bills 6\%.
 	\section{Methods}\label{sec:Methods}
 		\subsection{Adaboost}\label{sec:Adaboost}
 			The \emph{AdaBoost} algorithm will be used in combination with different techniques throughout this project, such as: \emph{PCA}, \emph{Haar-like features} and \emph{edge} and \emph{intensity} distributions over different regions.
 
-AdaBoost is a machine learning technique which can be used in conjunction with various other learning algorithms. The idea is to have a (convex) set of weak classifiers (classifiers that perform at least better than random) and then minimize the total error over the training-set by finding the best classifier at each stage of the algorithm.
-
-The theoretical basis of this algorithm is that given a set of models (or features), \emph{M}, the algorithm will determine the subset of \emph{T} models that	 are the best for distinguishing between the two classes (clean and dirty bills). Thus, \emph{AdaBoost} will learn the most representative features of the two classes. The algorithm for determining the best models is shown in \emph{Algorithm~\ref{AdaBoost}}. Another very important characteristic of this algorithm is the fact that it also specifies a method in which the models that were chosen as being the best, can be combined in order to give a strong classifier. The corresponding algorithm can be seen in \emph{Algorithm~\ref{AdaBoost_pred}}.
-
-Note that although this algorithm looks slightly different, is equivalent to the one described in \cite{Haar}.
+			AdaBoost is a machine learning technique which can be used in conjunction with various other learning algorithms. The idea is to have a (convex) set of weak classifiers (classifiers that perform at least better than random) and then minimize the total error over the training-set by finding the best classifier at each stage of the algorithm.
+			
+			The theoretical basis of this algorithm is that given a set of models (or features), \emph{M}, the algorithm will determine the subset of \emph{T} models that	 are the best for distinguishing between the two classes (clean and dirty bills). Thus, \emph{AdaBoost} will learn the most representative features of the two classes. The algorithm for determining the best models is shown in \emph{Algorithm~\ref{AdaBoost}}. Another very important characteristic of this algorithm is the fact that it also specifies a method in which the models that were chosen as being the best, can be combined in order to give a strong classifier. The corresponding algorithm can be seen in \emph{Algorithm~\ref{AdaBoost_pred}}.
+			
+			Note that although this algorithm \cite{Ada} looks slightly different, is equivalent to the one described in \cite{Haar}.
 			
 		\begin{algorithm}[!hbtp]
 				\caption{AdaBoost learning features}
@@ -138,10 +130,13 @@ Note that although this algorithm looks slightly different, is equivalent to the
 				\begin{tabular}{|lr|} \hline
 					& \\[5pt]
 					\textcolor{blue}{$\sum_x\sum_y Image(y:y+h,x:x+w) .* Pattern$} &\\[10pt]
-					where: \emph{h} -- the heigh of the pattern &\\
-					\hspace*{28px} \emph{w} -- the width of the pattern &\\[5pt] 
 					\hline 
 				\end{tabular}
+				where:
+				\begin{itemize}
+					\item \emph{h} -- the heigh of the pattern 
+					\item \emph{w} -- the width of the pattern 
+				\end{itemize}
 				\label{patterns_formula}
 			\end{figure}
 			
@@ -207,11 +202,14 @@ Note that although this algorithm looks slightly different, is equivalent to the
 						&\\[5pt]	
 						\textcolor{blue}{$\mu$ = $\sum_i \frac{x_i}{\mid X \mid}$}&\\
 						\textcolor{blue}{$\sigma$ = $\frac{(X - \mu)(X - \mu)^T}{\mid X \mid}$} &\\[10pt]  
-						where X -- the training data set &\\
-						\hspace*{28px} $\mu$ -- the mean &\\
-						\hspace*{28px} $\sigma$ -- the covariance &\\[5pt]
 				\hline
 				\end{tabular}
+				\\where:
+				\begin{itemize}
+					\item X -- the training data set
+					\item $\mu$ -- the mean
+					\item $\sigma$ -- the covariance
+				\end{itemize}
 				\label{mu_sigma}
 			\end{figure}
 			}
@@ -425,11 +423,11 @@ The idea of using the intensity is based on	the current approach used in the DNB
 
 	\section{Conclusion}\label{sec:conclusion}
 		From our experiments we have been able to learn the regions that contain the largest amount of information and help us distinguish between fit and unfit bills. These regions differ from one method to another, but in general the areas around the water-mark region and the middle of the bills have been proven to be the ones containing the most discriminative features.
-		
+
 		As it can be noticed from the results in section \ref{sec:comb_results}, combining different techniques can lead to an improvement in the performance of the final classifier although running single classifiers only gives great results as well. In terms of robustness it make sense to do combinations of strong classifiers for 5 and 10 Euro both bills, since the different techniques can cover different aspects of dirt on the bills. To test this hypothesis however, it is mandatory to have many more holdout-sets to test the final models on since our project does not give any proof on scalability yet.
 
 		Although the results obtained using the various techniques discussed are very promising already, future work is possible and it should be mainly focused on finding a more powerful way of combining all the features used by all 3 techniques (Haar, PCA, Intensity \& Edge) into a strong classifier as AdaBoost can be capable of doing this. Also, combining the models for both front and rear can also be improved if certain prior knowledge can be incorporated.
-		
+
 		We would also recommend that special attention should be payed to the validity of certain features of the images from the data set by retrieving the origin on how the data-set is built up. We mention this because the results for average intensity are really promising, but this could be caused by bills being scanned in each class at a time and having differences in the intensity of the light possibly induced by the scanner being heated up.
 	
 		\bibliographystyle{alpha} 
@@ -445,5 +443,5 @@ The idea of using the intensity is based on	the current approach used in the DNB
 				\tit{Classifying Bank Notes for Scheduled Destruction} (2009)
 			\bibitem{Geusebroek} J.M. Geusebroek: \\
 				\tit{Computer Vision for Banknote Sorting} (2009)		
-		\end{thebibliography}		
+		\end{thebibliography}
 \end{document}
