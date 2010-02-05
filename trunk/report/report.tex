@@ -37,7 +37,7 @@
 	\maketitle
 	\vspace*{300px}
 	\centering
-	\huge{\textbf{CONFIDENTIAL}}
+	\large{\textbf{CONFIDENTIAL}}
  \end{titlepage}
 
 	
@@ -185,8 +185,8 @@ Note that although this algorithm looks slightly different, is equivalent to the
 					\hspace*{50px}\textcolor{blue}{$\frac{P(\theta_{fit})*P(X\mid \theta_{fit})}{P(\theta_{fit})*P(X\mid \theta_{fit}) + P(\theta_{unfit})*P(X\mid \theta_{unfit})}$} &\\[15pt]
 					\textcolor{blue}{$argmax_{\theta_{unfit}}P(\theta_{unfit}\mid X) = $} &\\[5pt]
 					\hspace*{50px}\textcolor{blue}{$\frac{P(\theta_{unfit})*P(X\mid \theta_{unfit})}{P(\theta_{fit})*P(X\mid \theta_{fit}) + P(\theta_{unfit})*P(X\mid \theta_{unfit})}$} &\\[10pt]
-			\hline
-			\end{tabular}
+				\hline
+				\end{tabular}
 					where: 
 					\begin{itemize}
 					\item $P(\theta_{fit}), P(\theta_{unfit})$ -- marginal probabilities of
@@ -239,12 +239,12 @@ Note that although this algorithm looks slightly different, is equivalent to the
 			In previous research, the use of SVM in combination with PCA already gave great error reduction on both the 5 and 10 Euro bills. The best results were conducted from performing PCA on the white-patch area only, and propagate the projections through the SVM. PCA on the white-patch as well as the whole bill made it possible to reduce the data from a dimensionality equal to the number of pixels of the respective area to only a 30 components. This reduction ensures faster training and classification with SVM. The idea is to identify more regions with similar discriminative features as the white-patch. This is done by dividing the bill up in an arbitrary number of regions, and performing PCA for each of these regions in all the bills. The PCA segments then can be used to train SVM models for each segment. These SVM models in combination with their respective PCA segments in turn can be used as weak classifiers in AdaBoost. The dimensions for division are chosen using empirical evidence of the error rates, and as to be expected the segments cannot be too local for PCA to work.
 
 		\subsection{Intensity and Edge distributions}\label{sec:Intensity_Edge}
-			Next to the more complex approaches we decided to implement also two more simple techniques, based on the intensities on the image and on the edges on the bill. After plotting the average intensity and edge count for the hole bills we were convinced these simple approaches should work well. Figure \ref{histograms} shows on the left the average intensity plot and on the right the plot of the edge count for 5 Euro (on top) and for 10 Euro.
+			Next to the more complex approaches we decided to implement also two more simple techniques, based on the intensities on the image and on the edges on the bill. After plotting the average intensity and edge count for the hole bills we were convinced these simple approaches should work well. Figure \ref{histograms} shows on the left the average intensity plot and on the right the plot of the edge count for 5 Euro (on top) and for 10 Euro (blue indicates the dirty bills and red the clean bills).
 
 			\begin{figure}[!hbtp]
 				\centering
 				\epsfig{file=img/ie_histograms.eps, width=1\linewidth}
-				\caption{plot of average intensity and edge count for 5 Euro bills}
+				\caption{plot of average intensity and edge count for 5 and 10 Euro bills}
 				\label{histograms}
 			\end{figure}
 
