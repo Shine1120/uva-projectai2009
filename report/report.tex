@@ -55,7 +55,7 @@
 	\section{Background}\label{sec:Background}
 		In Europe a lot of different factories produce Euro bills using different ink and paper. This makes the task of detecting dirty bills hard because looking at the global features will not work perfectly due to these small differences in printing. In The Netherlands, on average bills return 2 to 3 times a year to the Dutch National Bank (DNB), in total of 1.1 billion bills a year. 
 
-		The current approach used in the DNB is to measure the reflection of the bill on a small area near the water mark. With this approach 30\% of all bills are destroyed in order to destroy 95\% of the dirty bills. In a first attempt to make this selection process more		sophisticated global features (eigen-money) of clean and dirty bills are extracted using PCA analysis \cite{MoNuSt}. This approach improved on the results of the current method used by the DNB. The implementation was again improved by learning more local features of the water mark region (also referred to as white patch) of the bill \cite{Geusebroek}. 
+		The current approach used in the DNB is to measure the reflection of the bill on a small area near the water mark. With this approach 30\% of all bills are destroyed in order to destroy 95\% of the dirty bills. In a first attempt to make this selection process more sophisticated global features (eigen-money) of clean and dirty bills are extracted using PCA analysis \cite{MoNuSt}. This approach improved on the results of the current method used by the DNB. For 5 Euro bills their error on clean bills was 12\%, on dirty bills 10.5\% and for 10 Euro their error on clean bills was 15\%, on dirty bills 7.5\%.  The implementation was again improved by learning more local features of the water mark region (also referred to as white patch) of the bill \cite{Geusebroek}.  For 5 Euro bills his error on clean bills was 3\%, on dirty bills 0\% and for 10 Euro their error on clean bills was 16\%, on dirty bills 6\%.
 	\section{Methods}\label{sec:Methods}
 		\subsection{Adaboost}\label{sec:Adaboost}
 			The \emph{AdaBoost} algorithm will be used in combination with different techniques throughout this project, such as: \emph{PCA}, \emph{Haar-like features} and \emph{edge} and \emph{intensity} distributions over different regions.
@@ -236,7 +236,7 @@ Note that although this algorithm looks slightly different, is equivalent to the
 
 			\begin{figure}[!hbtp]
 				\centering
-				\epsfig{file=img/ie_histograms.eps, width=0.5\linewidth}
+				\epsfig{file=img/ie_histograms.eps, width=1\linewidth}
 				\caption{plot of average intensity and edge count for 5 Euro bills}
 				\label{histograms}
 			\end{figure}
