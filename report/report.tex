@@ -33,7 +33,13 @@
 	 \\ S. L. Pintea (6109969) s.l.pintea@student.uva.nl}
 
 \begin{document}
+\begin{titlepage}
 	\maketitle
+	\vspace*{250px}
+	\centering
+	\large{\textbf{CONFIDENTIAL}}
+ \end{titlepage}
+
 	
 	\begin{abstract}
 		In the month January of 2010 a project on the classification of
@@ -52,10 +58,11 @@
 		The main techniques used in this project are: \emph{PCA}, \emph{Haar-like features}, \emph{Convolution with predefined kernels}, \emph{edge-detection} and \emph{intensity} distributions. All of these techniques have been analyzed on the image data using a machine learning technique called Adaptive Boosting, also referred to in literature as AdaBoost \cite{Ada}.
 		
 		In section \ref{sec:Background}, related work on the project is discussed. In section \ref{sec:Methods}, the implementation of the \emph{AdaBoost} algorithm applied on the different techniques \emph{Haar-like features}, \emph{convolution with kernels}, \emph{PCA}, \emph{SVM}, \emph{AdaBoost}, \emph{edge detection} and \emph{intensity} are discussed. We explain our experiments and their results in section \ref{sec:results}. Finally, we conclude in section \ref{sec:conclusion} and propose some topics for future research.
+
 	\section{Background}\label{sec:Background}
 		In Europe a lot of different factories produce Euro bills using different ink and paper. This makes the task of detecting dirty bills hard because looking at the global features will not work perfectly due to these small differences in printing. In The Netherlands, on average bills return 2 to 3 times a year to the Dutch National Bank (DNB), in total of 1.1 billion bills a year. 
 
-		The current approach used in the DNB is to measure the reflection of the bill on a small area near the water mark. With this approach 30\% of all bills are destroyed in order to destroy 95\% of the dirty bills. In a first attempt to make this selection process more sophisticated global features (eigen-money) of clean and dirty bills are extracted using PCA analysis \cite{MoNuSt}. This approach improved on the results of the current method used by the DNB. For 5 Euro bills their error on clean bills was 12\%, on dirty bills 10.5\% and for 10 Euro their error on clean bills was 15\%, on dirty bills 7.5\%.  The implementation was again improved by learning more local features of the water mark region (also referred to as white patch) of the bill \cite{Geusebroek}.  For 5 Euro bills his error on clean bills was 3\%, on dirty bills 0\% and for 10 Euro their error on clean bills was 16\%, on dirty bills 6\%.
+		The current approach used in the DNB is to measure the reflection of the bill on a small area near the water mark. With this approach 30\% of all bills are destroyed in order to destroy 95\% of the dirty bills. In a first attempt to make this selection process more sophisticated global features (eigen-money) of clean and dirty bills are extracted using PCA analysis \cite{MoNuSt}. This approach improved on the results of the current method used by the DNB. For 5 Euro bills the error on clean bills was 12\%, on dirty bills 10.5\% and for 10 Euro the error on clean bills was 15\%, on dirty bills 7.5\%.  The implementation was again improved by learning more local features of the water mark region (also referred to as white patch) of the bill \cite{Geusebroek}.  For 5 Euro bills the error on clean bills was 3\%, on dirty bills 0\% and for 10 Euro the error on clean bills was 16\%, on dirty bills 6\%.
 	\section{Methods}\label{sec:Methods}
 		\subsection{Adaboost}\label{sec:Adaboost}
 			The \emph{AdaBoost} algorithm will be used in combination with different techniques throughout this project, such as: \emph{PCA}, \emph{Haar-like features} and \emph{edge} and \emph{intensity} distributions over different regions.
@@ -242,7 +249,7 @@ Note that although this algorithm looks slightly different, is equivalent to the
 			\end{figure}
 
 
-The idea of using the intensity is based on	the current approach used in the DNB (e.g. measuring the reflection of light on a small patch near the water mark). The second idea of using the edges is based on the assumption that dirty and old bills have significantly more wrinkles and folds than relative new bills. In the first simple implementation the raw intensity values of the image of the bill are used. This is done by segmenting the bills into small regions (5 by 12 showed best results). Over these regions the average intensity is calculated. In this way it is possible to retrieve two Gaussian distributions of the intensity of all the regions over all the images, one for clean bills and one for dirty bills. This provides a tool to compare the probability of a region on a bill belonging to a clean or dirty bill. Here again we apply \emph{Naive Bayes} in order to make use of the prior knowledge available.
+The idea of using the intensity is based on	the current approach used in the DNB (e.g. measuring the reflection of light on a small patch near the water mark). The second idea of using the edges is based on the assumption that dirty and old bills have significantly more wrinkles and folds than relative new bills. In the first simple implementation the raw intensity values of the image of the bill are used. This is done by segmenting the bills into smal overlappingl regions (9 by 23 showed best results). Over these regions the average intensity is calculated. In this way it is possible to retrieve two Gaussian distributions of the intensity of all the regions over all the images, one for clean bills and one for dirty bills. This provides a tool to compare the probability of a region on a bill belonging to a clean or dirty bill. Here again we apply \emph{Naive Bayes} in order to make use of the prior knowledge available.
 			
 			In the edge approach the image is first filtered using the Canny-edge detector. The Canny edge filter works in 5 steps: 
 			
