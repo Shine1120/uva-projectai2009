@@ -39,8 +39,6 @@ function plots_haar(repetitions, money_dir, ySegms, xSegms, model_rear, model_fr
 		load 'convolved_images_rear'
 		load 'patterns'	
 	end
-	min_error_rear   = 1; min_error_front  = 1;
-	best_index_rear  = 1; best_index_front = 1;
 	%START REPETITIONS OF CROSSVALIDATION__________________________________
 	for r=1:repetitions	
 		%DEFINE HOLDOUT SET________________________________________________ 	
@@ -53,15 +51,15 @@ function plots_haar(repetitions, money_dir, ySegms, xSegms, model_rear, model_fr
 			holdout_id = all_id(1:hold_n_out);
 			rest_id    = all_id(hold_n_out+1:end);	
 		end	 
- 		labels_holdout     = all_labels(holdout_id);
- 		ImgHoldout_front   = convolutions_front(holdout_id,:);
- 		ImgHoldout_rear    = convolutions_rear(holdout_id,:); 
-        voted_indexes_rear = model_rear.best_ids;                
+ 		labels_holdout      = all_labels(holdout_id);
+ 		ImgHoldout_front    = convolutions_front(holdout_id,:);
+ 		ImgHoldout_rear     = convolutions_rear(holdout_id,:); 
+        voted_indexes_rear  = model_rear.best_ids;                
         voted_indexes_front = model_front.best_ids;       
         [incorrect_plot_rear_fit(r,:), incorrect_plot_rear_unfit(r,:), ...
 		  incorrect_plot_front_fit(r,:), incorrect_plot_front_unfit(r,:), ...
 		  incorrect_plot_both_fit(r,:), incorrect_plot_both_unfit(r,:)] = ...
-		evaluate(model_front, model_rear, labels_holdout, ImgHoldout_front, ImgHoldout_rear);    
+		evaluate(model_front, model_rear, labels_holdout, ImgHoldout_front, ImgHoldout_rear);   
 	end
 	plot_rear_fit = mean(incorrect_plot_rear_fit,1);
 	plot_rear_unfit = mean(incorrect_plot_rear_unfit,1);

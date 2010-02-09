@@ -11,12 +11,12 @@ function start_plots
 	pattern_scales = 1;
 	money_dir      = 'neur10'; % 'neur05';  
  	repetitions    = 5;
-	ySegms		   = 2%12;
-	xSegms		   = 2%5;
+	ySegms		   = 12;
+	xSegms		   = 5;
 	if_load        = 0;
-	load('model_neur10_handout_rear.mat');	
+	load('12x5_haar_model_neur10_handout_rear.mat');	
 	model_rear     = model;
-	load('model_neur10_handout_front.mat');	        
+	load('12x5_haar_model_neur10_handout_front.mat');	        
     model_front    = model;
 	plots_haar(repetitions, money_dir, ySegms, xSegms, ...
 			   model_rear, model_front, pattern_scales, if_load)
