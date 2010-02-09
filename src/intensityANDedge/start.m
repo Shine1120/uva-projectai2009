@@ -1,15 +1,22 @@
+% this function starts the intensity & edges learning.
+
+% Remark: During learning fit bills have labels 1 and unfit bills have
+% label 0. This is different from the combined phase where the labels are 
+% the other way around. This does not influence the models learned.
+
+
 function start( )
 
 	close all;
 
-	%seledt on what bills to learn
-	do5Euro           = 1;
-	do10Euro          = 0;
+	%select on what bills to learn
+	do5Euro           = 0;
+	do10Euro          = 1;
 
 	%select on what area of bill to learn on
-	doWholeNote       = 0;
-	doWholeNotePB     = 1;
-	doWhitePatchNote  = 0;
+	doWhitePatchNote  = 0; % white patch
+	doWholeNote       = 0; % whole bill
+	doWholeNotePB     = 1; % whole bill plus border
 
 	%select what side of the bill to learn on
 	useFront		  = 1;
@@ -40,12 +47,12 @@ function start( )
 	pathUnfit	  = [path 'unfit/'];
 
 	
-	sizeValidationSet = 75;
+	sizeValidationSet = 75; % size of validation set
 	leave_n_out		  = 35;	% size of test set
 
 	repetitions		  = 10; %number of repetitions of the test
-	trials			  = 20; %number of Repeated random sub-sampling validation 
-	hypotheses 		  = 10; %weak classifiers to be learned by adaBoost
+	trials			  = 40; %number of Repeated random sub-sampling validation 
+	hypotheses 		  = 20; %weak classifiers to be learned by adaBoost
 
 	%if invariant set to one. The mean intensity of each bill will be
 	%subtracted from the intensities of that bill
@@ -79,7 +86,6 @@ function start( )
 	
 	modelsVotes       = zeros(5,modelCount*(doEdge+doIntensity));
 	finalModels		  = zeros(7,modelCount*(doEdge+doIntensity));
-	uberModels		  = zeros(7,modelCount*(doEdge+doIntensity));
 	
 	plotData = zeros(hypotheses,4);
 	
@@ -121,9 +127,7 @@ function start( )
 	sumTPRate = 0;
 	sumTNRate = 0;
 	
-	overAllBestValResults = 0;
 	overAllBestHOFitGoodClass = 0;
-	overAllBestHOUnfitGoodClass = 0;
 	
 	for r=1:repetitions
 		tic
@@ -240,42 +244,28 @@ function start( )
 			
 		fprintf('HOResults::  fitGood: %4.4g \t unfitGood: %4.4g \t-->  error: %4.4g\n',...
 			ValTPRate,ValTNRate,1-ValGoodClassified)
-		
-% 		if ValGoodClassified > overAllBestValResults 
-% 			fprintf('new overall Model\n')
-% 			overAllBestValResults = ValGoodClassified;
-% 			%reinitialize bestmodel list
-% 			finalModels = zeros(7,modelCount*(doEdge+doIntensity));
-% 			finalModels = IEupdateBestModels(finalModels,modelsCombi,...
-% 				chosenModelsIdx,chosenModelsAlphas);
-% 		elseif ValGoodClassified == overAllBestValResults 
-% 			fprintf('overall Models updated\n')
-% 			%update bestModel list
-% 			finalModels = IEupdateBestModels(finalModels,modelsCombi,...
-% 				chosenModelsIdx,chosenModelsAlphas);
-% 		end
 	
 		if r==1
 			%just to fill up in case no run is under 5% unfit error
-			finalModels = IEupdateBestModels(uberModels,modelsCombi,...
+			finalModels = IEupdateBestModels(finalModels,modelsCombi,...
 				chosenModelsIdx,chosenModelsAlphas);		
 		end
 		if ValTNRate > 0.95
 			%if unfit error is smaller then 5%
 			if ValTPRate>overAllBestHOFitGoodClass
 				%if fit error is smaller then smallest until now
-				fprintf('new uber model\n')
+				fprintf('new model\n')
 				%if unfit good classified is better then current best results,
-				%clear uberModels and update it with the newest model
+				%clear finalModels and update it with the newest model
 				finalModels  = zeros(7,modelCount*(doEdge+doIntensity));
 				finalModels  = IEupdateBestModels(finalModels,modelsCombi,...
 					chosenModelsIdx,chosenModelsAlphas);
 				overAllBestHOFitGoodClass = ValTPRate;
 			elseif ValTPRate==overAllBestHOFitGoodClass
 				%if fit error is smaller then smallest until now
-				fprintf('uber model updated\n')
+				fprintf('model updated\n')
 				%if unfit good classified is better then current best results,
-				%clear uberModels and update it with the newest model
+				%clear finalModels and update it with the newest model
 				finalModels  = IEupdateBestModels(finalModels,modelsCombi,...
 					chosenModelsIdx,chosenModelsAlphas);
 			end
