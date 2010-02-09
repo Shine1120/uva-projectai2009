@@ -16,6 +16,7 @@ unfitset_rear = dir([unfitdir 'r*.bmp']);
 banknoteSize_front = size(DNBreadim([fitdir fitset_front(1).name]));
 banknoteSize_rear = size(DNBreadim([fitdir fitset_rear(1).name]));
 
+% allocate for faster performance
 all_money_front = zeros(length(fitset_front)+length(unfitset_front), banknoteSize_front(1)*banknoteSize_front(2));
 all_money_rear = zeros(length(fitset_rear)+length(unfitset_rear), banknoteSize_rear(1)*banknoteSize_rear(2));
 all_labels = [];

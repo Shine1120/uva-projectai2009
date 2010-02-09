@@ -4,11 +4,11 @@ function DNB_demo(docreate)%(all_money_front, all_money_rear, all_labels)
 %
 %
 %% Best Parameter Settings so far:
-%T				= 4;	% number of hypothesis for AdaBoost
+T				= 1;	% number of hypothesis for AdaBoost
 leave_n_out		= 35;	% size of test-set
 hold_n_out		= 75;   % size of validation-set
-trials			= 1;	% 20 fold experiment
-repetitions		= 1;	% 20 for repeating the k-fold experiment
+trials			= 10;	% 20 fold experiment
+repetitions		= 10;	% 20 for repeating the k-fold experiment
 unfitaccept		= 0.04; % ensures better than 5% error on unfit class
 
 
@@ -32,9 +32,6 @@ best_alpha_list1 = [];
 best_model_list2 = [];
 best_alpha_list2 = [];
 
-tot_nb = [];
-tot_f = [];
-tot_r = [];
 %% Create (slow) or load (fast) image regions
 if docreate
 	fprintf('Creating Image Regions... ');
@@ -61,7 +58,6 @@ end
 SIZE = size(all_money_front_regions)
 
 
-for T=1:10
 
 %% Start the repetitions
 for q=1:repetitions
@@ -309,10 +305,6 @@ for q=1:repetitions
 	error_front = 1-correct_front./n
 	error_rear = 1-correct_rear./n
 
-	tot_nb = [tot_nb; error_naive_Bayes]
-	tot_f = [tot_f; error_front]
-	tot_r = [tot_r; error_rear]
-
 	if error_naive_Bayes < error_naive_Best
 		fprintf('Found new best model! Saving... ')
 		ErrorBayes = error_naive_Bayes 
@@ -332,12 +324,6 @@ for q=1:repetitions
 end; % repetitions
 
 
-best_model_list1 = [];
-best_model_list2 = [];
-best_alpha_list1 = [];
-best_alpha_list2 = [];
-
-end; % T
 
 
 fprintf( 'Final:\n' );

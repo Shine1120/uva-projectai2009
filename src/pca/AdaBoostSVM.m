@@ -1,10 +1,10 @@
 function [alpha, modelIdx, models] = AdaBoostSVM(models, traindata, eigen_regions, labels, T)
-% Adaptive Boosting using SVM models as weak classifiers. Every model
+% ADABOOSTSVM - Adaptive Boosting using SVM models as weak classifiers. Every model
 % represents a pca segment on the bill. 
 %
 % models:			SVM models trained on pca segments
 % traindata:		image train data in format [imgIdx, data, regionIdx]
-% eigen_regions:	components used for projection
+% eigen_regions:	components used for projection (based on regions)
 % labels:			labels of the traindata [0 1]
 % T:				number of models to find
 

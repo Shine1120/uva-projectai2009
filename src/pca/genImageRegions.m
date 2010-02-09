@@ -1,5 +1,9 @@
 function img_regions = genImageRegions(imgVecs, fr)
-
+% genImageRegions - divides up all bills into 3x7 regions (this amount of
+% regions gave best results so far).
+%
+% imgVecs:		all the images (front or rear) in vector representation
+% fr:			flag for front/rear
 
 	for i=1:size(imgVecs,1)
 		img = imgVecs(i,:);
@@ -31,5 +35,4 @@ function img_regions = genImageRegions(imgVecs, fr)
 		end
 	end
 	
-% 	size(img_regions)
 end
