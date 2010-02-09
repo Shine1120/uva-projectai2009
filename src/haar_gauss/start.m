@@ -12,7 +12,7 @@ function start
 	rounds         = 10;
 	pattern_scales = 1;
 	money_dir      = 'neur10'; % 'neur05';  
- 	repetitions    = 5;
+ 	repetitions    = 1;
 	ySegms		   = 12;
 	xSegms		   = 5;
 	if_load        = 0;

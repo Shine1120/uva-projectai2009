@@ -12,8 +12,8 @@
 %__________________________________________________________________________
 function classification_haar(T, rounds, repetitions, ySegms, xSegms, money_dir, pattern_scales, if_load)
 	close all;
-    fit             = ['moneyDivided/wholeplusborder/' money_dir '/fit/'];
-    unfit           = ['moneyDivided/wholeplusborder/' money_dir '/unfit/'];	
+    fit             = ['../moneyDivided/wholeplusborder/' money_dir '/fit/'];
+    unfit           = ['../moneyDivided/wholeplusborder/' money_dir '/unfit/'];	
 	hold_n_out      = 75;
 	slice           = 35;
 	%______________________________________________________________________
@@ -111,7 +111,7 @@ function classification_haar(T, rounds, repetitions, ySegms, xSegms, money_dir, 
 					voted_front(2,best_feature_indexs) = voted_front(2,best_feature_indexs)+1;
 				end;
 			end
-			%REAR&FRONT CLASSIFIERS - JUST LABLES ARE NEEDED_______________  
+			%REAR&FRONT CLASSIFIERS - JUST LABELS ARE NEEDED_______________  
 			both_val(i,:) = 1-(1-classifier_front).*(1-classifier_rear); 				
 			[tp_both(i),tn_both(i),error_both(i),both_val(i,:)]= ...
 					eval_bills(model,labels_test,ImgTest,both_val(i,:),0);	
@@ -125,7 +125,7 @@ function classification_haar(T, rounds, repetitions, ySegms, xSegms, money_dir, 
 				best_index_front = rounds*(r-1)+i;
 			end	
 		end		
-		%COMPUTE THE MEAN OF THE RESULTS FROM THE CORSSVALIDATION__________
+		%COMPUTE THE MEAN OF THE RESULTS FROM THE CROSSVALIDATION__________
 		tpRear(r)    = mean(tp_rear);
 		tnRear(r)    = mean(tn_rear);
 		fnRear(r)    = mean(1 - tp_rear);
