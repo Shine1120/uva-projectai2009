@@ -4,6 +4,7 @@ function [ allResults ] = IEgetDataSet( do, path,cannyThresh,...
 	imgNr=1;
 	allResults=[0,0];
 	
+	%extract what detazet to get from given path
 	if strcmp(path(length(path)-5:length(path)-1),'unfit')
 		dataset = 'unfit';
 	else
@@ -11,11 +12,14 @@ function [ allResults ] = IEgetDataSet( do, path,cannyThresh,...
 	end
 
 	fprintf('\tconstructing the %s data set for %s\n',dataset, do)
+	%define maximum image number
+	% this is a little bit naive to get all the images, but works as long
+	% as maxImages is higher or equal to last image
 	maxImage=300;
 	for i = 1:maxImage
 		%for all images: extract the data
 
-		%construct front and rear image name
+		%construct front and rear image path
 		nextImageNameFront = [path 'f' num2str(i,'%01d') '.bmp'];
 		nextImageNameRear  = [path 'r' num2str(i,'%01d') '.bmp'];
 		%check if both exist in the dataset
@@ -29,13 +33,15 @@ function [ allResults ] = IEgetDataSet( do, path,cannyThresh,...
 			if (useRear)
 				nextImageRear  = im2double(imread(nextImageNameRear));
 			end
+			%get the segment sizes for front and rear (front and rear can 
+			% differ)
 			imgSegFX = floor((size(nextImageFront,2)-1)/xSegms);
 			imgSegFY = floor((size(nextImageFront,1)-1)/ySegms);
 			imgSegRX = floor((size(nextImageRear,2)-1)/xSegms);
 			imgSegRY = floor((size(nextImageRear,1)-1)/ySegms);
 
 
-		  %get the data for classification
+		  %get the data per method for front and rear
 		  if strcmp(do,'edge')
 			if (useFront)
 			  frontImageResults = doEdge(nextImageFront,cannyThresh,...
@@ -57,7 +63,7 @@ function [ allResults ] = IEgetDataSet( do, path,cannyThresh,...
 			end
 		  end
 
-		  %add count of front and rear image to results
+		  %add counts of front and rear image to one matrix
 		  allResults(imgNr,1:xSegms*ySegms*2)=0;
 		  if (useFront)
 			insMin = 1;  
@@ -80,14 +86,9 @@ function results = doEdge(image,cannyThresh,invariant,imgSegX, imgSegY,overlap)
 	if invariant==1
 		image = image - mean(mean(image));
 	end
+	%get edges of image
 	edgeImage = edge(image,'canny',cannyThresh);
 	
-% 	edgeImage         = conv2(im2double(image), double([-1 1;-1 1]));
-% 	threshold = mean(mean(edgeImage));
-% 	filter            = (edgeImage<threshold);
-% 	edgeImage(filter) = 0;
-
-	%do per image segment and store in vector
 	results = [];
 	count=1;
 	
@@ -97,6 +98,7 @@ function results = doEdge(image,cannyThresh,invariant,imgSegX, imgSegY,overlap)
 		yStepSize = floor(imgSegY/2);
 		xStepSize = floor(imgSegX/2);
 	end
+	%per image segment cut corresponding part out of the edge image
 	for y=1:yStepSize:size(image,1)-imgSegY
 		for x=1:xStepSize:size(image,2)-imgSegX
 			if y+imgSegY+10>size(image,1)
@@ -109,6 +111,8 @@ function results = doEdge(image,cannyThresh,invariant,imgSegX, imgSegY,overlap)
 			else
 				untillX = x+imgSegX-1;
 			end
+			%final value for edge of a segment if the sum of all edge
+			%points in the segment
 			results(count) = sum(sum(edgeImage(y:untillY,x:untillX)));
 			count = count+1;
 		end
@@ -119,7 +123,7 @@ function results = doIntensity(image,invariant,imgSegX, imgSegY,overlap)
 	if invariant==1
 		image = image - mean(mean(image));
 	end
-	%do per image segment and store in vector
+	
 	results = [];
 	count=1;
 	
@@ -130,6 +134,7 @@ function results = doIntensity(image,invariant,imgSegX, imgSegY,overlap)
 		xStepSize = floor(imgSegX/2);
 	end
 	
+	%per image segment cut corresponding part out of the image
 	for y=1:yStepSize:size(image,1)-imgSegY
 		for x=1:xStepSize:size(image,2)-imgSegX
 			if y+imgSegY+10>size(image,1)
@@ -142,18 +147,10 @@ function results = doIntensity(image,invariant,imgSegX, imgSegY,overlap)
 			else
 				untillX = x+imgSegX-1;
 			end
+			%final value for intensity of a segment if the mean intensity
+			%in that segment
 			results(count) = mean(mean(image(y:untillY,x:untillX)));
 			count = count+1;
 		end
 	end
 end
-
-% function count = doEdgeIntensity(image,cannyThresh,invariant,imgSegX, imgSegY)
-% 	if invariant==1
-% 		image = image - mean(mean(image));
-% 	end
-% 	factor = 10;
-% 	%average Intensity is raised by a factor to make it usefull for large count
-% 	%of edges. This might not be the ideal way to do this.
-% 	count = doEdge(image,cannyThresh) + (doIntensity(image)*factor);
-% end
