@@ -1,0 +1,5 @@
+There are around 10 billion euro banknotes in circulation; only in the Netherlands already something around 400 to 400 million. Each year, several billions of banknotes are collected by the various Central Banks of the Euro zone, and redistributed again. Part of these notes are destroyed and replaced, because they are too dirty for reuse - although they are technically still in fine condition, people simply don't want to pay or accept them anymore.
+
+The Central Banks use automatic sorting machines to do the job. They sort and check the notes for authenticity, damage, and dirt, at a rate of two-thousand per minute, and that for around 700 million notes each year for the Netherlands only. However, the sorting machines make use of partially out-dated technology.
+
+In this project, modern computer vision and machine learning techniques will be studied and implemented in order to improve the recognition rate of "dirty money". If successful, extra money will only have to be printed in times of financial crises...
